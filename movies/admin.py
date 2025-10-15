@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import Movie, Genre, Director
+from .models import Movie, Genre, Director, CustomUser
+from django.contrib.auth.admin import UserAdmin
+
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    pass
 
 
 @admin.register(Movie)

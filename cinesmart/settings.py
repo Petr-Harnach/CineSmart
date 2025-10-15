@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure--4m!&taszve!iiw(!p_n6yihs_n)(1m%a#e16xa-^0e1pka_9!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
+    'drf_spectacular',
     'movies',
 ]
 
@@ -58,8 +59,41 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10,  # kolik se vrátí záznamů, když nepošleš limit v URL
+    'PAGE_SIZE': 5,  # počet filmů na stránku
+
+}
+
+# drf-spectacular settings for OpenAPI schema generation
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'CineSmart API',
+    'DESCRIPTION': 'API for the CineSmart movie catalog',
+    'VERSION': '1.0.0',
+    'COMPONENTS': {
+        'securitySchemes': {
+            'BearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT'
+            }
+        }
+    },
+    'SECURITY': [
+        {'BearerAuth': []}
+    ],
+}
+
+# simplejwt settings (token lifetimes can be adjusted)
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
 }
 
 ROOT_URLCONF = 'cinesmart.urls'
@@ -95,6 +129,18 @@ DATABASES = {
         'PORT': '5432',           # default port PostgreSQL
     }
 }
+
+# Allow quick local testing with SQLite when USE_SQLITE=1 is set or when
+# DEBUG is True and PostgreSQL is not available locally. This keeps the
+# production settings untouched but makes it easy to run tests locally.
+import os
+USE_SQLITE = os.environ.get('USE_SQLITE') == '1'
+if USE_SQLITE or DEBUG:
+    # Use SQLite for quick local development/tests if requested
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -136,3 +182,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom User Model
+AUTH_USER_MODEL = 'movies.CustomUser'
