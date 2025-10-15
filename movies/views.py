@@ -1,4 +1,4 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Movie, Genre, Director, Review
 from .serializers import MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer
@@ -90,6 +90,13 @@ def change_password_view(request):
     return Response({'detail': 'password changed'})
 
 
+class ProfileView(generics.RetrieveUpdateAPIView):
+    """Retrieve or update the authenticated user's profile."""
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -127,13 +134,6 @@ def register_view(request):
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
     return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def profile_view(request):
-    user = request.user
-    return Response(UserSerializer(user).data)
 
 
 class GenreViewSet(viewsets.ModelViewSet):

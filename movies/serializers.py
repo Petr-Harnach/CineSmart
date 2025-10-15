@@ -49,7 +49,7 @@ class MovieSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email', 'bio', 'profile_picture']
 
 
 class RegisterSerializer(serializers.ModelSerializer):

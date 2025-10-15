@@ -65,6 +65,20 @@ class AuthTest(TestCase):
 		self.assertEqual(prof.status_code, 200)
 		self.assertEqual(prof.data['username'], 'u1')
 
+	def test_update_profile(self):
+		"""Test that a user can update their own bio."""
+		# register and login
+		self.client.post('/api/auth/register/', {'username': 'u3', 'password': 'pass34567', 'email': 'c@b.com'}, format='json')
+		token_resp = self.client.post('/api/token/', {'username': 'u3', 'password': 'pass34567'}, format='json')
+		access = token_resp.data['access']
+		self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access}')
+
+		# update bio
+		update_data = {'bio': 'This is my new bio.'}
+		resp = self.client.patch('/api/auth/profile/', update_data, format='json')
+		self.assertEqual(resp.status_code, 200)
+		self.assertEqual(resp.data['bio'], 'This is my new bio.')
+
 	def test_login_sets_cookie_and_change_password(self):
 		# register
 		resp = self.client.post('/api/auth/register/', {'username': 'u2', 'password': 'pass23456', 'email': 'b@b.com'}, format='json')

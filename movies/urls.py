@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
-	MovieViewSet, GenreViewSet, DirectorViewSet, register_view, profile_view,
+	MovieViewSet, GenreViewSet, DirectorViewSet, register_view, ProfileView,
 	CookieTokenObtainPairView, CookieTokenRefreshView, token_logout_view, change_password_view,
 	WatchlistViewSet, ReviewViewSet,
 )
@@ -18,7 +18,7 @@ urlpatterns = router.urls
 urlpatterns += [
 	# authentication helpers
 	path('auth/register/', register_view, name='auth-register'),
-	path('auth/profile/', profile_view, name='auth-profile'),
+	path('auth/profile/', ProfileView.as_view(), name='auth-profile'),
 	path('auth/login/', CookieTokenObtainPairView.as_view(), name='auth-login'),
 	path('auth/refresh/', CookieTokenRefreshView.as_view(), name='auth-refresh'),
 	path('auth/logout/', token_logout_view, name='auth-logout'),

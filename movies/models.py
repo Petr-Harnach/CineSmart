@@ -5,8 +5,8 @@ from django.conf import settings
 
 
 class CustomUser(AbstractUser):
-    # Add custom fields here in the future
-    pass
+    bio = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
 
 
 class Genre(models.Model):
