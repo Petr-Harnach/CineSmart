@@ -1,9 +1,9 @@
 <template>
   <nav class="bg-gray-800 p-4">
     <div class="container mx-auto flex justify-between items-center">
-      <router-link to="/" class="text-white text-lg font-bold">CineSmart</router-link>
+      <NuxtLink to="/" class="text-white text-lg font-bold">CineSmart</NuxtLink>
       <div class="space-x-4">
-        <router-link to="/" class="text-gray-300 hover:text-white">Home</router-link>
+        <NuxtLink to="/" class="text-gray-300 hover:text-white">Home</NuxtLink>
         <!-- Add other links like Login/Register later -->
       </div>
     </div>
@@ -11,5 +11,5 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
+// No script needed for now
 </script>
