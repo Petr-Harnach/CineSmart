@@ -28,6 +28,7 @@ class Movie(models.Model):
     description = models.TextField()
     release_date = models.DateField()
     duration_minutes = models.IntegerField()
+    poster = models.ImageField(upload_to='posters/', null=True, blank=True)
     genres = models.ManyToManyField(Genre, related_name="movies")
     director = models.ForeignKey(
         "Director", 

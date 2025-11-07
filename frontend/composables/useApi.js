@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../stores/auth';
 
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/api/',
@@ -7,13 +8,31 @@ const apiClient = axios.create({
   },
 });
 
+// Add a request interceptor to include the auth token
+apiClient.interceptors.request.use(config => {
+  const authStore = useAuthStore();
+  const token = authStore.accessToken;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
+
 export const useApi = () => {
   const getMovies = () => apiClient.get('movies/');
   
-  // Add other API calls here later, e.g.:
-  // const getMovieById = (id) => apiClient.get(`/movies/${id}/`);
+  const login = (credentials) => apiClient.post('auth/login/', credentials);
+
+  const register = (userData) => apiClient.post('auth/register/', userData);
+
+  const getProfile = () => apiClient.get('auth/profile/');
 
   return {
     getMovies,
+    login,
+    register,
+    getProfile,
   };
 };
