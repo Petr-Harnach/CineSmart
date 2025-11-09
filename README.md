@@ -113,20 +113,25 @@ Zde jsou vybrané ukázky kódu demonstrující klíčové části aplikace.
 
 ```python
 # movies/views.py
-from rest_framework import viewsets, filters
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import Movie, Genre, Director
+from rest_framework import viewsets
+from .models import Movie
 from .serializers import MovieSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+# ViewSet definuje logiku pro API endpoint.
+# ModelViewSet automaticky poskytuje operace GET, POST, PUT, DELETE.
 class MovieViewSet(viewsets.ModelViewSet):
+    # Určuje, jaká data se mají z databáze načíst.
     queryset = Movie.objects.all()
+    # Určuje, jak se mají data převést do formátu JSON.
     serializer_class = MovieSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly] # Kdokoli může číst, jen přihlášení mohou upravovat
+    # Nastavuje oprávnění: kdokoli může číst, jen přihlášení mohou zapisovat.
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    # Povoluje vestavěné filtry pro vyhledávání, řazení a filtrování.
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['genres', 'director']
-    search_fields = ['title', 'description']
-    ordering_fields = ['release_date', 'title']
+    filterset_fields = ['genres', 'director']  # Pole pro filtrování.
+    search_fields = ['title', 'description']   # Pole pro full-textové vyhledávání.
+    ordering_fields = ['release_date', 'title'] # Pole pro řazení.
 ```
 
 ### Backend - Serializér filmu (movies/serializers.py)
@@ -136,21 +141,17 @@ class MovieViewSet(viewsets.ModelViewSet):
 from rest_framework import serializers
 from .models import Movie, Genre, Director
 
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = ['id', 'name']
-
-class DirectorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Director
-        fields = ['id', 'name']
+# Serializer převádí komplexní datové typy (jako modely Django)
+# na nativní Python datové typy, které lze snadno převést na JSON.
 
 class MovieSerializer(serializers.ModelSerializer):
+    # Pro čtení (GET) chceme zobrazit celé informace o žánrech a režisérovi.
     genres = GenreSerializer(many=True, read_only=True)
     director = DirectorSerializer(read_only=True)
     
-    # Pro zápis přijímáme ID žánrů a režiséra
+    # Pro zápis (POST, PUT) chceme přijímat pouze ID, ne celý objekt.
+    # 'write_only=True' znamená, že se tato pole nebudou zobrazovat v odpovědi.
+    # 'source' propojí toto pole s polem modelu (např. 'genre_ids' s 'genres').
     genre_ids = serializers.PrimaryKeyRelatedField(
         queryset=Genre.objects.all(), many=True, write_only=True, source='genres'
     )
@@ -159,7 +160,8 @@ class MovieSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Movie
+        model = Movie # Propojení s modelem Movie.
+        # Seznam polí, která se mají zahrnout do API odpovědi.
         fields = [
             'id', 'title', 'description', 'release_date', 'duration_minutes', 'poster',
             'genres', 'genre_ids', 'director', 'director_id'
@@ -171,6 +173,9 @@ class MovieSerializer(serializers.ModelSerializer):
 ```python
 # movies/models.py
 from django.db import models
+
+# Model definuje strukturu dat v databázi.
+# Každá třída je tabulka, každý atribut je sloupec.
 
 class Genre(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -185,11 +190,17 @@ class Movie(models.Model):
     description = models.TextField()
     release_date = models.DateField()
     duration_minutes = models.IntegerField()
-    poster = models.ImageField(upload_to='posters/', null=True, blank=True) # Nové pole pro plakát
+    poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    
+    # Vztah Many-to-Many: jeden film může mít více žánrů a jeden žánr více filmů.
     genres = models.ManyToManyField(Genre, related_name="movies")
+    
+    # Vztah Foreign Key (Many-to-One): jeden režisér může mít více filmů.
+    # on_delete=models.SET_NULL znamená, že pokud smažeme režiséra, filmy zůstanou.
     director = models.ForeignKey(
         "Director", on_delete=models.SET_NULL, null=True, blank=True, related_name="movies"
     )
+    
     def __str__(self): return self.title
 ```
 
