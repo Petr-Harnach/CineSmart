@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 
 const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: 'http://127.00.1:8000/api/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,6 +23,8 @@ apiClient.interceptors.request.use(config => {
 export const useApi = () => {
   const getMovies = () => apiClient.get('movies/');
   
+  const getMovieById = (id) => apiClient.get(`movies/${id}/`);
+
   const login = (credentials) => apiClient.post('auth/login/', credentials);
 
   const register = (userData) => apiClient.post('auth/register/', userData);
@@ -31,6 +33,7 @@ export const useApi = () => {
 
   return {
     getMovies,
+    getMovieById,
     login,
     register,
     getProfile,

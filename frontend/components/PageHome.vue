@@ -14,7 +14,8 @@
       <div 
         v-for="movie in movies" 
         :key="movie.id" 
-        class="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300"
+        class="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+        @click="showMovieDetail(movie.id)"
       >
         <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
         <div v-else class="bg-gray-300 h-64 w-full"></div>
@@ -22,7 +23,6 @@
         <div class="p-4">
           <h2 class="text-lg font-semibold text-gray-900 truncate">{{ movie.title }}</h2>
           <p class="text-gray-600 text-sm mt-1">{{ movie.release_date }}</p>
-          <!-- <NuxtLink :to="`/movie/${movie.id}`" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mt-2 inline-block">View Details &rarr;</NuxtLink> -->
         </div>
       </div>
     </div>
@@ -33,6 +33,8 @@
 import { ref, onMounted } from 'vue';
 import { useApi } from '../composables/useApi';
 
+const emit = defineEmits(['show-detail']);
+
 const { getMovies } = useApi();
 const movies = ref([]);
 const loading = ref(true);
@@ -41,12 +43,15 @@ const error = ref(null);
 onMounted(async () => {
   try {
     const response = await getMovies();
-    movies.value = response.data.results; // Assuming pagination from DRF
+    movies.value = response.data.results;
   } catch (err) {
     error.value = err;
-    console.error('Error fetching movies:', err);
   } finally {
     loading.value = false;
   }
 });
+
+const showMovieDetail = (movieId) => {
+  emit('show-detail', movieId);
+};
 </script>
