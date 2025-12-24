@@ -23,20 +23,31 @@ class Director(models.Model):
         return self.name
 
 
+class Actor(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Movie(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     release_date = models.DateField()
-    duration_minutes = models.IntegerField()
+    duration_minutes = models.IntegerField(validators=[MinValueValidator(1)])
+    country = models.CharField(max_length=100, blank=True)
     poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    
     genres = models.ManyToManyField(Genre, related_name="movies")
     director = models.ForeignKey(
         "Director", 
-        on_delete=models.SET_NULL,  # když režiséra smažeš, film zůstane, ale bez režiséra
+        on_delete=models.SET_NULL,
         null=True, 
         blank=True,
         related_name="movies"
     )
+    screenwriter = models.CharField(max_length=150, blank=True)
+    actors = models.ManyToManyField(Actor, related_name="movies", blank=True)
 
     def __str__(self):
         return self.title

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Genre, Director, Review
+from .models import Movie, Genre, Director, Review, Actor
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -14,36 +14,10 @@ class DirectorSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class MovieSerializer(serializers.ModelSerializer):
-    # Read-only nested representation for GET
-    genres = GenreSerializer(many=True, read_only=True)
-    director = DirectorSerializer(read_only=True)
-
-    # Write-only fields for creating/updating relationships (accept PKs)
-    genre_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Genre.objects.all(), many=True, write_only=True, source='genres'
-    )
-    director_id = serializers.PrimaryKeyRelatedField(
-        queryset=Director.objects.all(), write_only=True, source='director', allow_null=True
-    )
-
+class ActorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Movie
-        fields = [
-            'id', 'title', 'description', 'release_date', 'duration_minutes', 'poster',
-            'genres', 'genre_ids', 'director', 'director_id'
-        ]
-
-    def validate_duration_minutes(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("duration_minutes must be a positive integer.")
-        return value
-
-    # Add explicit help_text for OpenAPI generation and readability
-    title = serializers.CharField(help_text='Movie title', max_length=200)
-    description = serializers.CharField(help_text='Full description of the movie')
-    release_date = serializers.DateField(help_text='Release date in YYYY-MM-DD format')
-    duration_minutes = serializers.IntegerField(help_text='Duration in minutes')
+        model = Actor
+        fields = ['id', 'name']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,6 +31,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     movie_id = serializers.PrimaryKeyRelatedField(
         queryset=Movie.objects.all(), write_only=True, source='movie'
     )
+    comment = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Review
@@ -70,6 +45,44 @@ class ReviewSerializer(serializers.ModelSerializer):
         if Review.objects.filter(user=user, movie=movie).exists():
             raise serializers.ValidationError("You have already reviewed this movie.")
         return super().create(validated_data)
+
+
+class MovieSerializer(serializers.ModelSerializer):
+    # Read-only nested representation for GET
+    genres = GenreSerializer(many=True, read_only=True)
+    director = DirectorSerializer(read_only=True)
+    reviews = ReviewSerializer(many=True, read_only=True)
+    actors = ActorSerializer(many=True, read_only=True)
+
+    # Write-only fields for creating/updating relationships (accept PKs)
+    genre_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Genre.objects.all(), many=True, write_only=True, source='genres'
+    )
+    director_id = serializers.PrimaryKeyRelatedField(
+        queryset=Director.objects.all(), write_only=True, source='director', allow_null=True
+    )
+    actor_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Actor.objects.all(), many=True, write_only=True, source='actors', required=False
+    )
+
+    class Meta:
+        model = Movie
+        fields = [
+            'id', 'title', 'description', 'release_date', 'duration_minutes', 'country', 'poster',
+            'genres', 'director', 'reviews', 'actors', 'screenwriter',
+            'genre_ids', 'director_id', 'actor_ids'
+        ]
+
+    def validate_duration_minutes(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("duration_minutes must be a positive integer.")
+        return value
+
+    # Add explicit help_text for OpenAPI generation and readability
+    title = serializers.CharField(help_text='Movie title', max_length=200)
+    description = serializers.CharField(help_text='Full description of the movie')
+    release_date = serializers.DateField(help_text='Release date in YYYY-MM-DD format')
+    duration_minutes = serializers.IntegerField(help_text='Duration in minutes')
 
 
 class RegisterSerializer(serializers.ModelSerializer):

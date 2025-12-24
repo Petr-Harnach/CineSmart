@@ -99,14 +99,28 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+from django.db.models.functions import Lower
+
 class MovieViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Movie.objects.all()
+    queryset = Movie.objects.all()  # This is required for the router to determine the basename
     serializer_class = MovieSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['genres', 'director']  # filtrování podle žánru a režiséra
     search_fields = ['title', 'description']   # fulltext vyhledávání
     ordering_fields = ['release_date', 'title']  # možnost řazení
+
+    def get_queryset(self):
+        queryset = Movie.objects.all()
+        ordering = self.request.query_params.get('ordering')
+
+        if ordering in ['title', '-title']:
+            # Apply case-insensitive ordering for the 'title' field
+            if ordering.startswith('-'):
+                return queryset.annotate(title_lower=Lower('title')).order_by('-title_lower')
+            return queryset.annotate(title_lower=Lower('title')).order_by('title_lower')
+        
+        return queryset
 
     @extend_schema(
         request=MovieSerializer,

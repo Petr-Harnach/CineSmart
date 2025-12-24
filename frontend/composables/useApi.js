@@ -21,9 +21,16 @@ apiClient.interceptors.request.use(config => {
 });
 
 export const useApi = () => {
-  const getMovies = () => apiClient.get('movies/');
+  const getMovies = (params) => {
+    if (typeof params === 'string') { // Handle raw URL for pagination
+      return apiClient.get(params);
+    }
+    return apiClient.get('movies/', { params });
+  };
   
   const getMovieById = (id) => apiClient.get(`movies/${id}/`);
+
+  const getGenres = () => apiClient.get('genres/');
 
   const login = (credentials) => apiClient.post('auth/login/', credentials);
 
@@ -31,11 +38,30 @@ export const useApi = () => {
 
   const getProfile = () => apiClient.get('auth/profile/');
 
+  const addReview = (reviewData) => apiClient.post('reviews/', reviewData);
+
+  const updateReview = (reviewId, reviewData) => apiClient.patch(`reviews/${reviewId}/`, reviewData);
+
+  const deleteReview = (reviewId) => apiClient.delete(`reviews/${reviewId}/`);
+
+  const getWatchlist = () => apiClient.get('watchlist/');
+  
+  const addToWatchlist = (movieId) => apiClient.post('watchlist/', { movie_id: movieId });
+
+  const removeFromWatchlist = (watchlistItemId) => apiClient.delete(`watchlist/${watchlistItemId}/`);
+
   return {
     getMovies,
     getMovieById,
+    getGenres,
     login,
     register,
     getProfile,
+    addReview,
+    updateReview,
+    deleteReview,
+    getWatchlist,
+    addToWatchlist,
+    removeFromWatchlist,
   };
 };
