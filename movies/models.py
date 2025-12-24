@@ -31,11 +31,16 @@ class Actor(models.Model):
 
 
 class Movie(models.Model):
+    MOVIE_TYPE_CHOICES = [
+        ('movie', 'Movie'),
+        ('series', 'Series'),
+    ]
     title = models.CharField(max_length=200)
     description = models.TextField()
     release_date = models.DateField()
     duration_minutes = models.IntegerField(validators=[MinValueValidator(1)])
     country = models.CharField(max_length=100, blank=True)
+    type = models.CharField(max_length=10, choices=MOVIE_TYPE_CHOICES, default='movie')
     poster = models.ImageField(upload_to='posters/', null=True, blank=True)
     
     genres = models.ManyToManyField(Genre, related_name="movies")
@@ -61,6 +66,7 @@ class WatchlistItem(models.Model):
         Movie, on_delete=models.CASCADE, related_name='watchlist_items'
     )
     added_at = models.DateTimeField(auto_now_add=True)
+    watched = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'movie')

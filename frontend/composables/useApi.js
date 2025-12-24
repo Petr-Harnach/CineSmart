@@ -50,6 +50,8 @@ export const useApi = () => {
 
   const removeFromWatchlist = (watchlistItemId) => apiClient.delete(`watchlist/${watchlistItemId}/`);
 
+  const updateWatchlistItem = (id, data) => apiClient.patch(`watchlist/${id}/`, data);
+
   return {
     getMovies,
     getMovieById,
@@ -63,5 +65,6 @@ export const useApi = () => {
     getWatchlist,
     addToWatchlist,
     removeFromWatchlist,
+    updateWatchlistItem,
   };
 };

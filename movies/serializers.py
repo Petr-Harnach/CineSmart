@@ -53,6 +53,7 @@ class MovieSerializer(serializers.ModelSerializer):
     director = DirectorSerializer(read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
+    avg_rating = serializers.FloatField(read_only=True) # Přidáno
 
     # Write-only fields for creating/updating relationships (accept PKs)
     genre_ids = serializers.PrimaryKeyRelatedField(
@@ -68,8 +69,8 @@ class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = [
-            'id', 'title', 'description', 'release_date', 'duration_minutes', 'country', 'poster',
-            'genres', 'director', 'reviews', 'actors', 'screenwriter',
+            'id', 'title', 'description', 'release_date', 'duration_minutes', 'country', 'type', 'poster',
+            'genres', 'director', 'reviews', 'actors', 'screenwriter', 'avg_rating', # Přidáno 'avg_rating'
             'genre_ids', 'director_id', 'actor_ids'
         ]
 
@@ -106,4 +107,4 @@ class WatchlistItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = __import__('django').apps.apps.get_model('movies', 'WatchlistItem')
-        fields = ['id', 'movie', 'movie_id', 'added_at']
+        fields = ['id', 'movie', 'movie_id', 'added_at', 'watched']

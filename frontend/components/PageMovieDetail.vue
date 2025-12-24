@@ -14,7 +14,10 @@
         </div>
         <div class="p-8 w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
-          <p class="text-gray-600 dark:text-gray-300 text-lg mb-4">{{ movie.release_date.substring(0, 4) }} | {{ movie.duration_minutes }} min</p>
+          <div class="flex items-center mb-4">
+            <p class="text-gray-600 dark:text-gray-300 text-lg mr-4">{{ movie.release_date.substring(0, 4) }} | {{ movie.duration_minutes }} min</p>
+            <AvgRating :rating="movie.avg_rating" />
+          </div>
           
           <button 
             @click="toggleWatchlist" 
