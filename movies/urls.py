@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
-	MovieViewSet, GenreViewSet, DirectorViewSet, register_view, ProfileView,
+	MovieViewSet, GenreViewSet, DirectorViewSet, ActorViewSet, register_view, ProfileView,
 	CookieTokenObtainPairView, CookieTokenRefreshView, token_logout_view, change_password_view,
 	WatchlistViewSet, ReviewViewSet,
 )
@@ -10,6 +10,7 @@ router = DefaultRouter()
 router.register(r'movies', MovieViewSet)
 router.register(r'genres', GenreViewSet)
 router.register(r'directors', DirectorViewSet)
+router.register(r'actors', ActorViewSet)
 router.register(r'watchlist', WatchlistViewSet, basename='watchlist')
 router.register(r'reviews', ReviewViewSet, basename='review')
 

@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Movie, Genre, Director, Review
-from .serializers import MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer
+from .models import Movie, Genre, Director, Review, Actor
+from .serializers import MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -169,6 +169,14 @@ class DirectorViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+
+class ActorViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = Actor.objects.all()
+    serializer_class = ActorSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
 

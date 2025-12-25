@@ -1,6 +1,6 @@
 <template>
-  <div class="max-w-6xl mx-auto mt-10">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">My Watchlist</h1>
+  <div class="max-w-6xl mx-auto mt-10 p-4">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800 dark:text-gray-100">Watchlist</h1>
     
     <div v-if="loading" class="text-center text-gray-500">
       <p>Loading watchlist...</p>
@@ -10,50 +10,86 @@
       <p>Failed to load watchlist: {{ error.message }}</p>
     </div>
 
-    <div v-else-if="watchlist.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-      <p>Your watchlist is empty. Add some movies!</p>
-      <button @click="$emit('navigate', 'home')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+    <div v-else-if="watchlist.length === 0" class="text-center text-gray-600 dark:text-gray-400 py-12">
+      <p class="text-lg">Your watchlist is empty. Add some movies!</p>
+      <button @click="$emit('navigate', 'home')" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
         Browse Movies
       </button>
     </div>
 
     <div v-else>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <div 
-          v-for="item in watchlist" 
-          :key="item.id" 
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
-          :class="{ 'opacity-60': item.watched }"
-          @click.self="$emit('show-detail', item.movie.id)"
-        >
-          <div v-if="item.watched" class="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
-            WATCHED
-          </div>
-          <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="$emit('show-detail', item.movie.id)">
-          <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="$emit('show-detail', item.movie.id)"></div>
-          
-          <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date.substring(0, 4) }}</p>
-            <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-1 rounded" :class="item.watched ? 'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200' : 'bg-green-500 text-white'">
-              {{ item.watched ? 'Mark as Unwatched' : 'Mark as Watched' }}
-            </button>
+      <!-- To Watch Section -->
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200 border-b-2 border-blue-500 pb-2">
+          To Watch
+          <span class="text-lg text-gray-500 dark:text-gray-400">({{ moviesToWatch.length }})</span>
+        </h2>
+        <div v-if="moviesToWatch.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-6">
+          <div 
+            v-for="item in moviesToWatch" 
+            :key="item.id" 
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
+            @click.self="$emit('show-detail', item.movie.id)"
+          >
+            <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="$emit('show-detail', item.movie.id)">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="$emit('show-detail', item.movie.id)"></div>
+            
+            <div class="p-4">
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
+              <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date.substring(0, 4) }}</p>
+              <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition">
+                Mark as Watched
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+        <p v-else class="text-center text-gray-500 dark:text-gray-400 py-8">You've watched all the movies on your list!</p>
+      </section>
 
-      <div class="flex justify-center mt-8 space-x-4">
+      <!-- Divider -->
+      <hr class="my-12 border-gray-200 dark:border-gray-700">
+
+      <!-- Already Watched Section -->
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200 border-b-2 border-gray-500 pb-2">
+          Already Watched
+          <span class="text-lg text-gray-500 dark:text-gray-400">({{ moviesWatched.length }})</span>
+        </h2>
+        <div v-if="moviesWatched.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-6">
+          <div 
+            v-for="item in moviesWatched" 
+            :key="item.id" 
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
+            @click.self="$emit('show-detail', item.movie.id)"
+          >
+            <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="$emit('show-detail', item.movie.id)">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="$emit('show-detail', item.movie.id)"></div>
+            
+            <div class="p-4">
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
+              <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date.substring(0, 4) }}</p>
+              <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-2 rounded-md bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition">
+                Mark as Unwatched
+              </button>
+            </div>
+          </div>
+        </div>
+        <p v-else class="text-center text-gray-500 dark:text-gray-400 py-8">You haven't marked any movies as watched yet.</p>
+      </section>
+
+      <!-- Pagination -->
+      <div class="flex justify-center mt-12 space-x-4">
         <button 
           @click="goToPrevPage" 
           :disabled="!prevPageUrl" 
-          class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
+          class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-400 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
         >
           Previous
         </button>
         <button 
           @click="goToNextPage" 
           :disabled="!nextPageUrl" 
-          class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
+          class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-400 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
         >
           Next
         </button>
@@ -63,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
 
@@ -76,6 +112,10 @@ const loading = ref(true);
 const error = ref(null);
 const nextPageUrl = ref(null);
 const prevPageUrl = ref(null);
+
+const moviesToWatch = computed(() => watchlist.value.filter(item => !item.watched));
+const moviesWatched = computed(() => watchlist.value.filter(item => item.watched));
+
 
 const fetchWatchlistData = async (url = 'watchlist/') => {
   loading.value = true;

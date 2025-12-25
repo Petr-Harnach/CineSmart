@@ -42,6 +42,7 @@ class Movie(models.Model):
     country = models.CharField(max_length=100, blank=True)
     type = models.CharField(max_length=10, choices=MOVIE_TYPE_CHOICES, default='movie')
     poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    trailer_url = models.URLField(blank=True)
     
     genres = models.ManyToManyField(Genre, related_name="movies")
     director = models.ForeignKey(

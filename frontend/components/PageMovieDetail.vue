@@ -129,7 +129,7 @@
 import { ref, onMounted, watch, reactive, computed } from 'vue';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
-
+import AvgRating from './AvgRating.vue';
 const props = defineProps({
   movieId: Number,
 });

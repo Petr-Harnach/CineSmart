@@ -52,10 +52,13 @@ export const useApi = () => {
 
   const updateWatchlistItem = (id, data) => apiClient.patch(`watchlist/${id}/`, data);
 
+  const getActors = () => apiClient.get('actors/');
+
   return {
     getMovies,
     getMovieById,
     getGenres,
+    getActors,
     login,
     register,
     getProfile,
