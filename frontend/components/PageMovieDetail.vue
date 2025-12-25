@@ -58,7 +58,12 @@
           <div v-if="movie.actors && movie.actors.length" class="mb-4 dark:text-gray-100">
             <span class="font-semibold">Actors:</span> 
             <span class="ml-2">
-              {{ movie.actors.map(a => a.name).join(', ') }}
+              <template v-for="(actor, index) in movie.actors" :key="actor.id">
+                <a @click.prevent="$emit('show-actor-detail', actor.id)" href="#" class="hover:underline cursor-pointer">
+                  {{ actor.name }}
+                </a>
+                <span v-if="index < movie.actors.length - 1">, </span>
+              </template>
             </span>
           </div>
         </div>
@@ -134,7 +139,7 @@ const props = defineProps({
   movieId: Number,
 });
 
-const emit = defineEmits(['navigate']);
+const emit = defineEmits(['navigate', 'show-actor-detail']);
 const authStore = useAuthStore();
 
 const { getMovieById, addReview, updateReview, deleteReview, getWatchlist, addToWatchlist, removeFromWatchlist } = useApi();

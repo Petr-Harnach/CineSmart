@@ -54,11 +54,14 @@ export const useApi = () => {
 
   const getActors = () => apiClient.get('actors/');
 
+  const getActorById = (id) => apiClient.get(`actors/${id}/`);
+
   return {
     getMovies,
     getMovieById,
     getGenres,
     getActors,
+    getActorById,
     login,
     register,
     getProfile,

@@ -245,7 +245,7 @@ const props = defineProps({
   filters: Object,
 });
 
-const emit = defineEmits(['show-detail', 'navigate']);
+const emit = defineEmits(['show-detail', 'navigate', 'show-actor-detail']);
 const authStore = useAuthStore();
 const { getMovies, getWatchlist, getActors, addToWatchlist, removeFromWatchlist } = useApi();
 
@@ -470,7 +470,7 @@ const fetchInTheatersMovies = async () => {
 const fetchMainTrailerMovie = async () => {
   loadingMainTrailer.value = true;
   try {
-    const response = await getMovies({ ordering: '-release_date', limit: 20 }); // Fetch more to ensure we find 6 with trailers
+    const response = await getMovies({ ordering: '-release_date', limit: 20 });
     const moviesWithTrailers = response.data.results.filter(movie => movie.trailer_url).slice(0, 6);
     mainTrailerMovies.value = moviesWithTrailers;
   } catch (err) {
@@ -508,5 +508,9 @@ onMounted(() => {
 
 const showMovieDetail = (movieId) => {
   emit('show-detail', movieId);
+};
+
+const showActorDetail = (actorId) => {
+  emit('show-actor-detail', actorId);
 };
 </script>

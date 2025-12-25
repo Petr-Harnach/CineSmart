@@ -16,28 +16,53 @@
         <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
 
           <!-- SEARCH (JEŠTĚ VĚTŠÍ) -->
-          <form @submit.prevent="handleFilterChange" class="w-full md:w-[28rem]">
-            <div class="relative">
-              <input
-                type="text"
-                v-model="searchQuery"
-                placeholder="Search movies, series..."
-                class="w-full p-3 pr-12 border rounded-md text-sm
-                       bg-gray-50 dark:bg-gray-700
-                       dark:border-gray-600 dark:text-gray-200"
-              />
-              <button
-                type="submit"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                  viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
+          <div class="relative w-full md:w-[28rem]">
+            <form @submit.prevent="handleFilterChange">
+              <div class="relative">
+                <input
+                  type="text"
+                  v-model="searchQuery"
+                  placeholder="Search movies, series..."
+                  class="w-full p-3 pr-12 border rounded-md text-sm
+                         bg-gray-50 dark:bg-gray-700
+                         dark:border-gray-600 dark:text-gray-200"
+                  @focus="onSearchFocus"
+                  @blur="onSearchBlur"
+                  autocomplete="off"
+                />
+                <button
+                  type="submit"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+            <!-- Search Results Dropdown -->
+            <div v-if="isSearchFocused && (searchResults.length > 0 || isSearchLoading || searchQuery.length > 2)"
+                 class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20">
+              <div v-if="isSearchLoading" class="p-4 text-gray-500">Loading...</div>
+              <div v-else-if="searchResults.length === 0 && searchQuery.length > 2" class="p-4 text-gray-500">No results found.</div>
+              <ul v-else>
+                <li v-for="movie in searchResults" :key="movie.id" 
+                    @click="selectMovie(movie.id)"
+                    class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                  <div class="flex items-center">
+                    <img v-if="movie.poster" :src="movie.poster" class="h-12 w-8 object-cover rounded-sm mr-3">
+                    <div v-else class="h-12 w-8 bg-gray-200 dark:bg-gray-700 rounded-sm mr-3"></div>
+                    <div>
+                      <p class="font-semibold text-gray-800 dark:text-gray-100">{{ movie.title }}</p>
+                      <p class="text-sm text-gray-500">{{ movie.release_date.substring(0, 4) }}</p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
             </div>
-          </form>
+          </div>
 
           <!-- TYPE -->
           <select
@@ -152,20 +177,27 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
 
 const colorMode = useColorMode();
-const emit = defineEmits(['navigate', 'filter-change']);
+const emit = defineEmits(['navigate', 'filter-change', 'show-detail']);
 const authStore = useAuthStore();
-const { getGenres } = useApi();
+const { getGenres, getMovies } = useApi();
 
+// Stavy pro filtry
 const searchQuery = ref('');
 const selectedGenre = ref('');
 const selectedSort = ref('');
 const selectedType = ref('');
 const genres = ref([]);
+
+// Stavy pro našeptávač
+const searchResults = ref([]);
+const isSearchLoading = ref(false);
+const isSearchFocused = ref(false);
+let debounceTimer = null;
 
 const toggleTheme = () => {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
@@ -186,6 +218,9 @@ const fetchGenres = async () => {
 };
 
 const handleFilterChange = () => {
+  searchResults.value = []; // Skrýt výsledky našeptávače
+  isSearchFocused.value = false;
+  
   const params = {};
   if (searchQuery.value) {
     params.search = searchQuery.value;
@@ -201,6 +236,47 @@ const handleFilterChange = () => {
   }
   emit('filter-change', params);
 };
+
+// Sledování změn ve vyhledávacím poli pro našeptávač
+watch(searchQuery, (newValue) => {
+  clearTimeout(debounceTimer);
+  searchResults.value = [];
+
+  if (newValue.length > 2) {
+    isSearchLoading.value = true;
+    debounceTimer = setTimeout(async () => {
+      try {
+        const response = await getMovies({ search: newValue, limit: 5 });
+        searchResults.value = response.data.results;
+      } catch (err) {
+        console.error('Error fetching search results:', err);
+      } finally {
+        isSearchLoading.value = false;
+      }
+    }, 300);
+  } else {
+    isSearchLoading.value = false;
+  }
+});
+
+const onSearchFocus = () => {
+  isSearchFocused.value = true;
+};
+
+const onSearchBlur = () => {
+  // Krátká prodleva, aby stihl proběhnout click na výsledek
+  setTimeout(() => {
+    isSearchFocused.value = false;
+  }, 200);
+};
+
+const selectMovie = (movieId) => {
+  emit('show-detail', movieId);
+  searchQuery.value = '';
+  searchResults.value = [];
+  isSearchFocused.value = false;
+};
+
 
 onMounted(() => {
   fetchGenres();

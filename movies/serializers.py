@@ -14,10 +14,19 @@ class DirectorSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
+# Zjednodušený serializer pro filmy v rámci profilu herce
+class MovieForActorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = ['id', 'title', 'poster', 'release_date']
+
+
 class ActorSerializer(serializers.ModelSerializer):
+    movies = MovieForActorSerializer(many=True, read_only=True)
+
     class Meta:
         model = Actor
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'bio', 'photo', 'movies']
 
 
 class UserSerializer(serializers.ModelSerializer):
