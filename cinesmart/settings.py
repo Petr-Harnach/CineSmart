@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'drf_spectacular',
-    'corsheaders',
+    'rest_framework_simplejwt',
+    'django_rest_passwordreset',
     'movies',
 ]
 
@@ -197,3 +198,6 @@ AUTH_USER_MODEL = 'movies.CustomUser'
 # Media files (for user-uploaded content like profile pictures)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Email backend for development (prints emails to console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

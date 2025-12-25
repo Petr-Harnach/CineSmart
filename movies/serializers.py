@@ -44,11 +44,22 @@ class ReviewSerializer(serializers.ModelSerializer):
         queryset=Movie.objects.all(), write_only=True, source='movie'
     )
     comment = serializers.CharField(required=False, allow_blank=True)
+    likes_count = serializers.SerializerMethodField()
+    user_has_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
-        fields = ['id', 'rating', 'comment', 'created_at', 'user', 'movie_id']
+        fields = ['id', 'rating', 'comment', 'created_at', 'user', 'movie_id', 'likes_count', 'user_has_liked']
         read_only_fields = ['created_at', 'user']
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_user_has_liked(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
 
     def create(self, validated_data):
         # Check if the user has already reviewed this movie

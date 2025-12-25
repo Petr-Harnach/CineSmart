@@ -15,6 +15,9 @@
       <button type="submit" :disabled="loading" class="w-full bg-blue-600 text-white p-2 rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600">
         {{ loading ? 'Logging in...' : 'Login' }}
       </button>
+      <div class="text-center mt-4">
+        <a href="#" @click.prevent="$emit('navigate', 'forgot-password')" class="text-sm text-blue-500 hover:underline">Forgot your password?</a>
+      </div>
     </form>
     <p class="text-center mt-4 text-gray-700 dark:text-gray-300">
       Don't have an account? 

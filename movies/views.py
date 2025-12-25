@@ -103,7 +103,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-from django.db.models import Avg, F
+from django.db.models import Avg, F, Count
 from django.db.models.functions import Lower
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -206,14 +206,31 @@ class WatchlistViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['movie']
+    ordering_fields = ['created_at', 'likes_count']
+
+    def get_queryset(self):
+        return Review.objects.annotate(likes_count=Count('likes'))
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def like(self, request, pk=None):
+        review = self.get_object()
+        user = request.user
+        ReviewLike = __import__('django').apps.apps.get_model('movies', 'ReviewLike')
+
+        try:
+            like = ReviewLike.objects.get(review=review, user=user)
+            like.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ReviewLike.DoesNotExist:
+            ReviewLike.objects.create(review=review, user=user)
+            return Response(status=status.HTTP_201_CREATED)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

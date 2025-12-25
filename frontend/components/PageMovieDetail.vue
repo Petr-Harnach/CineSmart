@@ -76,7 +76,6 @@
           <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Your Review</h3>
           <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
             <template v-if="editingReviewId === userReview.id">
-              <!-- Edit Form for User's Review -->
               <form @submit.prevent="handleSaveEdit(userReview.id)">
                 <div class="mb-2">
                   <label for="edit-rating" class="block text-gray-700 dark:text-gray-300 text-sm">Rating (1-5 Stars)</label>
@@ -93,41 +92,67 @@
               </form>
             </template>
             <template v-else>
-              <!-- Display User's Review -->
-              <div class="flex justify-between items-center mb-2">
+              <div class="flex justify-between items-start mb-2">
                 <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
-                <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
+                <p class="text-yellow-500 text-lg">{{ '⭐'.repeat(userReview.rating) }}</p>
               </div>
-              <p class="text-gray-700 dark:text-gray-300">{{ userReview.comment }}</p>
-              <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">{{ new Date(userReview.created_at).toLocaleDateString() }}</p>
-              <div class="mt-2 flex space-x-2 justify-end">
-                <button @click="handleEditReview(userReview)" class="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Edit</button>
-                <button @click="handleDeleteReview(userReview.id)" class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded hover:bg-red-300 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700">Delete</button>
+              <p class="text-gray-700 dark:text-gray-300 mb-3">{{ userReview.comment }}</p>
+              <div class="flex justify-between items-center">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ new Date(userReview.created_at).toLocaleDateString() }}</p>
+                <div class="flex items-center gap-4">
+                  <button @click="handleToggleLike(userReview)" class="flex items-center gap-1 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                    <svg v-if="userReview.user_has_liked" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-blue-500 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    <span>{{ userReview.likes_count }}</span>
+                  </button>
+                  <button @click="handleEditReview(userReview)" class="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Edit</button>
+                  <button @click="handleDeleteReview(userReview.id)" class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded hover:bg-red-300 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700">Delete</button>
+                </div>
               </div>
             </template>
           </div>
         </div>
 
         <!-- Other Reviews section -->
-        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Reviews</h2>
-        <div v-if="otherReviews.length" class="space-y-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold dark:text-gray-100">Reviews</h2>
+          <div v-if="reviews.length > 0">
+            <label for="sort-reviews" class="text-sm mr-2 dark:text-gray-300">Sort by:</label>
+            <select id="sort-reviews" v-model="reviewSortOrder" class="p-1 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+              <option value="-created_at">Newest</option>
+              <option value="created_at">Oldest</option>
+              <option value="-likes_count">Most Liked</option>
+            </select>
+          </div>
+        </div>
+        <div v-if="otherReviews.length > 0" class="space-y-4">
           <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-            <div class="flex justify-between items-center mb-2">
+            <div class="flex justify-between items-start mb-2">
               <p class="font-semibold dark:text-gray-100">
-                <a 
-                  v-if="authStore.isLoggedIn && review.user.id !== authStore.user?.id"
-                  href="#" 
-                  @click.prevent="$emit('show-user-profile', review.user.id)" 
-                  class="hover:underline"
-                >
+                <a v-if="authStore.isLoggedIn && review.user.id !== authStore.user?.id" href="#" @click.prevent="$emit('show-user-profile', review.user.id)" class="hover:underline">
                   {{ review.user.username }}
                 </a>
                 <span v-else>{{ review.user.username }}</span>
               </p>
-              <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+              <p class="text-yellow-500 text-lg">{{ '⭐'.repeat(review.rating) }}</p>
             </div>
-            <p class="text-gray-700 dark:text-gray-300">{{ review.comment }}</p>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">{{ new Date(review.created_at).toLocaleDateString() }}</p>
+            <p class="text-gray-700 dark:text-gray-300 mb-3">{{ review.comment }}</p>
+            <div class="flex justify-between items-center">
+              <p class="text-gray-500 dark:text-gray-400 text-sm">{{ new Date(review.created_at).toLocaleDateString() }}</p>
+              <button @click="handleToggleLike(review)" class="flex items-center gap-1 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 disabled:opacity-50" :disabled="!authStore.isLoggedIn">
+                <svg v-if="review.user_has_liked" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-blue-500 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span>{{ review.likes_count }}</span>
+              </button>
+            </div>
           </div>
         </div>
         <p v-else-if="!userReview" class="text-gray-500 dark:text-gray-400">No reviews yet.</p>
@@ -153,26 +178,6 @@
         </div>
         <p v-else-if="!authStore.isLoggedIn" class="mt-8 text-gray-600 dark:text-gray-400">Please <a @click.prevent="$emit('navigate', 'login')" class="text-blue-500 hover:underline cursor-pointer">log in</a> to add a review.</p>
       </div>
-
-      <!-- Related Movies Section -->
-      <div v-if="relatedMovies.length > 0" class="p-8 border-t border-gray-200 dark:border-gray-700">
-        <h2 class="text-2xl font-bold mt-8 mb-4 dark:text-gray-100">You might also like</h2>
-        <Carousel>
-          <div 
-            v-for="relatedMovie in relatedMovies" 
-            :key="relatedMovie.id" 
-            class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-            @click="$emit('show-detail', relatedMovie.id)"
-          >
-            <img v-if="relatedMovie.poster" :src="relatedMovie.poster" :alt="relatedMovie.title" class="h-64 w-full object-cover">
-            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
-            <div class="p-4">
-              <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ relatedMovie.title }}</h3>
-              <p v-if="relatedMovie.release_date" class="text-sm text-gray-500">{{ new Date(relatedMovie.release_date).getFullYear() }}</p>
-            </div>
-          </div>
-        </Carousel>
-      </div>
     </div>
     <div v-else class="text-center text-gray-500">Movie not found.</div>
   </div>
@@ -192,16 +197,20 @@ const props = defineProps({
 const emit = defineEmits(['navigate', 'show-actor-detail', 'show-director-detail', 'show-detail', 'show-user-profile']);
 const authStore = useAuthStore();
 
-const { getMovieById, addReview, updateReview, deleteReview, getWatchlist, addToWatchlist, removeFromWatchlist, getMovies } = useApi();
+const { 
+  getMovieById, addReview, updateReview, deleteReview, 
+  getWatchlist, addToWatchlist, removeFromWatchlist, 
+  getMovies, getReviews, toggleLikeReview 
+} = useApi();
+
 const movie = ref(null);
+const reviews = ref([]);
+const reviewSortOrder = ref('-created_at');
 const relatedMovies = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
-const newReview = reactive({
-  rating: 5,
-  comment: '',
-});
+const newReview = reactive({ rating: 5, comment: '' });
 const submittingReview = ref(false);
 const submitError = ref(null);
 
@@ -209,22 +218,20 @@ const editingReviewId = ref(null);
 const editedReviewRating = ref(1);
 const editedReviewComment = ref('');
 
-
 const watchlist = ref([]);
 const isProcessingWatchlist = ref(false);
-const watchlistItem = computed(() => {
-  return watchlist.value.find(item => item.movie.id === props.movieId);
-});
+
+const watchlistItem = computed(() => watchlist.value.find(item => item.movie.id === props.movieId));
 
 const userReview = computed(() => {
-  if (!authStore.user || !movie.value || !movie.value.reviews) return null;
-  return movie.value.reviews.find(review => review.user.id === authStore.user.id);
+  if (!authStore.user || !reviews.value) return null;
+  return reviews.value.find(review => review.user.id === authStore.user.id);
 });
 
 const otherReviews = computed(() => {
-  if (!movie.value || !movie.value.reviews) return [];
-  if (!userReview.value) return movie.value.reviews;
-  return movie.value.reviews.filter(review => review.id !== userReview.value.id);
+  if (!reviews.value) return [];
+  if (!userReview.value) return reviews.value;
+  return reviews.value.filter(review => review.id !== userReview.value.id);
 });
 
 const fetchMovie = async (id) => {
@@ -238,6 +245,7 @@ const fetchMovie = async (id) => {
       await fetchWatchlist();
     }
     await fetchRelatedMovies(movie.value);
+    await fetchReviews();
   } catch (err) {
     error.value = err;
     console.error('Error fetching movie:', err);
@@ -246,20 +254,42 @@ const fetchMovie = async (id) => {
   }
 };
 
-const fetchRelatedMovies = async (currentMovie) => {
-  if (!currentMovie || !currentMovie.genres || currentMovie.genres.length === 0) {
-    relatedMovies.value = [];
+const fetchReviews = async () => {
+  try {
+    const response = await getReviews({ movie: props.movieId, ordering: reviewSortOrder.value });
+    reviews.value = response.data.results;
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+  }
+};
+
+const handleToggleLike = async (review) => {
+  if (!authStore.isLoggedIn) {
+    emit('navigate', 'login');
     return;
   }
   try {
-    const genreId = currentMovie.genres[0].id; 
-    const response = await getMovies({ genres: genreId, limit: 10 });
-    relatedMovies.value = response.data.results.filter(m => m.id !== currentMovie.id);
+    if (review.user_has_liked) {
+      review.likes_count--;
+      review.user_has_liked = false;
+    } else {
+      review.likes_count++;
+      review.user_has_liked = true;
+    }
+    await toggleLikeReview(review.id);
   } catch (err) {
-    console.error('Error fetching related movies:', err);
-    relatedMovies.value = [];
+    console.error('Failed to toggle like:', err);
+    if (review.user_has_liked) {
+      review.likes_count--;
+      review.user_has_liked = false;
+    } else {
+      review.likes_count++;
+      review.user_has_liked = true;
+    }
   }
 };
+
+watch(reviewSortOrder, fetchReviews);
 
 const fetchWatchlist = async () => {
   try {
@@ -278,13 +308,10 @@ const toggleWatchlist = async () => {
   isProcessingWatchlist.value = true;
   try {
     if (watchlistItem.value) {
-      // It's on the list, remove it
       await removeFromWatchlist(watchlistItem.value.id);
     } else {
-      // It's not on the list, add it
       await addToWatchlist(props.movieId);
     }
-    // Refresh watchlist to update state
     await fetchWatchlist();
   } catch (err) {
     console.error("Failed to toggle watchlist:", err);
@@ -302,24 +329,15 @@ const submitReview = async () => {
       rating: newReview.rating,
       comment: newReview.comment,
     });
-    // Clear form and refetch movie to show new review
     newReview.rating = 5;
     newReview.comment = '';
-    await fetchMovie(props.movieId);
+    await fetchReviews();
   } catch (err) {
     console.error('Error submitting review:', err);
     if (err.response && err.response.data) {
         const data = err.response.data;
-        if (Array.isArray(data) && data.length > 0) {
-            submitError.value = data[0];
-        } else if (data.detail) {
+        if (data.detail) {
             submitError.value = data.detail;
-        } else if (data.non_field_errors) {
-            submitError.value = data.non_field_errors[0];
-        } else if (data.rating) {
-            submitError.value = `Rating: ${data.rating[0]}`;
-        } else if (data.comment) {
-            submitError.value = `Comment: ${data.comment[0]}`;
         } else {
             submitError.value = 'An unknown error occurred.';
         }
@@ -349,11 +367,10 @@ const handleSaveEdit = async (reviewId) => {
       rating: editedReviewRating.value,
       comment: editedReviewComment.value,
     });
-    await fetchMovie(props.movieId); // Refresh movie details to show updated review
-    handleCancelEdit(); // Exit edit mode
+    await fetchReviews();
+    handleCancelEdit();
   } catch (err) {
     console.error('Error saving review:', err);
-    // You might want to display an error message to the user here
   }
 };
 
@@ -361,14 +378,27 @@ const handleDeleteReview = async (reviewId) => {
   if (confirm('Are you sure you want to delete this review?')) {
     try {
       await deleteReview(reviewId);
-      await fetchMovie(props.movieId); // Refresh movie details to update review list
+      await fetchReviews();
     } catch (err) {
       console.error('Error deleting review:', err);
-      // Display error to user
     }
   }
 };
 
+const fetchRelatedMovies = async (currentMovie) => {
+  if (!currentMovie || !currentMovie.genres || currentMovie.genres.length === 0) {
+    relatedMovies.value = [];
+    return;
+  }
+  try {
+    const genreId = currentMovie.genres[0].id;
+    const response = await getMovies({ genres: genreId, limit: 10 });
+    relatedMovies.value = response.data.results.filter(m => m.id !== currentMovie.id);
+  } catch (err) {
+    console.error('Error fetching related movies:', err);
+    relatedMovies.value = [];
+  }
+};
 
 onMounted(() => {
   if (props.movieId) {
@@ -382,3 +412,4 @@ watch(() => props.movieId, (newId) => {
   }
 });
 </script>
+

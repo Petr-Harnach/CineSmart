@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 
 const apiClient = axios.create({
-  baseURL: 'http://127.00.1:8000/api/',
+  baseURL: 'http://127.0.0.1:8000/api/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -46,6 +46,20 @@ export const useApi = () => {
     });
   };
 
+  const requestPasswordReset = (email) => {
+    return apiClient.post('auth/password-reset/', { email });
+  };
+
+  const confirmPasswordReset = (token, password) => {
+    return apiClient.post('auth/password-reset/confirm/', { token, password });
+  };
+
+  const getReviews = (params) => apiClient.get('reviews/', { params });
+
+  const toggleLikeReview = (reviewId) => {
+    return apiClient.post(`reviews/${reviewId}/like/`);
+  };
+
   const addReview = (reviewData) => apiClient.post('reviews/', reviewData);
 
   const updateReview = (reviewId, reviewData) => apiClient.patch(`reviews/${reviewId}/`, reviewData);
@@ -80,6 +94,10 @@ export const useApi = () => {
     register,
     getProfile,
     updateProfile,
+    requestPasswordReset,
+    confirmPasswordReset,
+    getReviews,
+    toggleLikeReview,
     addReview,
     updateReview,
     deleteReview,

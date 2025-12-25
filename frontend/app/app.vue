@@ -40,6 +40,15 @@
         v-else-if="currentPage === 'profile'"
         @navigate="navigateTo"
       />
+      <PageForgotPassword 
+        v-else-if="currentPage === 'forgot-password'"
+        @navigate="navigateTo"
+      />
+      <PageResetPassword
+        v-else-if="currentPage === 'reset-password'"
+        :token="selectedResetToken"
+        @navigate="navigateTo"
+      />
       <PageViewUserProfile 
         v-else-if="currentPage === 'user-profile'"
         :user-id="selectedUserProfileId"
@@ -57,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import TheNavbar from '../components/TheNavbar.vue';
 import PageHome from '../components/PageHome.vue';
 import PageLogin from '../components/PageLogin.vue';
@@ -67,6 +76,8 @@ import PageActorDetail from '../components/PageActorDetail.vue';
 import PageDirectorDetail from '../components/PageDirectorDetail.vue';
 import PageProfile from '../components/PageProfile.vue';
 import PageViewUserProfile from '../components/PageViewUserProfile.vue';
+import PageForgotPassword from '../components/PageForgotPassword.vue';
+import PageResetPassword from '../components/PageResetPassword.vue';
 import PageWatchlist from '../components/PageWatchlist.vue';
 import TheFooter from '../components/TheFooter.vue';
 
@@ -75,32 +86,45 @@ const selectedMovieId = ref(null);
 const selectedActorId = ref(null);
 const selectedDirectorId = ref(null);
 const selectedUserProfileId = ref(null);
-const appSuccessMessage = ref(null); // Nová proměnná pro zprávu o úspěchu
+const selectedResetToken = ref(null);
+const appSuccessMessage = ref(null);
 const activeFilters = ref({});
 
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const page = urlParams.get('page');
+  const token = urlParams.get('token');
+
+  if (page === 'reset-password' && token) {
+    selectedResetToken.value = token;
+    currentPage.value = 'reset-password';
+  }
+});
+
 const navigateTo = (page, message = null) => {
-  console.log('Navigating to:', page, 'with message:', message); // Ladící výpis
+  console.log('Navigating to:', page, 'with message:', message);
   currentPage.value = page;
   selectedMovieId.value = null; 
   selectedActorId.value = null;
   selectedDirectorId.value = null;
   selectedUserProfileId.value = null;
-  appSuccessMessage.value = message; // Nastavení zprávy o úspěchu
+  selectedResetToken.value = null;
+  appSuccessMessage.value = message;
 };
 
 const showMovieDetail = (id) => {
-  console.log('Showing movie detail, clearing message'); // Ladící výpis
+  console.log('Showing movie detail, clearing message');
   selectedMovieId.value = id;
   currentPage.value = 'movie-detail';
-  appSuccessMessage.value = null; // Vyčistit zprávu
+  appSuccessMessage.value = null;
 };
 
-const showActorDetail = (id) => { // Nová funkce
+const showActorDetail = (id) => {
   selectedActorId.value = id;
   currentPage.value = 'actor-detail';
 };
 
-const showDirectorDetail = (id) => { // Nová funkce
+const showDirectorDetail = (id) => {
   selectedDirectorId.value = id;
   currentPage.value = 'director-detail';
 };
