@@ -13,10 +13,10 @@
 
       <!-- CENTER: SEARCH + FILTERS (OPRAVDU UPROSTŘED) -->
       <div class="flex-1 flex justify-center">
-        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:flex-1">
 
           <!-- SEARCH (JEŠTĚ VĚTŠÍ) -->
-          <div class="relative w-full md:w-[28rem]">
+          <div class="relative w-full md:flex-1">
             <form @submit.prevent="handleFilterChange">
               <div class="relative">
                 <input
@@ -64,48 +64,100 @@
             </div>
           </div>
 
-          <!-- TYPE -->
-          <select
-            v-model="selectedType"
-            @change="handleFilterChange"
-            class="w-full md:w-28 p-3 border rounded-md text-sm
-                   bg-gray-50 dark:bg-gray-700
-                   dark:border-gray-600 dark:text-gray-200 appearance-none"
-          >
-            <option value="">Type</option>
-            <option value="movie">Movies</option>
-            <option value="series">Series</option>
-          </select>
+          <!-- Filters Dropdown -->
+          <div class="relative">
+            <button 
+              @click="toggleFilterMenu"
+              class="w-full md:w-auto p-3 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9M3 12h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              <span>Filters</span>
+            </button>
 
-          <!-- GENRE -->
-          <select
-            v-model="selectedGenre"
-            @change="handleFilterChange"
-            class="w-full md:w-28 p-3 border rounded-md text-sm
-                   bg-gray-50 dark:bg-gray-700
-                   dark:border-gray-600 dark:text-gray-200 appearance-none"
-          >
-            <option value="">Genre</option>
-            <option v-for="genre in genres" :key="genre.id" :value="genre.id">
-              {{ genre.name }}
-            </option>
-          </select>
+            <!-- Filter Menu -->
+            <div 
+              v-if="isFilterMenuOpen"
+              class="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-full md:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20 p-4"
+            >
+              <div class="space-y-4">
+                <!-- TYPE -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                  <select
+                    v-model="selectedType"
+                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    <option value="">All</option>
+                    <option value="movie">Movies</option>
+                    <option value="series">Series</option>
+                  </select>
+                </div>
 
-          <!-- SORT -->
-          <select
-            v-model="selectedSort"
-            @change="handleFilterChange"
-            class="w-full md:w-32 p-3 border rounded-md text-sm
-                   bg-gray-50 dark:bg-gray-700
-                   dark:border-gray-600 dark:text-gray-200 appearance-none"
-          >
-            <option value="">Sort</option>
-            <option value="-avg_rating">Top Rated</option>
-            <option value="title">Title (A-Z)</option>
-            <option value="-title">Title (Z-A)</option>
-            <option value="-release_date">Newest First</option>
-            <option value="release_date">Oldest First</option>
-          </select>
+                <!-- GENRE -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Genre</label>
+                  <select
+                    v-model="selectedGenre"
+                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    <option value="">All</option>
+                    <option v-for="genre in genres" :key="genre.id" :value="genre.id">
+                      {{ genre.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- YEAR -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
+                  <div class="flex items-center gap-2 mt-1">
+                    <input 
+                      type="number" 
+                      v-model="yearFrom" 
+                      placeholder="From" 
+                      class="w-full p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    >
+                    <span class="text-gray-500">-</span>
+                    <input 
+                      type="number" 
+                      v-model="yearTo" 
+                      placeholder="To"
+                      class="w-full p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    >
+                  </div>
+                </div>
+
+                <!-- SORT -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort by</label>
+                  <select
+                    v-model="selectedSort"
+                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    <option value="">Default</option>
+                    <option value="-avg_rating">Top Rated</option>
+                    <option value="title">Title (A-Z)</option>
+                    <option value="-title">Title (Z-A)</option>
+                    <option value="-release_date">Newest First</option>
+                    <option value="release_date">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button @click="resetFilters" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500">
+                  Reset
+                </button>
+                <button @click="applyFilters" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+
 
         </div>
       </div>
@@ -134,9 +186,17 @@
           <a @click.prevent="$emit('navigate', 'watchlist')" href="#" class="text-gray-300 hover:text-white">
             Watchlist
           </a>
-          <span v-if="authStore.user" class="text-white hidden md:inline">
-            Welcome, {{ authStore.user.username }}
-          </span>
+          <a @click.prevent="$emit('navigate', 'profile')" href="#" class="flex items-center gap-2 text-white cursor-pointer">
+            <img 
+              v-if="authStore.user && authStore.user.profile_picture" 
+              :src="authStore.user.profile_picture" 
+              alt="Profile" 
+              class="h-8 w-8 rounded-full object-cover"
+            >
+            <span v-if="authStore.user" class="hidden md:inline">
+              {{ authStore.user.username }}
+            </span>
+          </a>
           <a
             @click.prevent="handleLogout"
             href="#"
@@ -191,6 +251,8 @@ const searchQuery = ref('');
 const selectedGenre = ref('');
 const selectedSort = ref('');
 const selectedType = ref('');
+const yearFrom = ref(null);
+const yearTo = ref(null);
 const genres = ref([]);
 
 // Stavy pro našeptávač
@@ -199,8 +261,30 @@ const isSearchLoading = ref(false);
 const isSearchFocused = ref(false);
 let debounceTimer = null;
 
+// Stav pro nové menu s filtry
+const isFilterMenuOpen = ref(false);
+
 const toggleTheme = () => {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
+};
+
+const toggleFilterMenu = () => {
+  isFilterMenuOpen.value = !isFilterMenuOpen.value;
+};
+
+const applyFilters = () => {
+  handleFilterChange();
+  isFilterMenuOpen.value = false;
+};
+
+const resetFilters = () => {
+  selectedGenre.value = '';
+  selectedSort.value = '';
+  selectedType.value = '';
+  yearFrom.value = null;
+  yearTo.value = null;
+  handleFilterChange();
+  isFilterMenuOpen.value = false;
 };
 
 const handleLogout = () => {
@@ -233,6 +317,12 @@ const handleFilterChange = () => {
   }
   if (selectedType.value) {
     params.type = selectedType.value;
+  }
+  if (yearFrom.value) {
+    params.release_date__year__gte = yearFrom.value;
+  }
+  if (yearTo.value) {
+    params.release_date__year__lte = yearTo.value;
   }
   emit('filter-change', params);
 };

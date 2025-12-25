@@ -8,35 +8,38 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class DirectorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Director
-        fields = ['id', 'name']
-
-
-# Zjednodušený serializer pro filmy v rámci profilu herce
-class MovieForActorSerializer(serializers.ModelSerializer):
+# Zjednodušený serializer pro filmy v rámci profilu herce/režiséra
+class BasicMovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = ['id', 'title', 'poster', 'release_date']
 
 
+class DirectorSerializer(serializers.ModelSerializer):
+    movies = BasicMovieSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Director
+        fields = ['id', 'name', 'bio', 'photo', 'movies']
+
+
 class ActorSerializer(serializers.ModelSerializer):
-    movies = MovieForActorSerializer(many=True, read_only=True)
+    movies = BasicMovieSerializer(many=True, read_only=True)
 
     class Meta:
         model = Actor
         fields = ['id', 'name', 'bio', 'photo', 'movies']
 
 
-class UserSerializer(serializers.ModelSerializer):
+# Serializer pro přihlášeného uživatele (vlastní profil)
+class MyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
         fields = ['id', 'username', 'email', 'bio', 'profile_picture']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = MyProfileSerializer(read_only=True)
     movie_id = serializers.PrimaryKeyRelatedField(
         queryset=Movie.objects.all(), write_only=True, source='movie'
     )
@@ -54,6 +57,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         if Review.objects.filter(user=user, movie=movie).exists():
             raise serializers.ValidationError("You have already reviewed this movie.")
         return super().create(validated_data)
+
+
+# Serializer pro veřejné profily ostatních uživatelů
+class PublicUserSerializer(serializers.ModelSerializer):
+    reviews = ReviewSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = __import__('django').contrib.auth.get_user_model()
+        fields = ['id', 'username', 'bio', 'profile_picture', 'reviews']
 
 
 class MovieSerializer(serializers.ModelSerializer):

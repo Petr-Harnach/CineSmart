@@ -2,6 +2,7 @@
   <div class="max-w-md mx-auto mt-10">
     <h1 class="text-2xl font-bold mb-4 dark:text-gray-100">Login</h1>
     <form @submit.prevent="handleLogin" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div v-if="successMessage" class="bg-green-100 text-green-700 p-3 mb-4 rounded">{{ successMessage }}</div>
       <div v-if="error" class="bg-red-100 text-red-700 p-3 mb-4 rounded">{{ error }}</div>
       <div class="mb-4">
         <label for="username" class="block text-gray-700 dark:text-gray-300">Username</label>
@@ -26,6 +27,13 @@
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
 
+const props = defineProps({
+  successMessage: {
+    type: String,
+    default: null,
+  },
+});
+
 const emit = defineEmits(['navigate']);
 const authStore = useAuthStore();
 
@@ -47,3 +55,4 @@ const handleLogin = async () => {
   }
 };
 </script>
+

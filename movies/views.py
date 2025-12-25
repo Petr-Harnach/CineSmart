@@ -1,15 +1,19 @@
 from rest_framework import viewsets, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Movie, Genre, Director, Review, Actor
-from .serializers import MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer
+from .models import Movie, Genre, Director, Review, Actor, CustomUser
+from .serializers import (
+    MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer,
+    MyProfileSerializer, PublicUserSerializer
+)
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes
 from django.contrib.auth import get_user_model
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .permissions import IsOwnerOrReadOnly
+from .filters import MovieFilter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from datetime import timedelta
@@ -92,7 +96,7 @@ def change_password_view(request):
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     """Retrieve or update the authenticated user's profile."""
-    serializer_class = UserSerializer
+    serializer_class = MyProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -107,7 +111,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()  # This is required for the router to determine the basename
     serializer_class = MovieSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['genres', 'director', 'type']
+    filterset_class = MovieFilter
     search_fields = ['title', 'description']
     ordering_fields = ['release_date', 'title', 'avg_rating']
 
@@ -154,7 +158,7 @@ def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-    return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+    return Response(MyProfileSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -210,3 +214,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """A viewset for viewing user profiles."""
+    queryset = CustomUser.objects.all()
+    serializer_class = PublicUserSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]

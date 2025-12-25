@@ -38,11 +38,13 @@
           
           <div class="mb-4 dark:text-gray-100">
             <span class="font-semibold">Director:</span> 
-            <span v-if="movie.director" class="ml-2">{{ movie.director.name }}</span>
+            <a v-if="movie.director" @click.prevent="$emit('show-director-detail', movie.director.id)" href="#" class="ml-2 hover:underline cursor-pointer">
+              {{ movie.director.name }}
+            </a>
             <span v-else class="ml-2">N/A</span>
           </div>
           
-<div class="mb-4 dark:text-gray-100">
+          <div class="mb-4 dark:text-gray-100">
             <span class="font-semibold">Genres:</span> 
             <span v-if="movie.genres && movie.genres.length" class="ml-2">
               {{ movie.genres.map(g => g.name).join(', ') }}
@@ -69,12 +71,13 @@
         </div>
       </div>
       <div class="p-8 border-t border-gray-200 dark:border-gray-700">
-        <!-- Reviews section -->
-        <h2 class="text-2xl font-bold mt-8 mb-4 dark:text-gray-100">Reviews</h2>
-        <div v-if="movie.reviews && movie.reviews.length" class="space-y-4">
-          <div v-for="review in movie.reviews" :key="review.id" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-            <template v-if="editingReviewId === review.id">
-              <form @submit.prevent="handleSaveEdit(review.id)">
+        <!-- Your Review Section -->
+        <div v-if="userReview" class="mb-8">
+          <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Your Review</h3>
+          <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
+            <template v-if="editingReviewId === userReview.id">
+              <!-- Edit Form for User's Review -->
+              <form @submit.prevent="handleSaveEdit(userReview.id)">
                 <div class="mb-2">
                   <label for="edit-rating" class="block text-gray-700 dark:text-gray-300 text-sm">Rating (1-5 Stars)</label>
                   <input type="number" v-model="editedReviewRating" id="edit-rating" min="1" max="5" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500" required />
@@ -85,28 +88,53 @@
                 </div>
                 <div class="flex justify-end space-x-2">
                   <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 dark:bg-gray-500 dark:text-gray-100 dark:hover:bg-gray-400">Cancel</button>
-                  <button type="submit" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Save</button>
+                  <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Save Changes</button>
                 </div>
               </form>
             </template>
             <template v-else>
+              <!-- Display User's Review -->
               <div class="flex justify-between items-center mb-2">
-                <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
-                <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+                <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
+                <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
               </div>
-              <p class="text-gray-700 dark:text-gray-300">{{ review.comment }}</p>
-              <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">{{ new Date(review.created_at).toLocaleDateString() }}</p>
-              <div v-if="authStore.user && review.user.id === authStore.user.id" class="mt-2 flex space-x-2 justify-end">
-                <button @click="handleEditReview(review)" class="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Edit</button>
-                <button @click="handleDeleteReview(review.id)" class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded hover:bg-red-300 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700">Delete</button>
+              <p class="text-gray-700 dark:text-gray-300">{{ userReview.comment }}</p>
+              <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">{{ new Date(userReview.created_at).toLocaleDateString() }}</p>
+              <div class="mt-2 flex space-x-2 justify-end">
+                <button @click="handleEditReview(userReview)" class="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Edit</button>
+                <button @click="handleDeleteReview(userReview.id)" class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded hover:bg-red-300 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700">Delete</button>
               </div>
             </template>
           </div>
         </div>
-        <p v-else class="text-gray-500 dark:text-gray-400">No reviews yet.</p>
+
+        <!-- Other Reviews section -->
+        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Reviews</h2>
+        <div v-if="otherReviews.length" class="space-y-4">
+          <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+              <p class="font-semibold dark:text-gray-100">
+                <a 
+                  v-if="authStore.isLoggedIn && review.user.id !== authStore.user?.id"
+                  href="#" 
+                  @click.prevent="$emit('show-user-profile', review.user.id)" 
+                  class="hover:underline"
+                >
+                  {{ review.user.username }}
+                </a>
+                <span v-else>{{ review.user.username }}</span>
+              </p>
+              <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+            </div>
+            <p class="text-gray-700 dark:text-gray-300">{{ review.comment }}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">{{ new Date(review.created_at).toLocaleDateString() }}</p>
+          </div>
+        </div>
+        <p v-else-if="!userReview" class="text-gray-500 dark:text-gray-400">No reviews yet.</p>
+        <p v-else class="text-gray-500 dark:text-gray-400">No other reviews yet.</p>
 
         <!-- New Review Form -->
-        <div v-if="authStore.isLoggedIn" class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <div v-if="authStore.isLoggedIn && !userReview" class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
           <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Add Your Review</h3>
           <form @submit.prevent="submitReview" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div v-if="submitError" class="bg-red-100 text-red-700 p-3 mb-4 rounded">{{ submitError }}</div>
@@ -123,7 +151,27 @@
             </button>
           </form>
         </div>
-        <p v-else class="mt-8 text-gray-600 dark:text-gray-400">Please <a @click.prevent="$emit('navigate', 'login')" class="text-blue-500 hover:underline cursor-pointer">log in</a> to add a review.</p>
+        <p v-else-if="!authStore.isLoggedIn" class="mt-8 text-gray-600 dark:text-gray-400">Please <a @click.prevent="$emit('navigate', 'login')" class="text-blue-500 hover:underline cursor-pointer">log in</a> to add a review.</p>
+      </div>
+
+      <!-- Related Movies Section -->
+      <div v-if="relatedMovies.length > 0" class="p-8 border-t border-gray-200 dark:border-gray-700">
+        <h2 class="text-2xl font-bold mt-8 mb-4 dark:text-gray-100">You might also like</h2>
+        <Carousel>
+          <div 
+            v-for="relatedMovie in relatedMovies" 
+            :key="relatedMovie.id" 
+            class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+            @click="$emit('show-detail', relatedMovie.id)"
+          >
+            <img v-if="relatedMovie.poster" :src="relatedMovie.poster" :alt="relatedMovie.title" class="h-64 w-full object-cover">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
+            <div class="p-4">
+              <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ relatedMovie.title }}</h3>
+              <p v-if="relatedMovie.release_date" class="text-sm text-gray-500">{{ new Date(relatedMovie.release_date).getFullYear() }}</p>
+            </div>
+          </div>
+        </Carousel>
       </div>
     </div>
     <div v-else class="text-center text-gray-500">Movie not found.</div>
@@ -135,15 +183,18 @@ import { ref, onMounted, watch, reactive, computed } from 'vue';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
 import AvgRating from './AvgRating.vue';
+import Carousel from './Carousel.vue';
+
 const props = defineProps({
   movieId: Number,
 });
 
-const emit = defineEmits(['navigate', 'show-actor-detail']);
+const emit = defineEmits(['navigate', 'show-actor-detail', 'show-director-detail', 'show-detail', 'show-user-profile']);
 const authStore = useAuthStore();
 
-const { getMovieById, addReview, updateReview, deleteReview, getWatchlist, addToWatchlist, removeFromWatchlist } = useApi();
+const { getMovieById, addReview, updateReview, deleteReview, getWatchlist, addToWatchlist, removeFromWatchlist, getMovies } = useApi();
 const movie = ref(null);
+const relatedMovies = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
@@ -165,20 +216,48 @@ const watchlistItem = computed(() => {
   return watchlist.value.find(item => item.movie.id === props.movieId);
 });
 
+const userReview = computed(() => {
+  if (!authStore.user || !movie.value || !movie.value.reviews) return null;
+  return movie.value.reviews.find(review => review.user.id === authStore.user.id);
+});
+
+const otherReviews = computed(() => {
+  if (!movie.value || !movie.value.reviews) return [];
+  if (!userReview.value) return movie.value.reviews;
+  return movie.value.reviews.filter(review => review.id !== userReview.value.id);
+});
+
 const fetchMovie = async (id) => {
   loading.value = true;
   error.value = null;
+  relatedMovies.value = [];
   try {
     const response = await getMovieById(id);
     movie.value = response.data;
     if (authStore.isLoggedIn) {
       await fetchWatchlist();
     }
+    await fetchRelatedMovies(movie.value);
   } catch (err) {
     error.value = err;
     console.error('Error fetching movie:', err);
   } finally {
     loading.value = false;
+  }
+};
+
+const fetchRelatedMovies = async (currentMovie) => {
+  if (!currentMovie || !currentMovie.genres || currentMovie.genres.length === 0) {
+    relatedMovies.value = [];
+    return;
+  }
+  try {
+    const genreId = currentMovie.genres[0].id; 
+    const response = await getMovies({ genres: genreId, limit: 10 });
+    relatedMovies.value = response.data.results.filter(m => m.id !== currentMovie.id);
+  } catch (err) {
+    console.error('Error fetching related movies:', err);
+    relatedMovies.value = [];
   }
 };
 

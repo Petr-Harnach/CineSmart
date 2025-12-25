@@ -38,6 +38,14 @@ export const useApi = () => {
 
   const getProfile = () => apiClient.get('auth/profile/');
 
+  const updateProfile = (formData) => {
+    return apiClient.patch('auth/profile/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  };
+
   const addReview = (reviewData) => apiClient.post('reviews/', reviewData);
 
   const updateReview = (reviewId, reviewData) => apiClient.patch(`reviews/${reviewId}/`, reviewData);
@@ -56,15 +64,22 @@ export const useApi = () => {
 
   const getActorById = (id) => apiClient.get(`actors/${id}/`);
 
+  const getDirectorById = (id) => apiClient.get(`directors/${id}/`);
+
+  const getUserById = (id) => apiClient.get(`users/${id}/`);
+
   return {
     getMovies,
     getMovieById,
     getGenres,
     getActors,
     getActorById,
+    getDirectorById,
+    getUserById,
     login,
     register,
     getProfile,
+    updateProfile,
     addReview,
     updateReview,
     deleteReview,

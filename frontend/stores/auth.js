@@ -40,10 +40,13 @@ export const useAuthStore = defineStore('auth', {
       try {
         await register(userData);
         console.log('Registration successful.');
-        return true;
+        return null; // Úspěch
       } catch (error) {
         console.error('Registration failed:', error);
-        return false;
+        if (error.response && error.response.data) {
+          return error.response.data; // Vrátit objekt s chybami
+        }
+        return { general: ['An unknown error occurred. Please try again.'] };
       }
     },
     logout() {
