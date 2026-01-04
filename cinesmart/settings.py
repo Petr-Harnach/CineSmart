@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -127,29 +128,17 @@ WSGI_APPLICATION = 'cinesmart.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+import dj_database_url
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cinesmart',      # název DB, co vytvoříš v PostgreSQL
-        'USER': 'postgres',       # uživatelské jméno (výchozí bývá postgres)
-        'PASSWORD': 'Assasin___238*1_+/a',# nastav si svoje heslo
-        'HOST': 'localhost',      # protože běží u tebe
-        'PORT': '5432',           # default port PostgreSQL
-    }
-}
-
-# Allow quick local testing with SQLite when USE_SQLITE=1 is set or when
-# DEBUG is True and PostgreSQL is not available locally. This keeps the
-# production settings untouched but makes it easy to run tests locally.
-import os
-USE_SQLITE = os.environ.get('USE_SQLITE') == '1'
-if USE_SQLITE or DEBUG:
-    # Use SQLite for quick local development/tests if requested
-    DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -182,13 +171,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -198,6 +184,9 @@ AUTH_USER_MODEL = 'movies.CustomUser'
 # Media files (for user-uploaded content like profile pictures)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Email backend for development (prints emails to console)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

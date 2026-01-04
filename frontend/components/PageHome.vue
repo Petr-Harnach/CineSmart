@@ -145,7 +145,8 @@
           <div class="p-4">
             <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ actor.name }}</h3>
             <!-- Placeholder for actor image/avatar -->
-            <div class="bg-gray-300 dark:bg-gray-700 h-24 w-full rounded-full flex items-center justify-center mt-2 text-gray-500">
+            <img v-if="actor.photo" :src="actor.photo" :alt="actor.name" class="h-24 w-24 rounded-full object-cover mx-auto mt-2">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-24 w-24 rounded-full flex items-center justify-center mt-2 text-gray-500 mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </div>
           </div>
