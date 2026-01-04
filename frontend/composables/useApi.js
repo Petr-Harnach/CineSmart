@@ -1,26 +1,29 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
-
-const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add a request interceptor to include the auth token
-apiClient.interceptors.request.use(config => {
-  const authStore = useAuthStore();
-  const token = authStore.accessToken;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+import { useRuntimeConfig } from '#app';
 
 export const useApi = () => {
+  const config = useRuntimeConfig();
+  
+  const apiClient = axios.create({
+    baseURL: config.public.apiBaseUrl,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // Add a request interceptor to include the auth token
+  apiClient.interceptors.request.use(config => {
+    const authStore = useAuthStore();
+    const token = authStore.accessToken;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  }, error => {
+    return Promise.reject(error);
+  });
+  
   const getMovies = (params) => {
     if (typeof params === 'string') { // Handle raw URL for pagination
       return apiClient.get(params);
