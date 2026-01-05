@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 import { useRuntimeConfig } from '#app';
+import qs from 'qs';
 
 export const useApi = () => {
   const config = useRuntimeConfig();
@@ -10,6 +11,7 @@ export const useApi = () => {
     headers: {
       'Content-Type': 'application/json',
     },
+    paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
   });
 
   // Add a request interceptor to include the auth token

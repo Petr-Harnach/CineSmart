@@ -49,6 +49,11 @@
         :token="selectedResetToken"
         @navigate="navigateTo"
       />
+      <PageBrowse
+        v-else-if="currentPage === 'browse'"
+        @navigate="navigateTo"
+        @show-detail="showMovieDetail"
+      />
       <PageViewUserProfile 
         v-else-if="currentPage === 'user-profile'"
         :user-id="selectedUserProfileId"
@@ -78,6 +83,7 @@ import PageProfile from '../components/PageProfile.vue';
 import PageViewUserProfile from '../components/PageViewUserProfile.vue';
 import PageForgotPassword from '../components/PageForgotPassword.vue';
 import PageResetPassword from '../components/PageResetPassword.vue';
+import PageBrowse from '../components/PageBrowse.vue';
 import PageWatchlist from '../components/PageWatchlist.vue';
 import TheFooter from '../components/TheFooter.vue';
 

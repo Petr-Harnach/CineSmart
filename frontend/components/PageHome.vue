@@ -179,58 +179,6 @@
         </div>
       </Carousel>
     </div>
-
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">{{ allMoviesHeading }}</h1>
-    </div>
-    
-    <div v-if="loading" class="text-center text-gray-500">
-      <p>Loading movies...</p>
-    </div>
-    
-    <div v-else-if="error" class="text-center text-red-500">
-      <p>Failed to load movies: {{ error.message }}</p>
-    </div>
-
-    <div v-else-if="movies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-      <p>No movies found matching your criteria.</p>
-    </div>
-
-    <div v-else v-scroll-reveal>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <div 
-          v-for="movie in movies" 
-          :key="movie.id" 
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-          @click="showMovieDetail(movie.id)"
-        >
-          <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
-          <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
-          
-          <div class="p-4">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h2>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ movie.release_date.substring(0, 4) }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-center mt-8 space-x-4">
-        <button 
-          @click="goToPrevPage" 
-          :disabled="!prevPageUrl" 
-          class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
-        >
-          Previous
-        </button>
-        <button 
-          @click="goToNextPage" 
-          :disabled="!nextPageUrl" 
-          class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
-        >
-          Next
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -242,30 +190,22 @@ import { useAuthStore } from '../stores/auth';
 import AvgRating from './AvgRating.vue';
 import Carousel from './Carousel.vue';
 
-const props = defineProps({
-  filters: Object,
-});
-
 const emit = defineEmits(['show-detail', 'navigate', 'show-actor-detail']);
 const authStore = useAuthStore();
 const { getMovies, getWatchlist, getActors, addToWatchlist, removeFromWatchlist } = useApi();
 
-const movies = ref([]);
 const topRatedMovies = ref([]);
 const userWatchlist = ref([]);
 const popularActors = ref([]);
 const inTheatersMovies = ref([]);
 const mainTrailerMovies = ref([]); // New array for carousel
 const currentTrailerIndex = ref(0); // Index for the carousel
-const loading = ref(true);
 const loadingTopRated = ref(true);
 const loadingWatchlist = ref(true);
 const loadingPopularActors = ref(true);
 const loadingInTheaters = ref(true);
 const loadingMainTrailer = ref(true); // New loading state for main trailer
 const error = ref(null);
-const nextPageUrl = ref(null);
-const prevPageUrl = ref(null);
 
 const player = ref(null); // To hold the YouTube player instance
 const isVideoPlaying = ref(false); // To track player state
@@ -330,16 +270,6 @@ const prevTrailer = () => {
   }
 };
 
-const allMoviesHeading = computed(() => {
-  if (props.filters && props.filters.type === 'movie') {
-    return 'All Movies';
-  } else if (props.filters && props.filters.type === 'series') {
-    return 'All Series';
-  } else {
-    return 'All Movies';
-  }
-});
-
 const youtubePlayerContainer = ref(null);
 const isApiReady = ref(false);
 
@@ -395,22 +325,6 @@ watch([currentTrailerMovie, isApiReady], ([movie, apiReady]) => {
   }
 }, { deep: true });
 
-
-const fetchMovies = async (urlOrParams) => {
-  loading.value = true;
-  error.value = null;
-  try {
-    const response = await getMovies(urlOrParams);
-    movies.value = response.data.results;
-    nextPageUrl.value = response.data.next;
-    prevPageUrl.value = response.data.previous;
-  } catch (err) {
-    error.value = err;
-    console.error('Error fetching movies:', err);
-  } finally {
-    loading.value = false;
-  }
-};
 
 const fetchTopRatedMovies = async () => {
   loadingTopRated.value = true;
@@ -481,25 +395,8 @@ const fetchMainTrailerMovie = async () => {
   }
 };
 
-const goToNextPage = () => {
-  if (nextPageUrl.value) {
-    fetchMovies(nextPageUrl.value);
-  }
-};
-
-const goToPrevPage = () => {
-  if (prevPageUrl.value) {
-    fetchMovies(prevPageUrl.value);
-  }
-};
-
-watch(() => props.filters, (newFilters) => {
-  fetchMovies(newFilters);
-}, { deep: true });
-
 onMounted(() => {
   loadYouTubeAPI();
-  fetchMovies(props.filters);
   fetchTopRatedMovies();
   fetchUserWatchlist();
   fetchPopularActors();
