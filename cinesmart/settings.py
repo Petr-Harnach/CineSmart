@@ -11,8 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--4m!&taszve!iiw(!p_n6yihs_n)(1m%a#e16xa-^0e1pka_9!')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
-ALLOWED_HOSTS.append('cinesmart-api.onrender.com')
+ALLOWED_HOSTS = ['*'] # Dočasně pro ladění
 
 
 # Application definition
@@ -50,9 +49,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://cine-smart.vercel.app",
 ]
 
-# Zabezpečení a proxy nastavení
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Povolit všechny domény pro CORS, pokud je DEBUG
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    # V produkci povolit jen explitni domeny
+    CORS_ALLOWED_ORIGINS.append('https://cine-smart.vercel.app') # Prozatimni placeholder, bude se upresnovat
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
@@ -109,7 +111,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
-    # MEDIA_ROOT sem nepatří, WhiteNoise je pro statické soubory, ne pro média.
+    MEDIA_ROOT,
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
