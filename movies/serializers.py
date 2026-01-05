@@ -2,6 +2,17 @@ from rest_framework import serializers
 from .models import Movie, Genre, Director, Review, Actor
 
 
+# Vlastní pole pro generování absolutních URL pro obrázky
+class AbsoluteImageField(serializers.ImageField):
+    def to_representation(self, value):
+        if not value:
+            return None
+        request = self.context.get('request', None)
+        if request is not None:
+            return request.build_absolute_uri(value.url)
+        return value.url
+
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
@@ -10,6 +21,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 # Zjednodušený serializer pro filmy v rámci profilu herce/režiséra
 class BasicMovieSerializer(serializers.ModelSerializer):
+    poster = AbsoluteImageField(read_only=True)
     class Meta:
         model = Movie
         fields = ['id', 'title', 'poster', 'release_date']
@@ -17,7 +29,7 @@ class BasicMovieSerializer(serializers.ModelSerializer):
 
 class DirectorSerializer(serializers.ModelSerializer):
     movies = BasicMovieSerializer(many=True, read_only=True)
-
+    photo = AbsoluteImageField(read_only=True)
     class Meta:
         model = Director
         fields = ['id', 'name', 'bio', 'photo', 'movies']
@@ -25,7 +37,7 @@ class DirectorSerializer(serializers.ModelSerializer):
 
 class ActorSerializer(serializers.ModelSerializer):
     movies = BasicMovieSerializer(many=True, read_only=True)
-
+    photo = AbsoluteImageField(read_only=True)
     class Meta:
         model = Actor
         fields = ['id', 'name', 'bio', 'photo', 'movies']
@@ -33,6 +45,7 @@ class ActorSerializer(serializers.ModelSerializer):
 
 # Serializer pro přihlášeného uživatele (vlastní profil)
 class MyProfileSerializer(serializers.ModelSerializer):
+    profile_picture = AbsoluteImageField(read_only=True)
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
         fields = ['id', 'username', 'email', 'bio', 'profile_picture']
@@ -73,21 +86,20 @@ class ReviewSerializer(serializers.ModelSerializer):
 # Serializer pro veřejné profily ostatních uživatelů
 class PublicUserSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
-
+    profile_picture = AbsoluteImageField(read_only=True)
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
         fields = ['id', 'username', 'bio', 'profile_picture', 'reviews']
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    # Read-only nested representation for GET
+    poster = AbsoluteImageField(read_only=True)
     genres = GenreSerializer(many=True, read_only=True)
     director = DirectorSerializer(read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
-    avg_rating = serializers.FloatField(read_only=True) # Přidáno
+    avg_rating = serializers.FloatField(read_only=True)
 
-    # Write-only fields for creating/updating relationships (accept PKs)
     genre_ids = serializers.PrimaryKeyRelatedField(
         queryset=Genre.objects.all(), many=True, write_only=True, source='genres'
     )
@@ -102,20 +114,9 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = [
             'id', 'title', 'description', 'release_date', 'duration_minutes', 'country', 'type', 'poster', 'trailer_url',
-            'genres', 'director', 'reviews', 'actors', 'screenwriter', 'avg_rating', # Přidáno 'avg_rating'
+            'genres', 'director', 'reviews', 'actors', 'screenwriter', 'avg_rating',
             'genre_ids', 'director_id', 'actor_ids'
         ]
-
-    def validate_duration_minutes(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("duration_minutes must be a positive integer.")
-        return value
-
-    # Add explicit help_text for OpenAPI generation and readability
-    title = serializers.CharField(help_text='Movie title', max_length=200)
-    description = serializers.CharField(help_text='Full description of the movie')
-    release_date = serializers.DateField(help_text='Release date in YYYY-MM-DD format')
-    duration_minutes = serializers.IntegerField(help_text='Duration in minutes')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
