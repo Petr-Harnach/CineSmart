@@ -53,7 +53,7 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     # V produkci povolit jen explitni domeny
-    CORS_ALLOWED_ORIGINS.append('https://cinesmart.vercel.app') # Prozatimni placeholder, bude se upresnovat
+    CORS_ALLOWED_ORIGINS.append('https://cine-smart.vercel.app') # Prozatimni placeholder, bude se upresnovat
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
@@ -101,10 +101,17 @@ DATABASES = {
 
 # ... (zbytek souboru)
 AUTH_USER_MODEL = 'movies.CustomUser'
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    MEDIA_ROOT,
-]
+
+# Media files (for user-uploaded content like profile pictures)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    MEDIA_ROOT, # !!! TADY JE TO POUŽITO
+]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
