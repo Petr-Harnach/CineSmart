@@ -1,4 +1,3 @@
-
 """
 URL configuration for cinesmart project.
 
@@ -31,8 +30,3 @@ urlpatterns = [
     path('api/', include('movies.urls')),
     path('api/auth/password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 ]
-
-# Povolit servírování mediálních souborů v produkci (pro Render)
-if settings.DEBUG is False:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
