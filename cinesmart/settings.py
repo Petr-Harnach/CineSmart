@@ -45,8 +45,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    # Zde přidáme URL frontendu na Vercelu, až ji budeme mít
-    # Např. "https://cinesmart.vercel.app"
+    "https://cine-smart.vercel.app",
 ]
 
 # Povolit všechny domény pro CORS, pokud je DEBUG
