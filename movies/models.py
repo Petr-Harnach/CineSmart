@@ -1,12 +1,30 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
+from cloudinary.models import CloudinaryField
 
 
 class CustomUser(AbstractUser):
     bio = models.TextField(blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    profile_picture = CloudinaryField('image', null=True, blank=True)
+
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        related_name="customuser_set",
+        related_query_name="user",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name="customuser_set",
+        related_query_name="user",
+    )
 
 
 class Genre(models.Model):
@@ -19,7 +37,7 @@ class Genre(models.Model):
 class Director(models.Model):
     name = models.CharField(max_length=150, unique=True)
     bio = models.TextField(blank=True)
-    photo = models.ImageField(upload_to='director_photos/', null=True, blank=True)
+    photo = CloudinaryField('image', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -28,7 +46,7 @@ class Director(models.Model):
 class Actor(models.Model):
     name = models.CharField(max_length=150, unique=True)
     bio = models.TextField(blank=True)
-    photo = models.ImageField(upload_to='actor_photos/', null=True, blank=True)
+    photo = CloudinaryField('image', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -45,7 +63,7 @@ class Movie(models.Model):
     duration_minutes = models.IntegerField(validators=[MinValueValidator(1)])
     country = models.CharField(max_length=100, blank=True)
     type = models.CharField(max_length=10, choices=MOVIE_TYPE_CHOICES, default='movie')
-    poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    poster = CloudinaryField('image', null=True, blank=True)
     trailer_url = models.URLField(blank=True)
     
     genres = models.ManyToManyField(Genre, related_name="movies")
@@ -106,8 +124,3 @@ class ReviewLike(models.Model):
 
     def __str__(self):
         return f'{self.user.username} likes {self.review.id}'
-
-
-    
-
-    
