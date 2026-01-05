@@ -11,13 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--4m!&taszve!iiw(!p_n6yihs_n)(1m%a#e16xa-^0e1pka_9!')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-if DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-else:
-    ALLOWED_HOSTS = ['cinesmart-api.onrender.com'] # Explicitní Render doména
+ALLOWED_HOSTS = ['*'] # Dočasně pro ladění
 
-
-INSTALLED_APPS = [
+# Application definition
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
