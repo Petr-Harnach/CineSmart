@@ -11,11 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--4m!&taszve!iiw(!p_n6yihs_n)(1m%a#e16xa-^0e1pka_9!')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    'cinesmart-api.onrender.com',
-    'localhost',
-    '127.0.0.1',
-]
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+else:
+    ALLOWED_HOSTS = ['cinesmart-api.onrender.com'] # Explicitní Render doména
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',  # Mělo by být nad staticfiles
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
@@ -50,11 +49,15 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     # Zde přidáme URL frontendu na Vercelu, až ji budeme mít
+    # Např. "https://cinesmart.vercel.app"
 ]
 
 # Povolit všechny domény pro CORS, pokud je DEBUG
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
+else:
+    # V produkci povolit jen explitni domeny
+    CORS_ALLOWED_ORIGINS.append('https://cinesmart.vercel.app') # Prozatimni placeholder, bude se upresnovat
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
