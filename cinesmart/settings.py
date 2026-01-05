@@ -7,14 +7,12 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Production settings
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--4m!&taszve!iiw(!p_n6yihs_n)(1m%a#e16xa-^0e1pka_9!')
+# --- Basic Settings ---
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-default-secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['cinesmart-api.onrender.com', 'localhost', '127.0.0.1']
 
-ALLOWED_HOSTS = ['*'] # Dočasně pro ladění
-
-
-# Application definition
+# --- Application definition ---
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,8 +25,12 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
-    'movies',
     'corsheaders',
+    # 'cloudinary', # Odebráno
+    # 'cloudinary_storage', # Odebráno
+
+    # Local apps
+    'movies',
 ]
 
 MIDDLEWARE = [
@@ -43,37 +45,32 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+ROOT_URLCONF = 'cinesmart.urls'
+
+# --- CORS Settings ---
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://cine-smart.vercel.app",
 ]
-
-# Povolit všechny domény pro CORS, pokud je DEBUG
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
-else:
-    # V produkci povolit jen explitni domeny
-    CORS_ALLOWED_ORIGINS.append('https://cine-smart.vercel.app') # Prozatimni placeholder, bude se upresnovat
 
+# --- REST Framework & JWT ---
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
 }
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
-# ... (ostatní nastavení zůstávají stejná)
-
-ROOT_URLCONF = 'cinesmart.urls'
-
+# --- Templates ---
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -91,28 +88,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cinesmart.wsgi.application'
 
-# Database
+# --- Database ---
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=not DEBUG  # SSL jen v produkci
+        ssl_require=not DEBUG
     )
 }
 
-# ... (zbytek souboru)
-AUTH_USER_MODEL = 'movies.CustomUser'
+# --- Password validation ---
+AUTH_PASSWORD_VALIDATORS = [
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+]
 
-# Media files (for user-uploaded content like profile pictures)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# --- Internationalization ---
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Static files (CSS, JavaScript, Images)
+# --- Static and Media Files ---
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    MEDIA_ROOT,
-]
+STATICFILES_DIRS = [ ] # Odebráno MEDIA_ROOT, protože Django bude servírovat media
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage' # Vráceno na výchozí
+
+# --- Email ---
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
