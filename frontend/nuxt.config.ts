@@ -9,7 +9,13 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api/'
+      // --- OPTION 1: LOCAL DEVELOPMENT (Default) ---
+      // Uncomment this line for local development
+      // apiBaseUrl: 'http://127.0.0.1:8000/api/'
+
+      // --- OPTION 2: PRODUCTION (Render.com) ---
+      // Uncomment this line when deploying to Vercel
+      apiBaseUrl: 'https://cinesmart-api.onrender.com/api/'
     }
   }
 })

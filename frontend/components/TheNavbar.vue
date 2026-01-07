@@ -43,10 +43,10 @@
               </div>
             </form>
             <!-- Search Results Dropdown -->
-            <div v-if="isSearchFocused && (searchResults.length > 0 || isSearchLoading || searchQuery.length > 2)"
+            <div v-if="isSearchFocused && (searchResults.length > 0 || isSearchLoading || searchQuery.length > 0)"
                  class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20">
               <div v-if="isSearchLoading" class="p-4 text-gray-500">Loading...</div>
-              <div v-else-if="searchResults.length === 0 && searchQuery.length > 2" class="p-4 text-gray-500">No results found.</div>
+              <div v-else-if="searchResults.length === 0 && searchQuery.length > 0" class="p-4 text-gray-500">No results found.</div>
               <ul v-else>
                 <li v-for="movie in searchResults" :key="movie.id" 
                     @click="selectMovie(movie.id)"
@@ -63,6 +63,18 @@
               </ul>
             </div>
           </div>
+
+          <!-- Random Pick Button -->
+          <button 
+            @click="handleRandomPick"
+            title="Random Pick"
+            class="p-3 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01M12 12h.01" />
+            </svg>
+          </button>
 
           <!-- Filters Button -->
           <div class="relative">
@@ -94,6 +106,9 @@
         <template v-else>
           <a @click.prevent="$emit('navigate', 'watchlist')" href="#" class="text-gray-300 hover:text-white">
             Watchlist
+          </a>
+          <a @click.prevent="$emit('navigate', 'collections')" href="#" class="text-gray-300 hover:text-white">
+            Collections
           </a>
           <a @click.prevent="$emit('navigate', 'profile')" href="#" class="flex items-center gap-2 text-white cursor-pointer">
             <img 
@@ -134,16 +149,58 @@ import { useApi } from '../composables/useApi';
 const colorMode = useColorMode();
 const emit = defineEmits(['navigate', 'filter-change', 'show-detail']);
 const authStore = useAuthStore();
-const { getMovies } = useApi();
+const { getGenres, getMovies, getRandomMovieId } = useApi();
 
+// Stavy pro filtry
 const searchQuery = ref('');
+const selectedGenre = ref('');
+const selectedSort = ref('');
+const selectedType = ref('');
+const yearFrom = ref(null);
+const yearTo = ref(null);
+const genres = ref([]);
+
+// Stavy pro našeptávač
 const searchResults = ref([]);
 const isSearchLoading = ref(false);
 const isSearchFocused = ref(false);
 let debounceTimer = null;
 
+// Stav pro nové menu s filtry
+const isFilterMenuOpen = ref(false);
+
 const toggleTheme = () => {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
+};
+
+const toggleFilterMenu = () => {
+  isFilterMenuOpen.value = !isFilterMenuOpen.value;
+};
+
+const applyFilters = () => {
+  handleFilterChange();
+  isFilterMenuOpen.value = false;
+};
+
+const resetFilters = () => {
+  selectedGenre.value = '';
+  selectedSort.value = '';
+  selectedType.value = '';
+  yearFrom.value = null;
+  yearTo.value = null;
+  handleFilterChange();
+  isFilterMenuOpen.value = false;
+};
+
+const handleRandomPick = async () => {
+  try {
+    const randomId = await getRandomMovieId();
+    if (randomId) {
+      emit('show-detail', randomId);
+    }
+  } catch (err) {
+    console.error('Error during random pick:', err);
+  }
 };
 
 const handleLogout = () => {
@@ -163,7 +220,7 @@ watch(searchQuery, (newValue) => {
   clearTimeout(debounceTimer);
   searchResults.value = [];
 
-  if (newValue.length > 2) {
+  if (newValue.length > 0) {
     isSearchLoading.value = true;
     debounceTimer = setTimeout(async () => {
       try {

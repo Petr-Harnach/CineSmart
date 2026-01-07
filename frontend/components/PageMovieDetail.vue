@@ -19,20 +19,53 @@
             <AvgRating :rating="movie.avg_rating" />
           </div>
           
-          <button 
-            @click="toggleWatchlist" 
-            :disabled="isProcessingWatchlist && authStore.isLoggedIn"
-            class="mb-4 w-full p-2 rounded font-semibold"
-            :class="[
-              authStore.isLoggedIn 
-                ? (watchlistItem 
-                    ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500' 
-                    : 'bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600')
-                : 'bg-gray-400 text-white cursor-pointer hover:bg-gray-500 dark:bg-gray-500 dark:hover:bg-gray-400'
-            ]"
-          >
-            {{ isProcessingWatchlist ? '...' : (authStore.isLoggedIn ? (watchlistItem ? '✓ On Watchlist' : '+ Add to Watchlist') : 'Log in to add to Watchlist') }}
-          </button>
+          <div class="flex gap-2 mb-4">
+            <button 
+              @click="toggleWatchlist" 
+              :disabled="isProcessingWatchlist && authStore.isLoggedIn"
+              class="flex-1 p-2 rounded font-semibold transition"
+              :class="[
+                authStore.isLoggedIn 
+                  ? (watchlistItem 
+                      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500' 
+                      : 'bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600')
+                  : 'bg-gray-400 text-white cursor-pointer hover:bg-gray-500 dark:bg-gray-500 dark:hover:bg-gray-400'
+              ]"
+            >
+              {{ isProcessingWatchlist ? '...' : (authStore.isLoggedIn ? (watchlistItem ? '✓ On Watchlist' : '+ Add to Watchlist') : 'Log in to add to Watchlist') }}
+            </button>
+
+            <!-- Collection Dropdown -->
+            <div v-if="authStore.isLoggedIn" class="relative">
+              <button 
+                @click="showCollectionDropdown = !showCollectionDropdown"
+                class="p-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition h-full flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Collection
+              </button>
+              
+              <div v-if="showCollectionDropdown" 
+                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
+                  You have no collections. Create one first!
+                </div>
+                <div v-else>
+                  <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Add to:</p>
+                  <button 
+                    v-for="col in userCollections" 
+                    :key="col.id"
+                    @click="handleAddToCollection(col.id)"
+                    class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                  >
+                    {{ col.name }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <p class="text-gray-700 dark:text-gray-200 mb-4">{{ movie.description }}</p>
           
@@ -178,6 +211,26 @@
         </div>
         <p v-else-if="!authStore.isLoggedIn" class="mt-8 text-gray-600 dark:text-gray-400">Please <a @click.prevent="$emit('navigate', 'login')" class="text-blue-500 hover:underline cursor-pointer">log in</a> to add a review.</p>
       </div>
+
+      <!-- Related Movies Section -->
+      <div v-if="relatedMovies.length > 0" class="p-8 border-t border-gray-200 dark:border-gray-700">
+        <h2 class="text-2xl font-bold mt-8 mb-4 dark:text-gray-100">You might also like</h2>
+        <Carousel>
+          <div 
+            v-for="relatedMovie in relatedMovies" 
+            :key="relatedMovie.id" 
+            class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+            @click="$emit('show-detail', relatedMovie.id)"
+          >
+            <img v-if="relatedMovie.poster" :src="relatedMovie.poster" :alt="relatedMovie.title" class="h-64 w-full object-cover">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
+            <div class="p-4">
+              <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ relatedMovie.title }}</h3>
+              <p v-if="relatedMovie.release_date" class="text-sm text-gray-500">{{ new Date(relatedMovie.release_date).getFullYear() }}</p>
+            </div>
+          </div>
+        </Carousel>
+      </div>
     </div>
     <div v-else class="text-center text-gray-500">Movie not found.</div>
   </div>
@@ -197,14 +250,17 @@ const props = defineProps({
 const emit = defineEmits(['navigate', 'show-actor-detail', 'show-director-detail', 'show-detail', 'show-user-profile']);
 const authStore = useAuthStore();
 
-const { 
+const {
   getMovieById, addReview, updateReview, deleteReview, 
   getWatchlist, addToWatchlist, removeFromWatchlist, 
-  getMovies, getReviews, toggleLikeReview 
+  getMovies, getReviews, toggleLikeReview,
+  getCollections, addMovieToCollection
 } = useApi();
 
 const movie = ref(null);
 const reviews = ref([]);
+const userCollections = ref([]);
+const showCollectionDropdown = ref(false);
 const reviewSortOrder = ref('-created_at');
 const relatedMovies = ref([]);
 const loading = ref(true);
@@ -234,6 +290,48 @@ const otherReviews = computed(() => {
   return reviews.value.filter(review => review.id !== userReview.value.id);
 });
 
+const fetchUserCollections = async () => {
+  try {
+    const response = await getCollections();
+    userCollections.value = response.data.results.filter(c => c.user.id === authStore.user?.id);
+  } catch (err) {
+    console.error('Failed to fetch collections:', err);
+  }
+};
+
+const fetchRelatedMovies = async (currentMovie) => {
+  if (!currentMovie || !currentMovie.genres || currentMovie.genres.length === 0) {
+    relatedMovies.value = [];
+    return;
+  }
+  try {
+    const genreId = currentMovie.genres[0].id;
+    const response = await getMovies({ genres: genreId, limit: 10 });
+    relatedMovies.value = response.data.results.filter(m => m.id !== currentMovie.id);
+  } catch (err) {
+    console.error('Error fetching related movies:', err);
+    relatedMovies.value = [];
+  }
+};
+
+const fetchReviews = async () => {
+  try {
+    const response = await getReviews({ movie: props.movieId, ordering: reviewSortOrder.value });
+    reviews.value = response.data.results;
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+  }
+};
+
+const fetchWatchlist = async () => {
+  try {
+    const response = await getWatchlist();
+    watchlist.value = response.data.results;
+  } catch (err) {
+    console.error("Failed to fetch watchlist:", err);
+  }
+};
+
 const fetchMovie = async (id) => {
   loading.value = true;
   error.value = null;
@@ -243,6 +341,7 @@ const fetchMovie = async (id) => {
     movie.value = response.data;
     if (authStore.isLoggedIn) {
       await fetchWatchlist();
+      await fetchUserCollections();
     }
     await fetchRelatedMovies(movie.value);
     await fetchReviews();
@@ -254,12 +353,14 @@ const fetchMovie = async (id) => {
   }
 };
 
-const fetchReviews = async () => {
+const handleAddToCollection = async (collectionId) => {
   try {
-    const response = await getReviews({ movie: props.movieId, ordering: reviewSortOrder.value });
-    reviews.value = response.data.results;
+    await addMovieToCollection(collectionId, props.movieId);
+    showCollectionDropdown.value = false;
+    alert('Added to collection!');
   } catch (err) {
-    console.error('Error fetching reviews:', err);
+    console.error('Failed to add to collection:', err);
+    alert('Movie is already in this collection.');
   }
 };
 
@@ -290,15 +391,6 @@ const handleToggleLike = async (review) => {
 };
 
 watch(reviewSortOrder, fetchReviews);
-
-const fetchWatchlist = async () => {
-  try {
-    const response = await getWatchlist();
-    watchlist.value = response.data.results;
-  } catch (err) {
-    console.error("Failed to fetch watchlist:", err);
-  }
-};
 
 const toggleWatchlist = async () => {
   if (!authStore.isLoggedIn) {
@@ -385,21 +477,6 @@ const handleDeleteReview = async (reviewId) => {
   }
 };
 
-const fetchRelatedMovies = async (currentMovie) => {
-  if (!currentMovie || !currentMovie.genres || currentMovie.genres.length === 0) {
-    relatedMovies.value = [];
-    return;
-  }
-  try {
-    const genreId = currentMovie.genres[0].id;
-    const response = await getMovies({ genres: genreId, limit: 10 });
-    relatedMovies.value = response.data.results.filter(m => m.id !== currentMovie.id);
-  } catch (err) {
-    console.error('Error fetching related movies:', err);
-    relatedMovies.value = [];
-  }
-};
-
 onMounted(() => {
   if (props.movieId) {
     fetchMovie(props.movieId);
@@ -412,4 +489,3 @@ watch(() => props.movieId, (newId) => {
   }
 });
 </script>
-

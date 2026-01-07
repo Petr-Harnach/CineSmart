@@ -79,6 +79,18 @@ export const useApi = () => {
 
   const updateWatchlistItem = (id, data) => apiClient.patch(`watchlist/${id}/`, data);
 
+  const getCollections = () => apiClient.get('collections/');
+
+  const getCollectionById = (id) => apiClient.get(`collections/${id}/`);
+
+  const createCollection = (data) => apiClient.post('collections/', data);
+
+  const deleteCollection = (id) => apiClient.delete(`collections/${id}/`);
+
+  const addMovieToCollection = (collectionId, movieId) => apiClient.post(`collections/${collectionId}/add_movie/`, { movie_id: movieId });
+
+  const removeMovieFromCollection = (collectionId, movieId) => apiClient.post(`collections/${collectionId}/remove_movie/`, { movie_id: movieId });
+
   const getActors = () => apiClient.get('actors/');
 
   const getActorById = (id) => apiClient.get(`actors/${id}/`);
@@ -86,6 +98,18 @@ export const useApi = () => {
   const getDirectorById = (id) => apiClient.get(`directors/${id}/`);
 
   const getUserById = (id) => apiClient.get(`users/${id}/`);
+
+  const getRandomMovieId = async () => {
+    // Použijeme náhodné řazení na backendu
+    const response = await apiClient.get('movies/', { 
+      params: { 
+        ordering: '?', 
+        limit: 1, 
+        t: new Date().getTime() // Anti-cache
+      } 
+    });
+    return response.data.results[0]?.id;
+  };
 
   return {
     getMovies,
@@ -95,6 +119,7 @@ export const useApi = () => {
     getActorById,
     getDirectorById,
     getUserById,
+    getRandomMovieId,
     login,
     register,
     getProfile,
@@ -110,5 +135,11 @@ export const useApi = () => {
     addToWatchlist,
     removeFromWatchlist,
     updateWatchlistItem,
+    getCollections,
+    getCollectionById,
+    createCollection,
+    deleteCollection,
+    addMovieToCollection,
+    removeMovieFromCollection,
   };
 };

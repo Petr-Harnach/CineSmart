@@ -2,11 +2,19 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
-from cloudinary.models import CloudinaryField
 
+# --- CLOUDINARY IMPORT (Zakomentovat pro lokální vývoj bez Cloudinary) ---
+from cloudinary.models import CloudinaryField
 
 class CustomUser(AbstractUser):
     bio = models.TextField(blank=True)
+    
+    # --- IMAGE FIELDS (Přepínat mezi lokálem a produkcí) ---
+    
+    # LOCAL (Aktivní):
+    # profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    
+    # PRODUCTION (Zakomentované):
     profile_picture = CloudinaryField('image', null=True, blank=True)
 
     groups = models.ManyToManyField(
@@ -37,6 +45,11 @@ class Genre(models.Model):
 class Director(models.Model):
     name = models.CharField(max_length=150, unique=True)
     bio = models.TextField(blank=True)
+    
+    # LOCAL (Aktivní):
+    # photo = models.ImageField(upload_to='director_photos/', null=True, blank=True)
+    
+    # PRODUCTION (Zakomentované):
     photo = CloudinaryField('image', null=True, blank=True)
 
     def __str__(self):
@@ -46,6 +59,11 @@ class Director(models.Model):
 class Actor(models.Model):
     name = models.CharField(max_length=150, unique=True)
     bio = models.TextField(blank=True)
+    
+    # LOCAL (Aktivní):
+    # photo = models.ImageField(upload_to='actor_photos/', null=True, blank=True)
+    
+    # PRODUCTION (Zakomentované):
     photo = CloudinaryField('image', null=True, blank=True)
 
     def __str__(self):
@@ -63,7 +81,13 @@ class Movie(models.Model):
     duration_minutes = models.IntegerField(validators=[MinValueValidator(1)])
     country = models.CharField(max_length=100, blank=True)
     type = models.CharField(max_length=10, choices=MOVIE_TYPE_CHOICES, default='movie')
+    
+    # LOCAL (Aktivní):
+    # poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    
+    # PRODUCTION (Zakomentované):
     poster = CloudinaryField('image', null=True, blank=True)
+    
     trailer_url = models.URLField(blank=True)
     
     genres = models.ManyToManyField(Genre, related_name="movies")
@@ -124,3 +148,27 @@ class ReviewLike(models.Model):
 
     def __str__(self):
         return f'{self.user.username} likes {self.review.id}'
+
+
+class Collection(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='collections')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    is_public = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} by {self.user.username}"
+
+
+class CollectionItem(models.Model):
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='items')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='collection_items')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('collection', 'movie')
+
+    def __str__(self):
+        return f"{self.movie.title} in {self.collection.name}"

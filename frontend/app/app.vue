@@ -23,6 +23,7 @@
         @show-actor-detail="showActorDetail"
         @show-director-detail="showDirectorDetail"
         @show-detail="showMovieDetail"
+        @show-user-profile="showUserProfile"
       />
       <PageActorDetail 
         v-else-if="currentPage === 'actor-detail'"
@@ -38,6 +39,17 @@
       />
       <PageProfile 
         v-else-if="currentPage === 'profile'"
+        @navigate="navigateTo"
+      />
+      <PageCollections
+        v-else-if="currentPage === 'collections'"
+        @show-collection-detail="showCollectionDetail"
+        @navigate="navigateTo"
+      />
+      <PageCollectionDetail
+        v-else-if="currentPage === 'collection-detail'"
+        :collection-id="selectedCollectionId"
+        @show-detail="showMovieDetail"
         @navigate="navigateTo"
       />
       <PageForgotPassword 
@@ -59,6 +71,7 @@
         :user-id="selectedUserProfileId"
         @navigate="navigateTo"
         @show-detail="showMovieDetail"
+        @show-collection-detail="showCollectionDetail"
       />
       <PageWatchlist 
         v-else-if="currentPage === 'watchlist'" 
@@ -80,6 +93,8 @@ import PageMovieDetail from '../components/PageMovieDetail.vue';
 import PageActorDetail from '../components/PageActorDetail.vue';
 import PageDirectorDetail from '../components/PageDirectorDetail.vue';
 import PageProfile from '../components/PageProfile.vue';
+import PageCollections from '../components/PageCollections.vue';
+import PageCollectionDetail from '../components/PageCollectionDetail.vue';
 import PageViewUserProfile from '../components/PageViewUserProfile.vue';
 import PageForgotPassword from '../components/PageForgotPassword.vue';
 import PageResetPassword from '../components/PageResetPassword.vue';
@@ -92,6 +107,7 @@ const selectedMovieId = ref(null);
 const selectedActorId = ref(null);
 const selectedDirectorId = ref(null);
 const selectedUserProfileId = ref(null);
+const selectedCollectionId = ref(null);
 const selectedResetToken = ref(null);
 const appSuccessMessage = ref(null);
 const activeFilters = ref({});
@@ -114,6 +130,7 @@ const navigateTo = (page, message = null) => {
   selectedActorId.value = null;
   selectedDirectorId.value = null;
   selectedUserProfileId.value = null;
+  selectedCollectionId.value = null;
   selectedResetToken.value = null;
   appSuccessMessage.value = message;
 };
@@ -133,6 +150,11 @@ const showActorDetail = (id) => {
 const showDirectorDetail = (id) => {
   selectedDirectorId.value = id;
   currentPage.value = 'director-detail';
+};
+
+const showCollectionDetail = (id) => {
+  selectedCollectionId.value = id;
+  currentPage.value = 'collection-detail';
 };
 
 const showUserProfile = (id) => {

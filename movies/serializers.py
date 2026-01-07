@@ -44,11 +44,31 @@ class ActorSerializer(serializers.ModelSerializer):
 
 
 # Serializer pro přihlášeného uživatele (vlastní profil)
+# PŘESUNUTO SEM, ABY BYLO DOSTUPNÉ PRO REVIEW A COLLECTION SERIALIZERY
 class MyProfileSerializer(serializers.ModelSerializer):
     profile_picture = AbsoluteImageField(read_only=True)
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
         fields = ['id', 'username', 'email', 'bio', 'profile_picture']
+
+
+class CollectionItemSerializer(serializers.ModelSerializer):
+    movie = BasicMovieSerializer(read_only=True)
+    movie_id = serializers.PrimaryKeyRelatedField(queryset=Movie.objects.all(), write_only=True, source='movie')
+
+    class Meta:
+        model = __import__('django').apps.apps.get_model('movies', 'CollectionItem')
+        fields = ['id', 'movie', 'movie_id', 'added_at']
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    user = MyProfileSerializer(read_only=True)
+    items = CollectionItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = __import__('django').apps.apps.get_model('movies', 'Collection')
+        fields = ['id', 'name', 'description', 'is_public', 'user', 'items', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'user']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -87,9 +107,16 @@ class ReviewSerializer(serializers.ModelSerializer):
 class PublicUserSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     profile_picture = AbsoluteImageField(read_only=True)
+    collections = serializers.SerializerMethodField()
+
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
-        fields = ['id', 'username', 'bio', 'profile_picture', 'reviews']
+        fields = ['id', 'username', 'bio', 'profile_picture', 'reviews', 'collections']
+
+    def get_collections(self, obj):
+        # Vrátit jen veřejné kolekce
+        public_collections = obj.collections.filter(is_public=True)
+        return CollectionSerializer(public_collections, many=True, context=self.context).data
 
 
 class MovieSerializer(serializers.ModelSerializer):

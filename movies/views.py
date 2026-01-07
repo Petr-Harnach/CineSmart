@@ -1,9 +1,9 @@
 from rest_framework import viewsets, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Movie, Genre, Director, Review, Actor, CustomUser
+from .models import Movie, Genre, Director, Review, Actor, CustomUser, Collection, CollectionItem
 from .serializers import (
     MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer,
-    MyProfileSerializer, PublicUserSerializer
+    MyProfileSerializer, PublicUserSerializer, CollectionSerializer, CollectionItemSerializer
 )
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import permissions, status
@@ -113,7 +113,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = MovieFilter
     search_fields = ['title', 'description']
-    ordering_fields = ['release_date', 'title', 'avg_rating']
+    ordering_fields = ['release_date', 'title', 'avg_rating', '?'] # Přidáno '?' pro náhodné řazení
 
     def get_queryset(self):
         queryset = Movie.objects.annotate(avg_rating=Avg('reviews__rating'))
@@ -238,3 +238,48 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = PublicUserSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class CollectionViewSet(viewsets.ModelViewSet):
+    serializer_class = CollectionSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        from django.db.models import Q
+        user = self.request.user
+        if user.is_authenticated:
+            # Veřejné kolekce + vlastní kolekce uživatele
+            return Collection.objects.filter(Q(is_public=True) | Q(user=user)).distinct().order_by('-created_at')
+        return Collection.objects.filter(is_public=True).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def add_movie(self, request, pk=None):
+        collection = self.get_object()
+        if collection.user != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        movie_id = request.data.get('movie_id')
+        if not movie_id:
+            return Response({'detail': 'movie_id required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            movie = Movie.objects.get(id=movie_id)
+            CollectionItem.objects.get_or_create(collection=collection, movie=movie)
+            return Response(status=status.HTTP_201_CREATED)
+        except Movie.DoesNotExist:
+            return Response({'detail': 'Movie not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def remove_movie(self, request, pk=None):
+        collection = self.get_object()
+        if collection.user != request.user:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        movie_id = request.data.get('movie_id')
+        item = CollectionItem.objects.filter(collection=collection, movie_id=movie_id).first()
+        if item:
+            item.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -5,7 +5,7 @@
       <div v-if="loadingMainTrailer" class="text-center text-gray-500 py-24">
         <p>Loading epic trailers...</p>
       </div>
-      <div v-else-if="currentTrailerMovie && currentTrailerMovie.trailer_url" 
+      <div v-else-if="currentTrailerMovie && currentTrailerMovie.trailer_url"
            class="relative max-w-6xl mx-auto overflow-hidden rounded-2xl shadow-2xl group">
         <div class="relative" style="padding-top: 56.25%;">
             <div ref="youtubePlayerContainer" class="absolute top-0 left-0 w-full h-full"></div>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Top Rated Movies Section -->
-    <div class="mb-12" v-scroll-reveal>
+    <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Top Rated Movies</h2>
       <div v-if="loadingTopRated" class="text-center text-gray-500">
         <p>Loading top rated movies...</p>
@@ -89,7 +89,7 @@
     </div>
 
     <!-- From your Watchlist Section -->
-    <div class="mb-12" v-scroll-reveal>
+    <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">From Your Watchlist</h2>
       <div v-if="loadingWatchlist" class="text-center text-gray-500">
         <p>Loading watchlist...</p>
@@ -127,7 +127,7 @@
     </div>
 
     <!-- Popular Actors Section -->
-    <div class="mb-12" v-scroll-reveal>
+    <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Popular Actors</h2>
       <div v-if="loadingPopularActors" class="text-center text-gray-500">
         <p>Loading popular actors...</p>
@@ -139,23 +139,21 @@
         <div 
           v-for="actor in popularActors" 
           :key="actor.id" 
-          class="flex-shrink-0 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+          class="flex-shrink-0 w-48 flex flex-col items-center cursor-pointer transform hover:-translate-y-1 transition-transform duration-300"
           @click="showActorDetail(actor.id)"
         >
-          <div class="p-4">
-            <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ actor.name }}</h3>
-            <!-- Placeholder for actor image/avatar -->
-            <img v-if="actor.photo" :src="actor.photo" :alt="actor.name" class="h-24 w-24 rounded-full object-cover mx-auto mt-2">
-            <div v-else class="bg-gray-300 dark:bg-gray-700 h-24 w-24 rounded-full flex items-center justify-center mt-2 text-gray-500 mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            </div>
+          <!-- Placeholder for actor image/avatar -->
+          <img v-if="actor.photo" :src="actor.photo" :alt="actor.name" class="h-40 w-40 rounded-full object-cover shadow-lg mb-3">
+          <div v-else class="bg-gray-300 dark:bg-gray-700 h-40 w-40 rounded-full flex items-center justify-center shadow-lg mb-3 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
           </div>
+          <h3 class="text-md font-bold text-gray-900 dark:text-gray-100 text-center truncate w-full">{{ actor.name }}</h3>
         </div>
       </Carousel>
     </div>
 
     <!-- In Theaters Section -->
-    <div class="mb-12" v-scroll-reveal>
+    <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">In Theaters Now</h2>
       <div v-if="loadingInTheaters" class="text-center text-gray-500">
         <p>Loading what's in theaters...</p>
@@ -179,6 +177,32 @@
         </div>
       </Carousel>
     </div>
+
+    <!-- Coming Soon Section -->
+    <div class="mb-12 reveal">
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Coming Soon</h2>
+      <div v-if="loadingComingSoon" class="text-center text-gray-500">
+        <p>Loading coming soon movies...</p>
+      </div>
+      <div v-else-if="!comingSoonMovies || comingSoonMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
+        <p>No upcoming movies found.</p>
+      </div>
+      <Carousel v-else>
+        <div 
+          v-for="movie in comingSoonMovies" 
+          :key="movie.id" 
+          class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+          @click="showMovieDetail(movie.id)"
+        >
+          <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
+          <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
+          <div class="p-4">
+            <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h3>
+            <p v-if="movie.release_date" class="text-sm text-gray-500 mt-1">Releases: {{ new Date(movie.release_date).toLocaleDateString() }}</p>
+          </div>
+        </div>
+      </Carousel>
+    </div>
   </div>
 </template>
 
@@ -189,6 +213,10 @@ import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
 import AvgRating from './AvgRating.vue';
 import Carousel from './Carousel.vue';
+
+const props = defineProps({
+  filters: Object,
+});
 
 const emit = defineEmits(['show-detail', 'navigate', 'show-actor-detail']);
 const authStore = useAuthStore();
@@ -330,7 +358,7 @@ const fetchTopRatedMovies = async () => {
   loadingTopRated.value = true;
   try {
     const response = await getMovies({ ordering: '-avg_rating', limit: 5 });
-    topRatedMovies.value = response.data.results;
+    topRatedMovies.value = response.data?.results || [];
   } catch (err) {
     console.error('Error fetching top rated movies:', err);
   } finally {
@@ -346,7 +374,7 @@ const fetchUserWatchlist = async () => {
   }
   try {
     const response = await getWatchlist();
-    userWatchlist.value = response.data.results;
+    userWatchlist.value = response.data?.results || [];
   } catch (err) {
     console.error('Error fetching user watchlist:', err);
   } finally {
@@ -362,7 +390,7 @@ const fetchPopularActors = async () => {
   loadingPopularActors.value = true;
   try {
     const response = await getActors({ limit: 10 }); // Limit to 10 popular actors
-    popularActors.value = response.data.results;
+    popularActors.value = response.data?.results || [];
   } catch (err) {
     console.error('Error fetching popular actors:', err);
   } finally {
@@ -373,8 +401,16 @@ const fetchPopularActors = async () => {
 const fetchInTheatersMovies = async () => {
   loadingInTheaters.value = true;
   try {
-    const response = await getMovies({ ordering: '-release_date', limit: 5 });
-    inTheatersMovies.value = response.data.results;
+    const today = new Date();
+    const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+
+    const response = await getMovies({ 
+      ordering: '-release_date', 
+      limit: 5,
+      release_date__gte: formattedDate 
+    });
+    inTheatersMovies.value = response.data?.results || [];
   } catch (err) {
     console.error('Error fetching "In Theaters" movies:', err);
   } finally {
@@ -385,8 +421,27 @@ const fetchInTheatersMovies = async () => {
 const fetchMainTrailerMovie = async () => {
   loadingMainTrailer.value = true;
   try {
-    const response = await getMovies({ ordering: '-release_date', limit: 20 });
-    const moviesWithTrailers = response.data.results.filter(movie => movie.trailer_url).slice(0, 6);
+    const today = new Date();
+    const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+
+    // Nejdříve zkusíme novinky s trailerem za poslední měsíc
+    let response = await getMovies({ 
+      ordering: '-release_date', 
+      limit: 20,
+      release_date__gte: formattedDate 
+    });
+    
+    let results = response.data?.results || [];
+    let moviesWithTrailers = results.filter(movie => movie.trailer_url).slice(0, 6);
+
+    // Pokud nemáme žádné novinky s trailerem, vezmeme prostě nejnovější filmy s trailerem bez omezení datem (fallback)
+    if (moviesWithTrailers.length === 0) {
+      response = await getMovies({ ordering: '-release_date', limit: 20 });
+      results = response.data?.results || [];
+      moviesWithTrailers = results.filter(movie => movie.trailer_url).slice(0, 6);
+    }
+
     mainTrailerMovies.value = moviesWithTrailers;
   } catch (err) {
     console.error('Error fetching main trailer movies:', err);
@@ -401,7 +456,27 @@ onMounted(() => {
   fetchUserWatchlist();
   fetchPopularActors();
   fetchInTheatersMovies();
-  fetchMainTrailerMovie(); // Call new function
+  fetchMainTrailerMovie();
+
+  // Logika pro animace při skrolování
+  const observerOptions = {
+    threshold: 0.25, // Spustí se, až když je vidět 25% sekce
+    rootMargin: '0px 0px -100px 0px' // Posune spouštěcí linii o 100px nahoru od spodku
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+        observer.unobserve(entry.target); // Animovat jen jednou
+      }
+    });
+  }, observerOptions);
+
+  nextTick(() => {
+    const revealedElements = document.querySelectorAll('.reveal');
+    revealedElements.forEach(el => observer.observe(el));
+  });
 });
 
 const showMovieDetail = (movieId) => {
@@ -412,3 +487,16 @@ const showActorDetail = (actorId) => {
   emit('show-actor-detail', actorId);
 };
 </script>
+
+<style scoped>
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
