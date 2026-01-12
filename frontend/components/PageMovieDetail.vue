@@ -374,7 +374,7 @@ const handleAddToCollection = async (collectionId) => {
   try {
     await addMovieToCollection(collectionId, props.movieId);
     showCollectionDropdown.value = false;
-    toast.success('Added to collection!');
+    // toast.success('Added to collection!'); // Removed per user request
   } catch (err) {
     console.error('Failed to add to collection:', err);
     toast.error('Movie is already in this collection.');
@@ -418,10 +418,10 @@ const toggleWatchlist = async () => {
   try {
     if (watchlistItem.value) {
       await removeFromWatchlist(watchlistItem.value.id);
-      toast.success('Removed from watchlist');
+      // toast.success('Removed from watchlist'); // Removed
     } else {
       await addToWatchlist(props.movieId);
-      toast.success('Added to watchlist');
+      // toast.success('Added to watchlist'); // Removed
     }
     await fetchWatchlist();
   } catch (err) {
@@ -444,7 +444,7 @@ const submitReview = async () => {
     newReview.rating = 5;
     newReview.comment = '';
     await fetchReviews();
-    toast.success('Review submitted!');
+    // toast.success('Review submitted!'); // Removed
   } catch (err) {
     console.error('Error submitting review:', err);
     if (err.response && err.response.data) {
@@ -483,7 +483,7 @@ const handleSaveEdit = async (reviewId) => {
     });
     await fetchReviews();
     handleCancelEdit();
-    toast.success('Review updated!');
+    // toast.success('Review updated!'); // Removed
   } catch (err) {
     console.error('Error saving review:', err);
     toast.error('Failed to update review');

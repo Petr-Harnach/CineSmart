@@ -314,7 +314,7 @@ const handleCreateCollection = async () => {
     newCollection.description = '';
     newCollection.is_public = true;
     await fetchCollections();
-    toast.success('Collection created successfully!');
+    // toast.success('Collection created successfully!'); // Removed
   } catch (err) {
     console.error('Error creating collection:', err);
     toast.error('Failed to create collection.');
