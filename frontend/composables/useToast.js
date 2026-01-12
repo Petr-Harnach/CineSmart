@@ -16,22 +16,12 @@ export const useToast = () => {
         {
           type: 'success',
           background: '#10B981',
-          icon: {
-            className: 'notyf-icon',
-            tagName: 'i',
-            text: '', // Clear text
-            html: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>',
-          },
+          icon: false, // No icon for cleaner look
         },
         {
           type: 'error',
           background: '#EF4444',
-          icon: {
-            className: 'notyf-icon',
-            tagName: 'i',
-            text: '', // Clear text
-            html: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>',
-          },
+          icon: false, // No icon
         },
       ],
     });

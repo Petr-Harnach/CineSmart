@@ -52,10 +52,32 @@
         <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 h-10">{{ collection.description || 'No description provided.' }}</p>
         <div class="flex justify-between items-center mt-auto">
           <span class="text-xs text-gray-500">By {{ collection.user.username }}</span>
-          <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">{{ collection.items.length }} items</span>
+          
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">{{ collection.items.length }} items</span>
+            <button 
+              v-if="authStore.user && collection.user.id === authStore.user.id"
+              @click.stop="handleDelete(collection.id)"
+              class="text-gray-400 hover:text-red-500 transition-colors"
+              title="Delete Collection"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Confirm Modal -->
+    <ConfirmModal 
+      :is-open="isConfirmModalOpen" 
+      :title="'Delete Collection'"
+      :message="'Are you sure you want to delete this collection? This action cannot be undone.'"
+      @confirm="confirmDelete" 
+      @close="isConfirmModalOpen = false" 
+    />
   </div>
 </template>
 
@@ -63,15 +85,22 @@
 import { ref, onMounted, reactive } from 'vue';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
+import ConfirmModal from './ConfirmModal.vue';
 
 const emit = defineEmits(['show-collection-detail']);
 const authStore = useAuthStore();
-const { getCollections, createCollection } = useApi();
+const toast = useToast();
+const { getCollections, createCollection, deleteCollection } = useApi();
 
 const collections = ref([]);
 const loading = ref(true);
 const showCreateForm = ref(false);
 const isCreating = ref(false);
+
+// Confirm Modal state
+const isConfirmModalOpen = ref(false);
+const collectionToDeleteId = ref(null);
 
 const newCollection = reactive({
   name: '',
@@ -100,10 +129,32 @@ const handleCreate = async () => {
     newCollection.is_public = true;
     showCreateForm.value = false;
     await fetchCollections();
+    toast.success('Collection created!');
   } catch (err) {
     console.error('Error creating collection:', err);
+    toast.error('Failed to create collection.');
   } finally {
     isCreating.value = false;
+  }
+};
+
+const handleDelete = (id) => {
+  collectionToDeleteId.value = id;
+  isConfirmModalOpen.value = true;
+};
+
+const confirmDelete = async () => {
+  if (!collectionToDeleteId.value) return;
+  try {
+    await deleteCollection(collectionToDeleteId.value);
+    await fetchCollections();
+    toast.success('Collection deleted.');
+  } catch (err) {
+    console.error('Error deleting collection:', err);
+    toast.error('Failed to delete collection.');
+  } finally {
+    isConfirmModalOpen.value = false;
+    collectionToDeleteId.value = null;
   }
 };
 

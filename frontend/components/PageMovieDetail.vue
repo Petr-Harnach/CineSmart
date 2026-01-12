@@ -501,7 +501,7 @@ const confirmDeleteReview = async () => {
   try {
     await deleteReview(pendingDeleteReviewId.value);
     await fetchReviews();
-    toast.success('Review deleted.');
+    // toast.success('Review deleted.'); // Removed
   } catch (err) {
     console.error('Error deleting review:', err);
     toast.error('Failed to delete review');
