@@ -101,6 +101,7 @@ import PageProfile from '../components/PageProfile.vue';
 import PageViewUserProfile from '../components/PageViewUserProfile.vue';
 import PageForgotPassword from '../components/PageForgotPassword.vue';
 import PageResetPassword from '../components/PageResetPassword.vue';
+import PageBrowse from '../components/PageBrowse.vue'; // Nový import
 import PageWatchlist from '../components/PageWatchlist.vue';
 import AuthModal from '../components/AuthModal.vue'; // Nový import
 import TheFooter from '../components/TheFooter.vue';
