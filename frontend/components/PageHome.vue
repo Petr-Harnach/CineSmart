@@ -179,26 +179,31 @@
     </div>
 
     <!-- Coming Soon Section -->
-    <div class="mb-12 reveal">
+    <div class="mb-12" v-scroll-reveal>
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Coming Soon</h2>
       <div v-if="loadingComingSoon" class="text-center text-gray-500">
-        <p>Loading coming soon movies...</p>
+        <p>Loading upcoming movies...</p>
       </div>
-      <div v-else-if="!comingSoonMovies || comingSoonMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
+      <div v-else-if="comingSoonMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
         <p>No upcoming movies found.</p>
       </div>
       <Carousel v-else>
         <div 
           v-for="movie in comingSoonMovies" 
           :key="movie.id" 
-          class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+          class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer opacity-90 hover:opacity-100"
           @click="showMovieDetail(movie.id)"
         >
-          <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
-          <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
+          <div class="relative">
+            <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
+            <div class="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
+              {{ new Date(movie.release_date).toLocaleDateString() }}
+            </div>
+          </div>
           <div class="p-4">
             <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h3>
-            <p v-if="movie.release_date" class="text-sm text-gray-500 mt-1">Releases: {{ new Date(movie.release_date).toLocaleDateString() }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Coming Soon</p>
           </div>
         </div>
       </Carousel>
@@ -226,12 +231,14 @@ const topRatedMovies = ref([]);
 const userWatchlist = ref([]);
 const popularActors = ref([]);
 const inTheatersMovies = ref([]);
+const comingSoonMovies = ref([]); // New state for upcoming movies
 const mainTrailerMovies = ref([]); // New array for carousel
 const currentTrailerIndex = ref(0); // Index for the carousel
 const loadingTopRated = ref(true);
 const loadingWatchlist = ref(true);
 const loadingPopularActors = ref(true);
 const loadingInTheaters = ref(true);
+const loadingComingSoon = ref(true); // New loading state
 const loadingMainTrailer = ref(true); // New loading state for main trailer
 const error = ref(null);
 
@@ -403,12 +410,15 @@ const fetchInTheatersMovies = async () => {
   try {
     const today = new Date();
     const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-    const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+    
+    const formattedToday = today.toISOString().split('T')[0];
+    const formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0];
 
     const response = await getMovies({ 
       ordering: '-release_date', 
       limit: 5,
-      release_date__gte: formattedDate 
+      release_date__gte: formattedOneMonthAgo,
+      release_date__lte: formattedToday // Filter out future movies
     });
     inTheatersMovies.value = response.data?.results || [];
   } catch (err) {
@@ -418,26 +428,52 @@ const fetchInTheatersMovies = async () => {
   }
 };
 
+const fetchComingSoonMovies = async () => {
+  loadingComingSoon.value = true;
+  try {
+    const today = new Date();
+    const formattedToday = today.toISOString().split('T')[0];
+
+    const response = await getMovies({ 
+      ordering: 'release_date', // Earliest first
+      limit: 10,
+      release_date__gt: formattedToday 
+    });
+    comingSoonMovies.value = response.data?.results || [];
+  } catch (err) {
+    console.error('Error fetching "Coming Soon" movies:', err);
+  } finally {
+    loadingComingSoon.value = false;
+  }
+};
+
 const fetchMainTrailerMovie = async () => {
   loadingMainTrailer.value = true;
   try {
     const today = new Date();
     const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-    const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+    
+    const formattedToday = today.toISOString().split('T')[0];
+    const formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0];
 
-    // Nejdříve zkusíme novinky s trailerem za poslední měsíc
+    // Try finding recent trailers first (excluding future)
     let response = await getMovies({ 
       ordering: '-release_date', 
       limit: 20,
-      release_date__gte: formattedDate 
+      release_date__gte: formattedOneMonthAgo,
+      release_date__lte: formattedToday
     });
     
     let results = response.data?.results || [];
     let moviesWithTrailers = results.filter(movie => movie.trailer_url).slice(0, 6);
 
-    // Pokud nemáme žádné novinky s trailerem, vezmeme prostě nejnovější filmy s trailerem bez omezení datem (fallback)
+    // Fallback if no recent trailers found
     if (moviesWithTrailers.length === 0) {
-      response = await getMovies({ ordering: '-release_date', limit: 20 });
+      response = await getMovies({ 
+        ordering: '-release_date', 
+        limit: 20,
+        release_date__lte: formattedToday 
+      });
       results = response.data?.results || [];
       moviesWithTrailers = results.filter(movie => movie.trailer_url).slice(0, 6);
     }
@@ -456,6 +492,7 @@ onMounted(() => {
   fetchUserWatchlist();
   fetchPopularActors();
   fetchInTheatersMovies();
+  fetchComingSoonMovies();
   fetchMainTrailerMovie();
 
   // Logika pro animace při skrolování
