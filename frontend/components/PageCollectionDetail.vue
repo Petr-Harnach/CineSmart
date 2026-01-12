@@ -45,8 +45,16 @@
           </div>
         </div>
       </div>
-      <p v-else class="text-center text-gray-500 py-12 italic">This collection is currently empty.</p>
-    </div>
+      <div v-else class="text-center text-gray-500 py-12 italic">This collection is currently empty.</div>
+
+    <!-- Confirm Modal -->
+    <ConfirmModal 
+      :is-open="isConfirmModalOpen"
+      :title="'Delete Collection'"
+      :message="'Are you sure you want to delete this collection? This action cannot be undone.'"
+      @confirm="confirmDeleteCollection"
+      @close="isConfirmModalOpen = false"
+    />
   </div>
 </template>
 
@@ -54,6 +62,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
+import ConfirmModal from './ConfirmModal.vue';
 
 const props = defineProps({
   collectionId: {
@@ -64,11 +74,14 @@ const props = defineProps({
 
 const emit = defineEmits(['show-detail', 'navigate']);
 const authStore = useAuthStore();
+const toast = useToast();
 const { getCollectionById, deleteCollection, removeMovieFromCollection } = useApi();
 
 const collection = ref(null);
 const loading = ref(true);
 const error = ref(null);
+
+const isConfirmModalOpen = ref(false);
 
 const isOwner = computed(() => {
   return authStore.isLoggedIn && collection.value && authStore.user && authStore.user.id === collection.value.user.id;
@@ -88,14 +101,20 @@ const fetchCollection = async () => {
   }
 };
 
-const handleDeleteCollection = async () => {
-  if (confirm('Are you sure you want to delete this collection?')) {
-    try {
-      await deleteCollection(props.collectionId);
-      emit('navigate', 'collections');
-    } catch (err) {
-      console.error('Failed to delete collection:', err);
-    }
+const handleDeleteCollection = () => {
+  isConfirmModalOpen.value = true;
+};
+
+const confirmDeleteCollection = async () => {
+  try {
+    await deleteCollection(props.collectionId);
+    emit('navigate', 'collections');
+    // toast.success('Collection deleted.'); // Removed
+  } catch (err) {
+    console.error('Failed to delete collection:', err);
+    toast.error('Failed to delete collection.');
+  } finally {
+    isConfirmModalOpen.value = false;
   }
 };
 
@@ -105,6 +124,7 @@ const handleRemoveMovie = async (movieId) => {
     await fetchCollection(); // Refresh
   } catch (err) {
     console.error('Failed to remove movie:', err);
+    toast.error('Failed to remove movie from collection.');
   }
 };
 
