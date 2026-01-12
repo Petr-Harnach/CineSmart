@@ -46,6 +46,7 @@
         </div>
       </div>
       <div v-else class="text-center text-gray-500 py-12 italic">This collection is currently empty.</div>
+    </div>
 
     <!-- Confirm Modal -->
     <ConfirmModal 
