@@ -98,12 +98,14 @@ import PageMovieDetail from '../components/PageMovieDetail.vue';
 import PageActorDetail from '../components/PageActorDetail.vue';
 import PageDirectorDetail from '../components/PageDirectorDetail.vue';
 import PageProfile from '../components/PageProfile.vue';
+import PageCollections from '../components/PageCollections.vue'; // Nový import
+import PageCollectionDetail from '../components/PageCollectionDetail.vue'; // Nový import
 import PageViewUserProfile from '../components/PageViewUserProfile.vue';
 import PageForgotPassword from '../components/PageForgotPassword.vue';
 import PageResetPassword from '../components/PageResetPassword.vue';
-import PageBrowse from '../components/PageBrowse.vue'; // Nový import
+import PageBrowse from '../components/PageBrowse.vue';
 import PageWatchlist from '../components/PageWatchlist.vue';
-import AuthModal from '../components/AuthModal.vue'; // Nový import
+import AuthModal from '../components/AuthModal.vue';
 import TheFooter from '../components/TheFooter.vue';
 
 const currentPage = ref('home');
@@ -111,6 +113,7 @@ const selectedMovieId = ref(null);
 const selectedActorId = ref(null);
 const selectedDirectorId = ref(null);
 const selectedUserProfileId = ref(null);
+const selectedCollectionId = ref(null); // Nový stav
 const selectedResetToken = ref(null);
 const appSuccessMessage = ref(null);
 const activeFilters = ref({});
@@ -156,6 +159,7 @@ const navigateTo = (page, message = null) => {
   selectedActorId.value = null;
   selectedDirectorId.value = null;
   selectedUserProfileId.value = null;
+  selectedCollectionId.value = null;
   selectedResetToken.value = null;
   appSuccessMessage.value = message;
 };
@@ -180,6 +184,11 @@ const showDirectorDetail = (id) => {
 const showUserProfile = (id) => {
   selectedUserProfileId.value = id;
   currentPage.value = 'user-profile';
+};
+
+const showCollectionDetail = (id) => { // Nová funkce
+  selectedCollectionId.value = id;
+  currentPage.value = 'collection-detail';
 };
 
 const handleFilterChange = (filters) => {
