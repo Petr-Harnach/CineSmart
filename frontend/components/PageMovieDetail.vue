@@ -233,6 +233,15 @@
       </div>
     </div>
     <div v-else class="text-center text-gray-500">Movie not found.</div>
+
+    <!-- Confirm Modal -->
+    <ConfirmModal 
+      :is-open="isConfirmModalOpen"
+      :title="'Delete Review'"
+      :message="'Are you sure you want to delete your review? This action cannot be undone.'"
+      @confirm="confirmDeleteReview"
+      @close="isConfirmModalOpen = false"
+    />
   </div>
 </template>
 
@@ -240,9 +249,11 @@
 import { ref, onMounted, watch, reactive, computed } from 'vue';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
 import AvgRating from './AvgRating.vue';
 import Carousel from './Carousel.vue';
 import RatingInput from './RatingInput.vue';
+import ConfirmModal from './ConfirmModal.vue';
 
 const props = defineProps({
   movieId: Number,
@@ -250,6 +261,7 @@ const props = defineProps({
 
 const emit = defineEmits(['navigate', 'show-actor-detail', 'show-director-detail', 'show-detail', 'show-user-profile']);
 const authStore = useAuthStore();
+const toast = useToast();
 
 const {
   getMovieById, addReview, updateReview, deleteReview, 
@@ -277,6 +289,10 @@ const editedReviewComment = ref('');
 
 const watchlist = ref([]);
 const isProcessingWatchlist = ref(false);
+
+// Confirm Modal State
+const isConfirmModalOpen = ref(false);
+const pendingDeleteReviewId = ref(null);
 
 const watchlistItem = computed(() => watchlist.value.find(item => item.movie.id === props.movieId));
 
@@ -358,10 +374,10 @@ const handleAddToCollection = async (collectionId) => {
   try {
     await addMovieToCollection(collectionId, props.movieId);
     showCollectionDropdown.value = false;
-    alert('Added to collection!');
+    toast.success('Added to collection!');
   } catch (err) {
     console.error('Failed to add to collection:', err);
-    alert('Movie is already in this collection.');
+    toast.error('Movie is already in this collection.');
   }
 };
 
@@ -402,12 +418,15 @@ const toggleWatchlist = async () => {
   try {
     if (watchlistItem.value) {
       await removeFromWatchlist(watchlistItem.value.id);
+      toast.success('Removed from watchlist');
     } else {
       await addToWatchlist(props.movieId);
+      toast.success('Added to watchlist');
     }
     await fetchWatchlist();
   } catch (err) {
     console.error("Failed to toggle watchlist:", err);
+    toast.error('Failed to update watchlist');
   } finally {
     isProcessingWatchlist.value = false;
   }
@@ -425,6 +444,7 @@ const submitReview = async () => {
     newReview.rating = 5;
     newReview.comment = '';
     await fetchReviews();
+    toast.success('Review submitted!');
   } catch (err) {
     console.error('Error submitting review:', err);
     if (err.response && err.response.data) {
@@ -437,6 +457,7 @@ const submitReview = async () => {
     } else {
         submitError.value = 'Failed to submit review. Please check your connection.';
     }
+    toast.error('Failed to submit review');
   } finally {
     submittingReview.value = false;
   }
@@ -462,19 +483,31 @@ const handleSaveEdit = async (reviewId) => {
     });
     await fetchReviews();
     handleCancelEdit();
+    toast.success('Review updated!');
   } catch (err) {
     console.error('Error saving review:', err);
+    toast.error('Failed to update review');
   }
 };
 
-const handleDeleteReview = async (reviewId) => {
-  if (confirm('Are you sure you want to delete this review?')) {
-    try {
-      await deleteReview(reviewId);
-      await fetchReviews();
-    } catch (err) {
-      console.error('Error deleting review:', err);
-    }
+const handleDeleteReview = (reviewId) => {
+  pendingDeleteReviewId.value = reviewId;
+  isConfirmModalOpen.value = true;
+};
+
+const confirmDeleteReview = async () => {
+  if (!pendingDeleteReviewId.value) return;
+  
+  try {
+    await deleteReview(pendingDeleteReviewId.value);
+    await fetchReviews();
+    toast.success('Review deleted.');
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    toast.error('Failed to delete review');
+  } finally {
+    isConfirmModalOpen.value = false;
+    pendingDeleteReviewId.value = null;
   }
 };
 

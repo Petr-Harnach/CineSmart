@@ -214,6 +214,14 @@
       </div>
       <p v-else class="text-center text-gray-500 italic">No collections yet.</p>
     </section>
+    <!-- Confirm Modal -->
+    <ConfirmModal 
+      :is-open="isConfirmModalOpen"
+      :title="'Delete Collection'"
+      :message="'Are you sure you want to delete this collection? This action cannot be undone.'"
+      @confirm="confirmDeleteCollection"
+      @close="isConfirmModalOpen = false"
+    />
   </div>
 </template>
 
@@ -221,9 +229,12 @@
 import { ref, onMounted, computed, reactive, nextTick } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
+import { useToast } from '../composables/useToast'; // Import toast
+import ConfirmModal from './ConfirmModal.vue'; // Import modal
 
 const authStore = useAuthStore();
 const { updateProfile, getWatchlist, getCollections, createCollection, deleteCollection, changePassword } = useApi();
+const toast = useToast(); // Initialize toast
 
 const username = ref('');
 const bio = ref('');
@@ -256,6 +267,10 @@ const newCollection = reactive({
   is_public: true
 });
 const isCreatingCollection = ref(false);
+
+// Pro Confirm Modal
+const isConfirmModalOpen = ref(false);
+const pendingDeleteCollectionId = ref(null);
 
 onMounted(() => {
   if (authStore.user) {
@@ -299,21 +314,33 @@ const handleCreateCollection = async () => {
     newCollection.description = '';
     newCollection.is_public = true;
     await fetchCollections();
+    toast.success('Collection created successfully!');
   } catch (err) {
     console.error('Error creating collection:', err);
-    alert('Failed to create collection.');
+    toast.error('Failed to create collection.');
   } finally {
     isCreatingCollection.value = false;
   }
 };
 
-const handleDeleteCollection = async (id) => {
-  if (!confirm('Are you sure you want to delete this collection?')) return;
+const handleDeleteCollection = (id) => {
+  pendingDeleteCollectionId.value = id;
+  isConfirmModalOpen.value = true;
+};
+
+const confirmDeleteCollection = async () => {
+  if (!pendingDeleteCollectionId.value) return;
+  
   try {
-    await deleteCollection(id);
+    await deleteCollection(pendingDeleteCollectionId.value);
     await fetchCollections();
+    toast.success('Collection deleted.');
   } catch (err) {
     console.error('Error deleting collection:', err);
+    toast.error('Failed to delete collection.');
+  } finally {
+    isConfirmModalOpen.value = false;
+    pendingDeleteCollectionId.value = null;
   }
 };
 
@@ -345,10 +372,10 @@ const saveProfile = async () => {
   try {
     await updateProfile(formData);
     await authStore.fetchProfile(); // Obnovení dat uživatele ve storu
-    successMessage.value = 'Profile updated successfully!';
+    toast.success('Profile updated successfully!');
   } catch (err) {
     console.error('Error updating profile:', err);
-    errorMessage.value = 'Failed to update profile. Username might be taken.';
+    toast.error('Failed to update profile. Username might be taken.');
   } finally {
     isSaving.value = false;
   }
@@ -357,6 +384,7 @@ const saveProfile = async () => {
 const handleChangePassword = async () => {
   if (passwordForm.new_password !== passwordForm.confirm_password) {
     passwordError.value = "New passwords do not match.";
+    toast.error("New passwords do not match.");
     return;
   }
   
@@ -369,13 +397,15 @@ const handleChangePassword = async () => {
       old_password: passwordForm.old_password,
       new_password: passwordForm.new_password
     });
-    passwordSuccess.value = "Password changed successfully.";
+    toast.success("Password changed successfully.");
     passwordForm.old_password = '';
     passwordForm.new_password = '';
     passwordForm.confirm_password = '';
   } catch (err) {
     console.error('Password change failed:', err);
-    passwordError.value = err.response?.data?.detail || "Failed to change password. Please check your old password.";
+    const msg = err.response?.data?.detail || "Failed to change password.";
+    passwordError.value = msg;
+    toast.error(msg);
   } finally {
     isChangingPassword.value = false;
   }
