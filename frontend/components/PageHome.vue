@@ -381,7 +381,9 @@ const fetchUserWatchlist = async () => {
   }
   try {
     const response = await getWatchlist();
-    userWatchlist.value = response.data?.results || [];
+    const allItems = response.data?.results || [];
+    // Filtrujeme pouze ty, které nejsou "watched"
+    userWatchlist.value = allItems.filter(item => !item.watched);
   } catch (err) {
     console.error('Error fetching user watchlist:', err);
   } finally {
