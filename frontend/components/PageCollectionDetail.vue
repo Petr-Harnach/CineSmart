@@ -50,10 +50,10 @@
     <!-- Confirm Modal -->
     <ConfirmModal 
       :is-open="isConfirmModalOpen"
-      :title="'Delete Collection'"
-      :message="'Are you sure you want to delete this collection? This action cannot be undone.'"
-      @confirm="confirmDeleteCollection"
-      @close="isConfirmModalOpen = false"
+      :title="confirmModalTitle"
+      :message="confirmModalMessage"
+      @confirm="confirmAction"
+      @close="closeModal"
     />
   </div>
 </template>
@@ -81,7 +81,20 @@ const collection = ref(null);
 const loading = ref(true);
 const error = ref(null);
 
+// Modal state
 const isConfirmModalOpen = ref(false);
+const actionType = ref(null); // 'deleteCollection' or 'removeMovie'
+const itemIdToRemove = ref(null);
+
+const confirmModalTitle = computed(() => {
+  return actionType.value === 'deleteCollection' ? 'Delete Collection' : 'Remove Movie';
+});
+
+const confirmModalMessage = computed(() => {
+  return actionType.value === 'deleteCollection' 
+    ? 'Are you sure you want to delete this collection? This action cannot be undone.'
+    : 'Are you sure you want to remove this movie from the collection?';
+});
 
 const isOwner = computed(() => {
   return authStore.isLoggedIn && collection.value && authStore.user && authStore.user.id === collection.value.user.id;
@@ -102,30 +115,41 @@ const fetchCollection = async () => {
 };
 
 const handleDeleteCollection = () => {
+  actionType.value = 'deleteCollection';
   isConfirmModalOpen.value = true;
 };
 
-const confirmDeleteCollection = async () => {
-  try {
-    await deleteCollection(props.collectionId);
-    emit('navigate', 'collections');
-    // toast.success('Collection deleted.'); // Removed
-  } catch (err) {
-    console.error('Failed to delete collection:', err);
-    toast.error('Failed to delete collection.');
-  } finally {
-    isConfirmModalOpen.value = false;
-  }
+const handleRemoveMovie = (movieId) => {
+  actionType.value = 'removeMovie';
+  itemIdToRemove.value = movieId;
+  isConfirmModalOpen.value = true;
 };
 
-const handleRemoveMovie = async (movieId) => {
-  try {
-    await removeMovieFromCollection(props.collectionId, movieId);
-    await fetchCollection(); // Refresh
-  } catch (err) {
-    console.error('Failed to remove movie:', err);
-    toast.error('Failed to remove movie from collection.');
+const closeModal = () => {
+  isConfirmModalOpen.value = false;
+  actionType.value = null;
+  itemIdToRemove.value = null;
+};
+
+const confirmAction = async () => {
+  if (actionType.value === 'deleteCollection') {
+    try {
+      await deleteCollection(props.collectionId);
+      emit('navigate', 'collections');
+    } catch (err) {
+      console.error('Failed to delete collection:', err);
+      toast.error('Failed to delete collection.');
+    }
+  } else if (actionType.value === 'removeMovie' && itemIdToRemove.value) {
+    try {
+      await removeMovieFromCollection(props.collectionId, itemIdToRemove.value);
+      await fetchCollection();
+    } catch (err) {
+      console.error('Failed to remove movie:', err);
+      toast.error('Failed to remove movie.');
+    }
   }
+  closeModal();
 };
 
 onMounted(fetchCollection);

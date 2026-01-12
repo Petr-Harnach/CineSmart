@@ -129,7 +129,7 @@ const handleCreate = async () => {
     newCollection.is_public = true;
     showCreateForm.value = false;
     await fetchCollections();
-    toast.success('Collection created!');
+    // toast.success('Collection created!'); // Removed
   } catch (err) {
     console.error('Error creating collection:', err);
     toast.error('Failed to create collection.');
@@ -148,7 +148,7 @@ const confirmDelete = async () => {
   try {
     await deleteCollection(collectionToDeleteId.value);
     await fetchCollections();
-    toast.success('Collection deleted.');
+    // toast.success('Collection deleted.'); // Removed
   } catch (err) {
     console.error('Error deleting collection:', err);
     toast.error('Failed to delete collection.');
