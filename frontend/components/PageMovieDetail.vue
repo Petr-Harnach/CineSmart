@@ -14,9 +14,11 @@
         </div>
         <div class="p-8 w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
-          <div class="flex items-center mb-4">
-            <p class="text-gray-600 dark:text-gray-300 text-lg mr-4">{{ movie.release_date.substring(0, 4) }} | {{ movie.duration_minutes }} min</p>
-            <AvgRating :rating="movie.avg_rating" />
+          <div class="flex items-center mb-4 text-gray-600 dark:text-gray-300 text-lg">
+            <span v-if="movie.release_date" class="mr-2">{{ movie.release_date.substring(0, 4) }}</span>
+            <span v-else class="mr-2">TBA</span>
+            <span v-if="movie.duration_minutes">| {{ movie.duration_minutes }} min</span>
+            <AvgRating :rating="movie.avg_rating" class="ml-4" />
           </div>
           
           <div class="flex gap-2 mb-4">
@@ -67,13 +69,19 @@
             </div>
           </div>
           
-          <p class="text-gray-700 dark:text-gray-200 mb-4">{{ movie.description }}</p>
+          <p v-if="movie.description" class="text-gray-700 dark:text-gray-200 mb-4">{{ movie.description }}</p>
+          <p v-else class="text-gray-500 italic mb-4">No description available.</p>
           
           <div class="mb-4 dark:text-gray-100">
-            <span class="font-semibold">Director:</span> 
-            <a v-if="movie.director" @click.prevent="$emit('show-director-detail', movie.director.id)" href="#" class="ml-2 hover:underline cursor-pointer">
-              {{ movie.director.name }}
-            </a>
+            <span class="font-semibold">Directors:</span> 
+            <span v-if="movie.directors && movie.directors.length" class="ml-2">
+              <template v-for="(director, index) in movie.directors" :key="director.id">
+                <a @click.prevent="$emit('show-director-detail', director.id)" href="#" class="hover:underline cursor-pointer">
+                  {{ director.name }}
+                </a>
+                <span v-if="index < movie.directors.length - 1">, </span>
+              </template>
+            </span>
             <span v-else class="ml-2">N/A</span>
           </div>
           
@@ -85,9 +93,13 @@
             <span v-else class="ml-2">N/A</span>
           </div>
 
-          <div v-if="movie.screenwriter" class="mb-4 dark:text-gray-100">
-            <span class="font-semibold">Screenwriter:</span> 
-            <span class="ml-2">{{ movie.screenwriter }}</span>
+          <div v-if="movie.screenwriters && movie.screenwriters.length" class="mb-4 dark:text-gray-100">
+            <span class="font-semibold">Screenwriters:</span> 
+            <span class="ml-2">
+              <span v-for="(writer, index) in movie.screenwriters" :key="writer.id">
+                {{ writer.name }}<span v-if="index < movie.screenwriters.length - 1">, </span>
+              </span>
+            </span>
           </div>
 
           <div v-if="movie.actors && movie.actors.length" class="mb-4 dark:text-gray-100">

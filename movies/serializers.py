@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Genre, Director, Review, Actor
+from .models import Movie, Genre, Director, Review, Actor, Screenwriter
 
 
 # Vlastní pole pro generování absolutních URL pro obrázky
@@ -32,6 +32,14 @@ class DirectorSerializer(serializers.ModelSerializer):
     photo = AbsoluteImageField(read_only=True)
     class Meta:
         model = Director
+        fields = ['id', 'name', 'bio', 'photo', 'movies']
+
+
+class ScreenwriterSerializer(serializers.ModelSerializer):
+    movies = BasicMovieSerializer(many=True, read_only=True)
+    photo = AbsoluteImageField(read_only=True)
+    class Meta:
+        model = Screenwriter
         fields = ['id', 'name', 'bio', 'photo', 'movies']
 
 
@@ -122,7 +130,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     poster = AbsoluteImageField(read_only=True)
     genres = GenreSerializer(many=True, read_only=True)
-    director = DirectorSerializer(read_only=True)
+    directors = DirectorSerializer(many=True, read_only=True) # Changed to Many-to-Many
+    screenwriters = ScreenwriterSerializer(many=True, read_only=True) # New field
     reviews = ReviewSerializer(many=True, read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
     avg_rating = serializers.FloatField(read_only=True)
@@ -130,8 +139,11 @@ class MovieSerializer(serializers.ModelSerializer):
     genre_ids = serializers.PrimaryKeyRelatedField(
         queryset=Genre.objects.all(), many=True, write_only=True, source='genres'
     )
-    director_id = serializers.PrimaryKeyRelatedField(
-        queryset=Director.objects.all(), write_only=True, source='director', allow_null=True
+    director_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Director.objects.all(), many=True, write_only=True, source='directors', required=False
+    )
+    screenwriter_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Screenwriter.objects.all(), many=True, write_only=True, source='screenwriters', required=False
     )
     actor_ids = serializers.PrimaryKeyRelatedField(
         queryset=Actor.objects.all(), many=True, write_only=True, source='actors', required=False
@@ -141,8 +153,8 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = [
             'id', 'title', 'description', 'release_date', 'duration_minutes', 'country', 'type', 'poster', 'trailer_url',
-            'genres', 'director', 'reviews', 'actors', 'screenwriter', 'avg_rating',
-            'genre_ids', 'director_id', 'actor_ids'
+            'genres', 'directors', 'screenwriters', 'reviews', 'actors', 'avg_rating',
+            'genre_ids', 'director_ids', 'screenwriter_ids', 'actor_ids'
         ]
 
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Movie, Genre, Director, CustomUser, Review, Actor
+from .models import Movie, Genre, Director, CustomUser, Review, Actor, Screenwriter
 from django.contrib.auth.admin import UserAdmin
 
 
@@ -8,15 +8,25 @@ class CustomUserAdmin(UserAdmin):
     pass
 
 
+@admin.register(Screenwriter)
+class ScreenwriterAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ('title', 'release_date', 'get_genres', 'director')  # přidáme režiséra
-    list_filter = ('genres', 'director')  # možnost filtrovat podle žánru a režiséra
-    search_fields = ('title', 'description', 'director__name')  # vyhledávání podle názvu, popisu i režiséra
+    list_display = ('title', 'release_date', 'get_genres', 'get_directors')
+    list_filter = ('genres', 'directors')
+    search_fields = ('title', 'description', 'directors__name')
+    filter_horizontal = ('genres', 'directors', 'actors', 'screenwriters') # Better UI for M2M
 
     def get_genres(self, obj):
         return ", ".join([g.name for g in obj.genres.all()])
     get_genres.short_description = 'Genres'
+
+    def get_directors(self, obj):
+        return ", ".join([d.name for d in obj.directors.all()])
+    get_directors.short_description = 'Directors'
 
 
 @admin.register(Genre)
