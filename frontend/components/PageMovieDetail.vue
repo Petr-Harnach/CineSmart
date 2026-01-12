@@ -111,8 +111,8 @@
             <template v-if="editingReviewId === userReview.id">
               <form @submit.prevent="handleSaveEdit(userReview.id)">
                 <div class="mb-2">
-                  <label for="edit-rating" class="block text-gray-700 dark:text-gray-300 text-sm">Rating (1-5 Stars)</label>
-                  <input type="number" v-model="editedReviewRating" id="edit-rating" min="1" max="5" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500" required />
+                  <label class="block text-gray-700 dark:text-gray-300 text-sm mb-1">Rating</label>
+                  <RatingInput v-model="editedReviewRating" />
                 </div>
                 <div class="mb-2">
                   <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Comment</label>
@@ -197,8 +197,8 @@
           <form @submit.prevent="submitReview" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div v-if="submitError" class="bg-red-100 text-red-700 p-3 mb-4 rounded">{{ submitError }}</div>
             <div class="mb-4">
-              <label for="rating" class="block text-gray-700 dark:text-gray-300">Rating (1-5 Stars)</label>
-              <input type="number" v-model="newReview.rating" id="rating" min="1" max="5" class="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600" required />
+              <label class="block text-gray-700 dark:text-gray-300 mb-1">Rating</label>
+              <RatingInput v-model="newReview.rating" />
             </div>
             <div class="mb-4">
               <label for="comment" class="block text-gray-700 dark:text-gray-300">Comment</label>
@@ -242,6 +242,7 @@ import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
 import AvgRating from './AvgRating.vue';
 import Carousel from './Carousel.vue';
+import RatingInput from './RatingInput.vue';
 
 const props = defineProps({
   movieId: Number,

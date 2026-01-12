@@ -36,9 +36,8 @@
         <input 
           type="text" 
           id="username"
-          :value="authStore.user.username"
-          disabled
-          class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
+          v-model="username"
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
         >
       </div>
 
@@ -70,6 +69,57 @@
         </button>
       </div>
     </form>
+
+    <!-- Security Section -->
+    <hr class="my-8 border-gray-200 dark:border-gray-700">
+    <section class="mt-8">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Security</h2>
+      <form @submit.prevent="handleChangePassword" class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+        <div v-if="passwordSuccess" class="mb-4 text-green-600 dark:text-green-400">{{ passwordSuccess }}</div>
+        <div v-if="passwordError" class="mb-4 text-red-600 dark:text-red-400">{{ passwordError }}</div>
+
+        <div class="mb-4">
+          <label for="old_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Old Password</label>
+          <input 
+            type="password" 
+            id="old_password" 
+            v-model="passwordForm.old_password" 
+            required
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+          >
+        </div>
+        <div class="mb-4">
+          <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+          <input 
+            type="password" 
+            id="new_password" 
+            v-model="passwordForm.new_password" 
+            required
+            minlength="8"
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+          >
+        </div>
+        <div class="mb-4">
+          <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
+          <input 
+            type="password" 
+            id="confirm_password" 
+            v-model="passwordForm.confirm_password" 
+            required
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+          >
+        </div>
+        <div class="flex justify-end">
+          <button 
+            type="submit" 
+            :disabled="isChangingPassword"
+            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-red-400"
+          >
+            {{ isChangingPassword ? 'Changing...' : 'Change Password' }}
+          </button>
+        </div>
+      </form>
+    </section>
 
     <!-- Stats Section -->
     <hr class="my-8 border-gray-200 dark:border-gray-700">
@@ -173,8 +223,9 @@ import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
 
 const authStore = useAuthStore();
-const { updateProfile, getWatchlist, getCollections, createCollection, deleteCollection } = useApi();
+const { updateProfile, getWatchlist, getCollections, createCollection, deleteCollection, changePassword } = useApi();
 
+const username = ref('');
 const bio = ref('');
 const profilePictureFile = ref(null);
 const previewImageUrl = ref('');
@@ -182,6 +233,16 @@ const previewImageUrl = ref('');
 const isSaving = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
+
+// Změna hesla
+const passwordForm = reactive({
+  old_password: '',
+  new_password: '',
+  confirm_password: ''
+});
+const isChangingPassword = ref(false);
+const passwordSuccess = ref('');
+const passwordError = ref('');
 
 // Pro statistiky
 const watchlistItems = ref([]);
@@ -198,6 +259,7 @@ const isCreatingCollection = ref(false);
 
 onMounted(() => {
   if (authStore.user) {
+    username.value = authStore.user.username || '';
     bio.value = authStore.user.bio || '';
   }
   fetchWatchlistData();
@@ -221,7 +283,8 @@ const fetchWatchlistData = async () => {
 const fetchCollections = async () => {
   try {
     const response = await getCollections();
-    collections.value = response.data?.results || [];
+    // Filtrovat pouze kolekce přihlášeného uživatele
+    collections.value = (response.data?.results || []).filter(c => c.user.id === authStore.user?.id);
   } catch (err) {
     console.error('Error fetching collections:', err);
     collections.value = [];
@@ -273,6 +336,7 @@ const saveProfile = async () => {
   errorMessage.value = '';
 
   const formData = new FormData();
+  formData.append('username', username.value);
   formData.append('bio', bio.value);
   if (profilePictureFile.value) {
     formData.append('profile_picture', profilePictureFile.value);
@@ -284,9 +348,36 @@ const saveProfile = async () => {
     successMessage.value = 'Profile updated successfully!';
   } catch (err) {
     console.error('Error updating profile:', err);
-    errorMessage.value = 'Failed to update profile. Please try again.';
+    errorMessage.value = 'Failed to update profile. Username might be taken.';
   } finally {
     isSaving.value = false;
+  }
+};
+
+const handleChangePassword = async () => {
+  if (passwordForm.new_password !== passwordForm.confirm_password) {
+    passwordError.value = "New passwords do not match.";
+    return;
+  }
+  
+  isChangingPassword.value = true;
+  passwordError.value = '';
+  passwordSuccess.value = '';
+
+  try {
+    await changePassword({
+      old_password: passwordForm.old_password,
+      new_password: passwordForm.new_password
+    });
+    passwordSuccess.value = "Password changed successfully.";
+    passwordForm.old_password = '';
+    passwordForm.new_password = '';
+    passwordForm.confirm_password = '';
+  } catch (err) {
+    console.error('Password change failed:', err);
+    passwordError.value = err.response?.data?.detail || "Failed to change password. Please check your old password.";
+  } finally {
+    isChangingPassword.value = false;
   }
 };
 

@@ -85,10 +85,19 @@ def change_password_view(request):
     user = request.user
     old = request.data.get('old_password')
     new = request.data.get('new_password')
+    
+    print(f"DEBUG: Change password for user: {user.username}")
+    print(f"DEBUG: Old password provided: {old}")
+    
     if not old or not new:
         return Response({'detail': 'old_password and new_password required'}, status=status.HTTP_400_BAD_REQUEST)
-    if not user.check_password(old):
+    
+    is_valid = user.check_password(old)
+    print(f"DEBUG: Password check result: {is_valid}")
+
+    if not is_valid:
         return Response({'detail': 'old password incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+    
     user.set_password(new)
     user.save()
     return Response({'detail': 'password changed'})

@@ -59,6 +59,8 @@ export const useApi = () => {
     return apiClient.post('auth/password-reset/confirm/', { token, password });
   };
 
+  const changePassword = (passwordData) => apiClient.post('auth/change-password/', passwordData);
+
   const getReviews = (params) => apiClient.get('reviews/', { params });
 
   const toggleLikeReview = (reviewId) => {
@@ -126,6 +128,7 @@ export const useApi = () => {
     updateProfile,
     requestPasswordReset,
     confirmPasswordReset,
+    changePassword,
     getReviews,
     toggleLikeReview,
     addReview,

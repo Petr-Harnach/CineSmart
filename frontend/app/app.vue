@@ -14,8 +14,7 @@
         :filters="activeFilters" 
         @navigate="navigateTo"
       />
-      <PageLogin v-else-if="currentPage === 'login'" @navigate="navigateTo" :success-message="appSuccessMessage" />
-      <PageRegister v-else-if="currentPage === 'register'" @navigate="navigateTo" />
+      <!-- PageLogin a PageRegister odstraněny -->
       <PageMovieDetail 
         v-else-if="currentPage === 'movie-detail'" 
         :movie-id="selectedMovieId" 
@@ -78,6 +77,14 @@
         @navigate="navigateTo" 
         @show-detail="showMovieDetail" 
       />
+
+      <!-- Auth Modal -->
+      <AuthModal 
+        :is-open="isAuthModalOpen" 
+        :initial-view="authModalView"
+        @close="closeAuthModal"
+        @forgot-password="navigateTo('forgot-password')"
+      />
     </main>
     <TheFooter />
   </div>
@@ -87,19 +94,15 @@
 import { ref, onMounted } from 'vue';
 import TheNavbar from '../components/TheNavbar.vue';
 import PageHome from '../components/PageHome.vue';
-import PageLogin from '../components/PageLogin.vue';
-import PageRegister from '../components/PageRegister.vue';
 import PageMovieDetail from '../components/PageMovieDetail.vue';
 import PageActorDetail from '../components/PageActorDetail.vue';
 import PageDirectorDetail from '../components/PageDirectorDetail.vue';
 import PageProfile from '../components/PageProfile.vue';
-import PageCollections from '../components/PageCollections.vue';
-import PageCollectionDetail from '../components/PageCollectionDetail.vue';
 import PageViewUserProfile from '../components/PageViewUserProfile.vue';
 import PageForgotPassword from '../components/PageForgotPassword.vue';
 import PageResetPassword from '../components/PageResetPassword.vue';
-import PageBrowse from '../components/PageBrowse.vue';
 import PageWatchlist from '../components/PageWatchlist.vue';
+import AuthModal from '../components/AuthModal.vue'; // Nový import
 import TheFooter from '../components/TheFooter.vue';
 
 const currentPage = ref('home');
@@ -107,10 +110,13 @@ const selectedMovieId = ref(null);
 const selectedActorId = ref(null);
 const selectedDirectorId = ref(null);
 const selectedUserProfileId = ref(null);
-const selectedCollectionId = ref(null);
 const selectedResetToken = ref(null);
 const appSuccessMessage = ref(null);
 const activeFilters = ref({});
+
+// Stavy pro AuthModal
+const isAuthModalOpen = ref(false);
+const authModalView = ref('login');
 
 onMounted(() => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -123,14 +129,32 @@ onMounted(() => {
   }
 });
 
+const openAuthModal = (view = 'login') => {
+  authModalView.value = view;
+  isAuthModalOpen.value = true;
+};
+
+const closeAuthModal = () => {
+  isAuthModalOpen.value = false;
+};
+
 const navigateTo = (page, message = null) => {
   console.log('Navigating to:', page, 'with message:', message);
+  
+  if (page === 'login') {
+    openAuthModal('login');
+    return;
+  }
+  if (page === 'register') {
+    openAuthModal('register');
+    return;
+  }
+
   currentPage.value = page;
   selectedMovieId.value = null; 
   selectedActorId.value = null;
   selectedDirectorId.value = null;
   selectedUserProfileId.value = null;
-  selectedCollectionId.value = null;
   selectedResetToken.value = null;
   appSuccessMessage.value = message;
 };
@@ -150,11 +174,6 @@ const showActorDetail = (id) => {
 const showDirectorDetail = (id) => {
   selectedDirectorId.value = id;
   currentPage.value = 'director-detail';
-};
-
-const showCollectionDetail = (id) => {
-  selectedCollectionId.value = id;
-  currentPage.value = 'collection-detail';
 };
 
 const showUserProfile = (id) => {

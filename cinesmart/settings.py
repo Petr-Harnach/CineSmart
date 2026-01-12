@@ -85,7 +85,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',  # Mělo by být nad staticfiles
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',

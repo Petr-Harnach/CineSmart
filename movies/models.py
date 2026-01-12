@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
 
 # --- CLOUDINARY IMPORT (Zakomentovat pro lokální vývoj bez Cloudinary) ---
-from cloudinary.models import CloudinaryField
+# from cloudinary.models import CloudinaryField
 
 class CustomUser(AbstractUser):
     bio = models.TextField(blank=True)
@@ -12,10 +12,10 @@ class CustomUser(AbstractUser):
     # --- IMAGE FIELDS (Přepínat mezi lokálem a produkcí) ---
     
     # LOCAL (Aktivní):
-    # profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     
     # PRODUCTION (Zakomentované):
-    profile_picture = CloudinaryField('image', null=True, blank=True)
+    # profile_picture = CloudinaryField('image', null=True, blank=True)
 
     groups = models.ManyToManyField(
         Group,
@@ -47,10 +47,10 @@ class Director(models.Model):
     bio = models.TextField(blank=True)
     
     # LOCAL (Aktivní):
-    # photo = models.ImageField(upload_to='director_photos/', null=True, blank=True)
+    photo = models.ImageField(upload_to='director_photos/', null=True, blank=True)
     
     # PRODUCTION (Zakomentované):
-    photo = CloudinaryField('image', null=True, blank=True)
+    # photo = CloudinaryField('image', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -61,10 +61,10 @@ class Actor(models.Model):
     bio = models.TextField(blank=True)
     
     # LOCAL (Aktivní):
-    # photo = models.ImageField(upload_to='actor_photos/', null=True, blank=True)
+    photo = models.ImageField(upload_to='actor_photos/', null=True, blank=True)
     
     # PRODUCTION (Zakomentované):
-    photo = CloudinaryField('image', null=True, blank=True)
+    # photo = CloudinaryField('image', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -83,10 +83,10 @@ class Movie(models.Model):
     type = models.CharField(max_length=10, choices=MOVIE_TYPE_CHOICES, default='movie')
     
     # LOCAL (Aktivní):
-    # poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    poster = models.ImageField(upload_to='posters/', null=True, blank=True)
     
     # PRODUCTION (Zakomentované):
-    poster = CloudinaryField('image', null=True, blank=True)
+    # poster = CloudinaryField('image', null=True, blank=True)
     
     trailer_url = models.URLField(blank=True)
     
