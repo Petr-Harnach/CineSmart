@@ -98,7 +98,7 @@
 
         <template v-else>
           <NuxtLink to="/watchlist" class="text-gray-300 hover:text-white">
-            Chci vidět
+            Můj seznam
           </NuxtLink>
           <NuxtLink to="/collections" class="text-gray-300 hover:text-white">
             Kolekce
