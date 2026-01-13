@@ -5,11 +5,13 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: null,
     user: null,
+    isInitialized: false, // New state
   }),
   getters: {
     isLoggedIn: (state) => !!state.accessToken,
   },
   actions: {
+    // ... (login, fetchProfile, register, logout remain same) ...
     async login(credentials) {
       const { login } = useApi();
       try {
@@ -68,6 +70,7 @@ export const useAuthStore = defineStore('auth', {
           await this.fetchProfile();
         }
       }
+      this.isInitialized = true; // Set initialized
     },
   },
 });

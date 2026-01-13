@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
@@ -118,13 +118,15 @@ const moviesToWatch = computed(() => watchlist.value.filter(item => !item.watche
 const moviesWatched = computed(() => watchlist.value.filter(item => item.watched));
 
 const fetchWatchlistData = async (url = 'watchlist/') => {
-  loading.value = true;
-  error.value = null;
   if (!authStore.isLoggedIn) {
-    error.value = new Error("You must be logged in to view your watchlist.");
     loading.value = false;
+    watchlist.value = [];
+    // error.value = new Error("You must be logged in to view your watchlist."); // Don't show error immediately, just empty list
     return;
   }
+  
+  loading.value = true;
+  error.value = null;
   try {
     const response = await getWatchlist(url);
     watchlist.value = response.data.results;
@@ -167,6 +169,22 @@ const goToMovie = (id) => {
 };
 
 onMounted(() => {
-  fetchWatchlistData();
+  if (authStore.isInitialized) {
+    fetchWatchlistData();
+  }
+});
+
+watch(() => authStore.isInitialized, (isInit) => {
+  if (isInit) {
+    fetchWatchlistData();
+  }
+});
+
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (isLoggedIn) {
+    fetchWatchlistData();
+  } else {
+    watchlist.value = [];
+  }
 });
 </script>
