@@ -19,9 +19,12 @@
 <script setup>
 import { ref, provide } from 'vue';
 import { useRouter } from 'vue-router';
-import TheNavbar from '../components/TheNavbar.vue';
-import TheFooter from '../components/TheFooter.vue';
-import AuthModal from '../components/AuthModal.vue';
+// Nuxt 3 auto-imports components from components/ directory, 
+// but if we keep explicit imports, we should use the correct path or alias.
+// Using explicit imports with alias ~ which points to srcDir (root)
+import TheNavbar from '~/components/TheNavbar.vue';
+import TheFooter from '~/components/TheFooter.vue';
+import AuthModal from '~/components/AuthModal.vue';
 
 const router = useRouter();
 

@@ -84,7 +84,7 @@
               <span>Filters</span>
             </button>
 
-            <!-- Filter Menu (Dropdown logic remains same, but applyFilters navigates) -->
+            <!-- Filter Menu -->
             <div 
               v-if="isFilterMenuOpen"
               class="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-full md:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20 p-4"
