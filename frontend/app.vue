@@ -17,16 +17,15 @@
 </template>
 
 <script setup>
-import { ref, provide } from 'vue';
+import { ref, onMounted, provide } from 'vue';
 import { useRouter } from 'vue-router';
-// Nuxt 3 auto-imports components from components/ directory, 
-// but if we keep explicit imports, we should use the correct path or alias.
-// Using explicit imports with alias ~ which points to srcDir (root)
-import TheNavbar from '~/components/TheNavbar.vue';
-import TheFooter from '~/components/TheFooter.vue';
-import AuthModal from '~/components/AuthModal.vue';
+import { useAuthStore } from './stores/auth'; // Import store
+import TheNavbar from './components/TheNavbar.vue';
+import TheFooter from './components/TheFooter.vue';
+import AuthModal from './components/AuthModal.vue';
 
 const router = useRouter();
+const authStore = useAuthStore(); // Use store
 
 // Global Auth Modal State
 const isAuthModalOpen = ref(false);
@@ -43,4 +42,8 @@ const closeAuthModal = () => {
 
 // Provide the openAuthModal function to all descendants
 provide('openAuthModal', openAuthModal);
+
+onMounted(() => {
+  authStore.initialize(); // Initialize auth state
+});
 </script>

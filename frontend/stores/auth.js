@@ -15,6 +15,9 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await login(credentials);
         this.accessToken = response.data.access;
+        if (process.client) {
+          localStorage.setItem('accessToken', this.accessToken);
+        }
         console.log('Login successful, fetching profile...');
         await this.fetchProfile();
         return true;
@@ -52,7 +55,17 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.accessToken = null;
       this.user = null;
+      if (process.client) {
+        localStorage.removeItem('accessToken');
+      }
       console.log('Logged out.');
     },
-  },
-});
+    async initialize() {
+      if (process.client) {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          this.accessToken = token;
+          await this.fetchProfile();
+        }
+      }
+    },
