@@ -3,7 +3,7 @@
     <!-- Hlavní banner s trailery -->
     <div class="mb-12">
       <div v-if="loadingMainTrailer" class="text-center text-gray-500 py-24">
-        <p>Načítám skvělé trailery...</p>
+        <p>Načítám trailery...</p>
       </div>
       <div v-else-if="currentTrailerMovie && currentTrailerMovie.trailer_url"
            class="relative max-w-6xl mx-auto overflow-hidden rounded-2xl shadow-2xl group">
