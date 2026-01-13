@@ -13,9 +13,10 @@ class ScreenwriterAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
 
-class EpisodeInline(admin.TabularInline):
+class EpisodeInline(admin.StackedInline):
     model = Episode
     extra = 1
+    filter_horizontal = ('directors', 'screenwriters', 'guest_stars')
 
 
 @admin.register(Season)
@@ -23,13 +24,14 @@ class SeasonAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'movie', 'season_number', 'release_date')
     list_filter = ('movie',)
     search_fields = ('movie__title', 'title')
+    filter_horizontal = ('directors', 'screenwriters', 'actors') # Added for Season
     inlines = [EpisodeInline]
 
 
 class SeasonInline(admin.TabularInline):
     model = Season
     extra = 0
-    show_change_link = True # Allow clicking through to edit episodes
+    show_change_link = True 
 
 
 @admin.register(Movie)
@@ -38,7 +40,7 @@ class MovieAdmin(admin.ModelAdmin):
     list_filter = ('type', 'genres', 'directors')
     search_fields = ('title', 'description', 'directors__name')
     filter_horizontal = ('genres', 'directors', 'actors', 'screenwriters')
-    inlines = [SeasonInline] # Add seasons directly to movie
+    inlines = [SeasonInline] 
 
     def get_genres(self, obj):
         return ", ".join([g.name for g in obj.genres.all()])

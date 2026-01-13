@@ -107,12 +107,9 @@ class Movie(models.Model):
     
     genres = models.ManyToManyField(Genre, related_name="movies")
     
-    # Changed from ForeignKey to ManyToManyField
+    # Main crew/cast for the whole show
     directors = models.ManyToManyField(Director, related_name="movies", blank=True)
-    
-    # New ManyToManyField for Screenwriters
     screenwriters = models.ManyToManyField(Screenwriter, related_name="movies", blank=True)
-    
     actors = models.ManyToManyField(Actor, related_name="movies", blank=True)
 
     def __str__(self):
@@ -125,6 +122,11 @@ class Season(models.Model):
     title = models.CharField(max_length=200, blank=True)
     overview = models.TextField(blank=True)
     release_date = models.DateField(null=True, blank=True)
+    
+    # Season specific crew/cast (useful for anthologies)
+    directors = models.ManyToManyField(Director, related_name='seasons', blank=True)
+    screenwriters = models.ManyToManyField(Screenwriter, related_name='seasons', blank=True)
+    actors = models.ManyToManyField(Actor, related_name='seasons', blank=True)
     
     class Meta:
         ordering = ['season_number']
@@ -140,6 +142,11 @@ class Episode(models.Model):
     overview = models.TextField(blank=True)
     air_date = models.DateField(null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True)
+    
+    # Episode specific crew/cast
+    directors = models.ManyToManyField(Director, related_name='episodes', blank=True)
+    screenwriters = models.ManyToManyField(Screenwriter, related_name='episodes', blank=True)
+    guest_stars = models.ManyToManyField(Actor, related_name='episodes', blank=True)
     
     # LOCAL (Aktivní):
     # still_path = models.ImageField(upload_to='episode_stills/', null=True, blank=True)
