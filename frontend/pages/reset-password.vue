@@ -1,11 +1,11 @@
 <template>
   <div class="max-w-md mx-auto mt-10">
-    <h1 class="text-2xl font-bold mb-4 dark:text-gray-100">Reset Password</h1>
+    <h1 class="text-2xl font-bold mb-4 dark:text-gray-100">Obnovit heslo</h1>
     <form @submit.prevent="handleReset" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <div v-if="error" class="bg-red-100 text-red-700 p-3 mb-4 rounded">{{ error }}</div>
       
       <div class="mb-4">
-        <label for="password" class="block text-gray-700 dark:text-gray-300">New Password</label>
+        <label for="password" class="block text-gray-700 dark:text-gray-300">Nové heslo</label>
         <input 
           type="password" 
           v-model="password" 
@@ -16,7 +16,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="password-confirm" class="block text-gray-700 dark:text-gray-300">Confirm New Password</label>
+        <label for="password-confirm" class="block text-gray-700 dark:text-gray-300">Potvrzení nového hesla</label>
         <input 
           type="password" 
           v-model="passwordConfirm" 
@@ -31,7 +31,7 @@
         :disabled="loading" 
         class="w-full bg-blue-600 text-white p-2 rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
       >
-        {{ loading ? 'Resetting...' : 'Reset Password' }}
+        {{ loading ? 'Obnovování...' : 'Obnovit heslo' }}
       </button>
     </form>
   </div>
@@ -56,7 +56,7 @@ const error = ref(null);
 
 const handleReset = async () => {
   if (password.value !== passwordConfirm.value) {
-    error.value = "Passwords do not match.";
+    error.value = "Hesla se neshodují.";
     return;
   }
 
@@ -64,15 +64,15 @@ const handleReset = async () => {
   error.value = null;
   try {
     await confirmPasswordReset(token, password.value);
-    // Redirect to home and open login modal
+    // Přesměrování na domovskou stránku a otevření přihlašovacího modalu
     router.push('/');
     setTimeout(() => {
-        openAuthModal('login');
-        alert('Your password has been successfully reset. Please log in.'); // Simple feedback for now
+        if (openAuthModal) openAuthModal('login');
+        alert('Vaše heslo bylo úspěšně obnoveno. Nyní se můžete přihlásit.');
     }, 500);
   } catch (err) {
-    console.error('Password reset failed:', err);
-    error.value = err.response?.data?.detail || 'Failed to reset password. The link might be expired or invalid.';
+    console.error('Obnovení hesla selhalo:', err);
+    error.value = err.response?.data?.detail || 'Nepodařilo se obnovit heslo. Odkaz může být neplatný nebo expirovaný.';
   } finally {
     loading.value = false;
   }

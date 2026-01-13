@@ -1,16 +1,16 @@
 <template>
   <div>
-    <!-- Main Trailer Banner -->
+    <!-- Hlavní banner s trailery -->
     <div class="mb-12">
       <div v-if="loadingMainTrailer" class="text-center text-gray-500 py-24">
-        <p>Načítám trailery...</p>
+        <p>Načítám skvělé trailery...</p>
       </div>
       <div v-else-if="currentTrailerMovie && currentTrailerMovie.trailer_url"
            class="relative max-w-6xl mx-auto overflow-hidden rounded-2xl shadow-2xl group">
         <div class="relative" style="padding-top: 56.25%;">
             <div ref="youtubePlayerContainer" class="absolute top-0 left-0 w-full h-full"></div>
         </div>
-        <!-- Carousel Navigation -->
+        <!-- Navigace karuselu -->
         <template v-if="mainTrailerMovies.length > 1">
           <button @click="prevTrailer" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-4 bg-black bg-opacity-50 rounded-r-lg text-white opacity-0 group-hover:opacity-100 transition-opacity">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
@@ -19,7 +19,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
           </button>
         </template>
-        <!-- Overlays -->
+        <!-- Překryvy -->
         <div 
           class="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black to-transparent pointer-events-none transition-opacity duration-500"
           :class="{'opacity-0': isVideoPlaying}"
@@ -34,13 +34,11 @@
               <button 
                 @click.stop="toggleWatchlist"
                 class="absolute top-0 right-0 transform -translate-y-1/2 translate-x-1/2 bg-gray-800 bg-opacity-75 rounded-full p-2 text-white hover:bg-opacity-100 hover:scale-110 transition-transform"
-                :aria-label="isCurrentTrailerInWatchlist ? 'Remove from watchlist' : 'Add to watchlist'"
+                :aria-label="isCurrentTrailerInWatchlist ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
               >
-                <!-- Plus Icon -->
                 <svg v-if="!isCurrentTrailerInWatchlist" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                <!-- Check Icon -->
                 <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -61,13 +59,13 @@
       </div>
       <div v-else class="text-center bg-gray-100 dark:bg-gray-800 rounded-lg py-24 max-w-6xl mx-auto">
         <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300">Žádný trailer není k dispozici</h3>
-        <p class="text-gray-500 dark:text-gray-400 mt-2">Zkuste to později.</p>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Zkuste to prosím později.</p>
       </div>
     </div>
 
-    <!-- Top Rated Movies Section -->
+    <!-- Sekce Nejlépe hodnocené -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nejlépe hodnocené</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nejlépe hodnocené filmy</h2>
       <div v-if="loadingTopRated" class="text-center text-gray-500">
         <p>Načítám filmy...</p>
       </div>
@@ -88,7 +86,7 @@
       </Carousel>
     </div>
 
-    <!-- From your Watchlist Section -->
+    <!-- Sekce Z vašeho seznamu -->
     <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Z vašeho seznamu</h2>
       <div v-if="loadingWatchlist" class="text-center text-gray-500">
@@ -98,8 +96,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Váš seznam filmů je na dosah</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Přihlaste se a sledujte filmy, které chcete vidět.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Váš seznam je na dosah kliknutí</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Přihlaste se, abyste si mohli ukládat filmy, které chcete vidět.</p>
         <div class="mt-6">
           <button @click="openAuthModal('login')" type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             Přihlásit se
@@ -126,14 +124,14 @@
       </Carousel>
     </div>
 
-    <!-- Popular Actors Section -->
+    <!-- Sekce Populární herci -->
     <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Populární herci</h2>
       <div v-if="loadingPopularActors" class="text-center text-gray-500">
         <p>Načítám herce...</p>
       </div>
       <div v-else-if="popularActors.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>Žádní herci nenalezeni.</p>
+        <p>Žádní populární herci nenalezeni.</p>
       </div>
       <Carousel v-else>
         <div 
@@ -142,7 +140,6 @@
           class="flex-shrink-0 w-48 flex flex-col items-center cursor-pointer transform hover:-translate-y-1 transition-transform duration-300"
           @click="goToActor(actor.id)"
         >
-          <!-- Placeholder for actor image/avatar -->
           <img v-if="actor.photo" :src="actor.photo" :alt="actor.name" class="h-40 w-40 rounded-full object-cover shadow-lg mb-3">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-40 w-40 rounded-full flex items-center justify-center shadow-lg mb-3 text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -152,14 +149,14 @@
       </Carousel>
     </div>
 
-    <!-- In Theaters Section -->
+    <!-- Sekce Právě v kinech -->
     <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Právě v kinech</h2>
       <div v-if="loadingInTheaters" class="text-center text-gray-500">
         <p>Načítám filmy v kinech...</p>
       </div>
       <div v-else-if="inTheatersMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>Žádné filmy v kinech.</p>
+        <p>Žádné filmy v kinech nenalezeny.</p>
       </div>
       <Carousel v-else>
         <div 
@@ -178,14 +175,14 @@
       </Carousel>
     </div>
 
-    <!-- Coming Soon Section -->
+    <!-- Sekce Brzy v kinech -->
     <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Brzy v kinech</h2>
       <div v-if="loadingComingSoon" class="text-center text-gray-500">
         <p>Načítám nadcházející filmy...</p>
       </div>
       <div v-else-if="comingSoonMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>Žádné nadcházející filmy.</p>
+        <p>Žádné nadcházející filmy nenalezeny.</p>
       </div>
       <Carousel v-else>
         <div 
@@ -292,7 +289,7 @@ const toggleWatchlist = async () => {
     }
     await fetchUserWatchlist(); 
   } catch (error) {
-    console.error("Failed to update watchlist:", error);
+    console.error("Nepodařilo se aktualizovat seznam:", error);
   }
 };
 
@@ -370,7 +367,7 @@ const fetchTopRatedMovies = async () => {
     const response = await getMovies({ ordering: '-avg_rating', limit: 5 });
     topRatedMovies.value = response.data?.results || [];
   } catch (err) {
-    console.error('Error fetching top rated movies:', err);
+    console.error('Chyba při načítání nejlépe hodnocených filmů:', err);
   } finally {
     loadingTopRated.value = false;
   }
@@ -387,7 +384,7 @@ const fetchUserWatchlist = async () => {
     const allItems = response.data?.results || [];
     userWatchlist.value = allItems.filter(item => !item.watched);
   } catch (err) {
-    console.error('Error fetching user watchlist:', err);
+    console.error('Chyba při načítání seznamu uživatele:', err);
   } finally {
     loadingWatchlist.value = false;
   }
@@ -399,7 +396,7 @@ const fetchPopularActors = async () => {
     const response = await getActors({ limit: 10 }); 
     popularActors.value = response.data?.results || [];
   } catch (err) {
-    console.error('Error fetching popular actors:', err);
+    console.error('Chyba při načítání herců:', err);
   } finally {
     loadingPopularActors.value = false;
   }
@@ -422,7 +419,7 @@ const fetchInTheatersMovies = async () => {
     });
     inTheatersMovies.value = response.data?.results || [];
   } catch (err) {
-    console.error('Error fetching "In Theaters" movies:', err);
+    console.error('Chyba při načítání filmů v kinech:', err);
   } finally {
     loadingInTheaters.value = false;
   }
@@ -441,7 +438,7 @@ const fetchComingSoonMovies = async () => {
     });
     comingSoonMovies.value = response.data?.results || [];
   } catch (err) {
-    console.error('Error fetching "Coming Soon" movies:', err);
+    console.error('Chyba při načítání nadcházejících filmů:', err);
   } finally {
     loadingComingSoon.value = false;
   }
@@ -469,7 +466,7 @@ const fetchMainTrailerMovie = async () => {
     if (moviesWithTrailers.length === 0) {
       response = await getMovies({ 
         ordering: '-release_date', 
-        limit: 20,
+        limit: 20, 
         release_date__lte: formattedToday 
       });
       results = response.data?.results || [];
@@ -478,7 +475,7 @@ const fetchMainTrailerMovie = async () => {
 
     mainTrailerMovies.value = moviesWithTrailers;
   } catch (err) {
-    console.error('Error fetching main trailer movies:', err);
+    console.error('Chyba při načítání trailerů:', err);
   } finally {
     loadingMainTrailer.value = false;
   }

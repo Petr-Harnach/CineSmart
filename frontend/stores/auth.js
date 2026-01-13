@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
         if (error.response && error.response.data) {
           return error.response.data; // Vrátit objekt s chybami
         }
-        return { general: ['An unknown error occurred. Please try again.'] };
+        return { general: ['Vyskytla se neznámá chyba. Zkuste to prosím znovu.'] };
       }
     },
     logout() {

@@ -1,9 +1,9 @@
 <template>
   <div v-if="loading" class="text-center text-gray-500 py-12">
-    <p>Loading director details...</p>
+    <p>Načítám detaily režiséra...</p>
   </div>
   <div v-else-if="error" class="text-center text-red-500 py-12">
-    <p>Failed to load director details: {{ error.message }}</p>
+    <p>Nepodařilo se načíst detaily režiséra: {{ error.message }}</p>
   </div>
   <div v-else-if="director" class="max-w-6xl mx-auto mt-10 p-4">
     <div class="flex flex-col md:flex-row gap-8">
@@ -16,14 +16,14 @@
       <div class="md:w-2/3">
         <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">{{ director.name }}</h1>
         <p v-if="director.bio" class="mt-4 text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{{ director.bio }}</p>
-        <p v-else class="mt-4 text-gray-500 italic">No biography available.</p>
+        <p v-else class="mt-4 text-gray-500 italic">Biografie není k dispozici.</p>
       </div>
     </div>
 
     <hr class="my-12 border-gray-200 dark:border-gray-700">
 
     <div>
-      <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Filmography</h2>
+      <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Filmografie</h2>
       <div v-if="director.movies && director.movies.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <div 
           v-for="movie in director.movies" 
@@ -35,11 +35,11 @@
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
           <div class="p-4">
             <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h3>
-            <p v-if="movie.release_date" class="text-sm text-gray-500">{{ new Date(movie.release_date).getFullYear() }}</p>
+            <p v-if="item.movie.release_date" class="text-sm text-gray-500">{{ new Date(movie.release_date).getFullYear() }}</p>
           </div>
         </div>
       </div>
-      <p v-else class="text-center text-gray-500 italic">No movies found in our database for this director.</p>
+      <p v-else class="text-center text-gray-500 italic">V naší databázi nebyly pro tohoto režiséra nalezeny žádné filmy.</p>
     </div>
   </div>
 </template>
@@ -66,7 +66,7 @@ const fetchDirector = async (id) => {
     const response = await getDirectorById(id);
     director.value = response.data;
   } catch (err) {
-    console.error(`Error fetching director with id ${id}:`, err);
+    console.error(`Chyba při načítání režiséra s id ${id}:`, err);
     error.value = err;
   } finally {
     loading.value = false;
@@ -79,6 +79,6 @@ onMounted(() => {
 
 // Znovu načíst data, pokud se změní directorId
 watch(() => route.params.id, (newId) => {
-  fetchDirector(newId);
+  if (newId) fetchDirector(newId);
 });
 </script>

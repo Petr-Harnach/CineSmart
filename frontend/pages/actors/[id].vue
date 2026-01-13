@@ -1,9 +1,9 @@
 <template>
   <div v-if="loading" class="text-center text-gray-500 py-12">
-    <p>Loading actor details...</p>
+    <p>Načítám detaily herce...</p>
   </div>
   <div v-else-if="error" class="text-center text-red-500 py-12">
-    <p>Failed to load actor details: {{ error.message }}</p>
+    <p>Nepodařilo se načíst detaily herce: {{ error.message }}</p>
   </div>
   <div v-else-if="actor" class="max-w-6xl mx-auto mt-10 p-4">
     <div class="flex flex-col md:flex-row gap-8">
@@ -16,14 +16,14 @@
       <div class="md:w-2/3">
         <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">{{ actor.name }}</h1>
         <p v-if="actor.bio" class="mt-4 text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{{ actor.bio }}</p>
-        <p v-else class="mt-4 text-gray-500 italic">No biography available.</p>
+        <p v-else class="mt-4 text-gray-500 italic">Biografie není k dispozici.</p>
       </div>
     </div>
 
     <hr class="my-12 border-gray-200 dark:border-gray-700">
 
     <div>
-      <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Filmography</h2>
+      <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Filmografie</h2>
       <div v-if="actor.movies && actor.movies.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <div 
           v-for="movie in actor.movies" 
@@ -39,7 +39,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="text-center text-gray-500 italic">No movies found in our database for this actor.</p>
+      <p v-else class="text-center text-gray-500 italic">V naší databázi nebyly pro tohoto herce nalezeny žádné filmy.</p>
     </div>
   </div>
 </template>
@@ -66,7 +66,7 @@ const fetchActor = async (id) => {
     const response = await getActorById(id);
     actor.value = response.data;
   } catch (err) {
-    console.error(`Error fetching actor with id ${id}:`, err);
+    console.error(`Chyba při načítání herce s id ${id}:`, err);
     error.value = err;
   } finally {
     loading.value = false;
@@ -79,6 +79,6 @@ onMounted(() => {
 
 // Znovu načíst data, pokud se změní actorId
 watch(() => route.params.id, (newId) => {
-  fetchActor(newId);
+  if (newId) fetchActor(newId);
 });
 </script>
