@@ -224,8 +224,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const { getMovies, getWatchlist, getActors, addToWatchlist, removeFromWatchlist } = useApi();
 
-// Inject openAuthModal from layout or app.vue
-const openAuthModal = inject('openAuthModal', () => console.warn('openAuthModal not provided'));
+const openAuthModal = inject('openAuthModal');
 
 const topRatedMovies = ref([]);
 const userWatchlist = ref([]);
@@ -252,8 +251,6 @@ const goToMovie = (id) => {
 const goToActor = (id) => {
   router.push(`/actors/${id}`);
 };
-
-// ... (Logic same as PageHome.vue) ...
 
 const parseVideoId = (url) => {
   if (!url) return null;
