@@ -73,99 +73,15 @@
           </button>
 
           <!-- Filters Button -->
-          <div class="relative">
-            <button 
-              @click="toggleFilterMenu"
-              class="w-full md:w-auto p-3 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9M3 12h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-              </svg>
-              <span>Filters</span>
-            </button>
-
-            <!-- Filter Menu -->
-            <div 
-              v-if="isFilterMenuOpen"
-              class="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-full md:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20 p-4"
-            >
-              <div class="space-y-4">
-                <!-- TYPE -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
-                  <select
-                    v-model="selectedType"
-                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                  >
-                    <option value="">All</option>
-                    <option value="movie">Movies</option>
-                    <option value="series">Series</option>
-                  </select>
-                </div>
-
-                <!-- GENRE -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Genre</label>
-                  <select
-                    v-model="selectedGenre"
-                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                  >
-                    <option value="">All</option>
-                    <option v-for="genre in genres" :key="genre.id" :value="genre.id">
-                      {{ genre.name }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- YEAR -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
-                  <div class="flex items-center gap-2 mt-1">
-                    <input 
-                      type="number" 
-                      v-model="yearFrom" 
-                      placeholder="From" 
-                      class="w-full p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    >
-                    <span class="text-gray-500">-</span>
-                    <input 
-                      type="number" 
-                      v-model="yearTo" 
-                      placeholder="To"
-                      class="w-full p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                    >
-                  </div>
-                </div>
-
-                <!-- SORT -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort by</label>
-                  <select
-                    v-model="selectedSort"
-                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                  >
-                    <option value="">Default</option>
-                    <option value="-avg_rating">Top Rated</option>
-                    <option value="title">Title (A-Z)</option>
-                    <option value="-title">Title (Z-A)</option>
-                    <option value="-release_date">Newest First</option>
-                    <option value="release_date">Oldest First</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button @click="resetFilters" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500">
-                  Reset
-                </button>
-                <button @click="applyFilters" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-          </div>
-
+          <NuxtLink 
+            to="/browse"
+            class="w-full md:w-auto p-3 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9M3 12h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+            </svg>
+            <span>Filters</span>
+          </NuxtLink>
         </div>
       </div>
 
@@ -194,7 +110,7 @@
               alt="Profile" 
               class="h-8 w-8 rounded-full object-cover"
             >
-            <span v-if="authStore.user">
+            <span v-if="authStore.user" class="hidden md:inline">
               {{ authStore.user.username }}
             </span>
           </NuxtLink>
@@ -234,57 +150,17 @@ import { useRouter } from 'vue-router';
 const colorMode = useColorMode();
 const router = useRouter();
 const authStore = useAuthStore();
-const { getGenres, getMovies, getRandomMovieId } = useApi();
+const { getMovies, getRandomMovieId } = useApi();
 const openAuthModal = inject('openAuthModal');
 
-// Stavy pro filtry
 const searchQuery = ref('');
-const selectedGenre = ref('');
-const selectedSort = ref('');
-const selectedType = ref('');
-const yearFrom = ref(null);
-const yearTo = ref(null);
-const genres = ref([]);
-
-// Stavy pro našeptávač
 const searchResults = ref([]);
 const isSearchLoading = ref(false);
 const isSearchFocused = ref(false);
 let debounceTimer = null;
 
-// Stav pro nové menu s filtry
-const isFilterMenuOpen = ref(false);
-
 const toggleTheme = () => {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
-};
-
-const toggleFilterMenu = () => {
-  isFilterMenuOpen.value = !isFilterMenuOpen.value;
-};
-
-const applyFilters = () => {
-  const params = {};
-  if (searchQuery.value) params.search = searchQuery.value;
-  if (selectedGenre.value) params.genres = selectedGenre.value;
-  if (selectedSort.value) params.ordering = selectedSort.value;
-  if (selectedType.value) params.type = selectedType.value;
-  if (yearFrom.value) params.release_date__year__gte = yearFrom.value;
-  if (yearTo.value) params.release_date__year__lte = yearTo.value;
-
-  isFilterMenuOpen.value = false;
-  router.push({ path: '/browse', query: params });
-};
-
-const resetFilters = () => {
-  selectedGenre.value = '';
-  selectedSort.value = '';
-  selectedType.value = '';
-  yearFrom.value = null;
-  yearTo.value = null;
-  // Ne-resetujeme searchQuery, pokud chceme zachovat kontext, ale zde asi ano?
-  // searchResults resetujeme.
-  applyFilters(); // Aplikovat resetované filtry
 };
 
 const handleRandomPick = async () => {
@@ -344,17 +220,4 @@ const selectMovie = (movieId) => {
   isSearchFocused.value = false;
   router.push(`/movies/${movieId}`);
 };
-
-const fetchGenres = async () => {
-  try {
-    const response = await getGenres();
-    genres.value = response.data.results;
-  } catch (err) {
-    console.error('Error fetching genres:', err);
-  }
-};
-
-onMounted(() => {
-  fetchGenres();
-});
 </script>
