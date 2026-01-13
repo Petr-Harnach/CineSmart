@@ -7,6 +7,7 @@
     </div>
 
     <form v-else @submit.prevent="saveProfile">
+      <!-- ... (Same form content as PageProfile.vue) ... -->
       <div class="flex flex-col items-center space-y-4 mb-8">
         <img 
           v-if="previewImageUrl || authStore.user.profile_picture"
@@ -70,7 +71,6 @@
       </div>
     </form>
 
-    <!-- Security Section -->
     <hr class="my-8 border-gray-200 dark:border-gray-700">
     <section class="mt-8">
       <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Security</h2>
@@ -121,7 +121,6 @@
       </form>
     </section>
 
-    <!-- Stats Section -->
     <hr class="my-8 border-gray-200 dark:border-gray-700">
     <section class="mt-8">
       <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Your Stats</h2>
@@ -150,12 +149,10 @@
       </div>
     </section>
 
-    <!-- Collections Section -->
     <hr class="my-8 border-gray-200 dark:border-gray-700">
     <section class="mt-8">
       <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My Collections</h2>
       
-      <!-- Create New Collection Form -->
       <form @submit.prevent="handleCreateCollection" class="mb-8 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
         <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Create New Collection</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,7 +185,6 @@
         </div>
       </form>
 
-      <!-- List of Collections -->
       <div v-if="collections.length > 0" class="space-y-4">
         <div 
           v-for="collection in collections" 
@@ -230,12 +226,12 @@
 import { ref, onMounted, computed, reactive, nextTick } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
-import { useToast } from '../composables/useToast'; // Import toast
-import ConfirmModal from './ConfirmModal.vue'; // Import modal
+import { useToast } from '../composables/useToast';
+import ConfirmModal from '../components/ConfirmModal.vue'; // Correct path
 
 const authStore = useAuthStore();
 const { updateProfile, getWatchlist, getCollections, createCollection, deleteCollection, changePassword } = useApi();
-const toast = useToast(); // Initialize toast
+const toast = useToast();
 
 const username = ref('');
 const bio = ref('');
@@ -246,7 +242,6 @@ const isSaving = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
 
-// Změna hesla
 const passwordForm = reactive({
   old_password: '',
   new_password: '',
@@ -256,11 +251,9 @@ const isChangingPassword = ref(false);
 const passwordSuccess = ref('');
 const passwordError = ref('');
 
-// Pro statistiky
 const watchlistItems = ref([]);
 const isLoadingStats = ref(true);
 
-// Pro kolekce
 const collections = ref([]);
 const newCollection = reactive({
   name: '',
@@ -269,7 +262,6 @@ const newCollection = reactive({
 });
 const isCreatingCollection = ref(false);
 
-// Pro Confirm Modal
 const isConfirmModalOpen = ref(false);
 const pendingDeleteCollectionId = ref(null);
 
@@ -286,7 +278,6 @@ const fetchWatchlistData = async () => {
   isLoadingStats.value = true;
   try {
     const response = await getWatchlist();
-    // Bezpečný přístup k datům
     watchlistItems.value = response.data?.results || [];
   } catch (err) {
     console.error('Error fetching watchlist for stats:', err);
@@ -299,7 +290,6 @@ const fetchWatchlistData = async () => {
 const fetchCollections = async () => {
   try {
     const response = await getCollections();
-    // Filtrovat pouze kolekce přihlášeného uživatele
     collections.value = (response.data?.results || []).filter(c => c.user.id === authStore.user?.id);
   } catch (err) {
     console.error('Error fetching collections:', err);
@@ -315,7 +305,6 @@ const handleCreateCollection = async () => {
     newCollection.description = '';
     newCollection.is_public = true;
     await fetchCollections();
-    // toast.success('Collection created successfully!'); // Removed
   } catch (err) {
     console.error('Error creating collection:', err);
     toast.error('Failed to create collection.');
@@ -349,7 +338,6 @@ const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     profilePictureFile.value = file;
-    // Vytvoření náhledu obrázku
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImageUrl.value = e.target.result;
@@ -372,7 +360,7 @@ const saveProfile = async () => {
 
   try {
     await updateProfile(formData);
-    await authStore.fetchProfile(); // Obnovení dat uživatele ve storu
+    await authStore.fetchProfile();
     toast.success('Profile updated successfully!');
   } catch (err) {
     console.error('Error updating profile:', err);
@@ -412,7 +400,6 @@ const handleChangePassword = async () => {
   }
 };
 
-// Computed properties pro statistiky
 const watchedMovies = computed(() => {
     if (!Array.isArray(watchlistItems.value)) return [];
     return watchlistItems.value.filter(item => item.watched);
@@ -428,16 +415,12 @@ const stats = computed(() => {
     };
   }
 
-  // 1. Celkový počet
   const totalCount = watchedMovies.value.length;
-
-  // 2. Celkový čas
   const totalMinutes = watchedMovies.value.reduce((total, item) => total + (item.movie?.duration_minutes || 0), 0);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   const formattedTime = `${hours}h ${minutes}m`;
 
-  // 3. Nejoblíbenější žánr
   const genreCounts = watchedMovies.value
     .flatMap(item => item.movie?.genres || [])
     .reduce((counts, genre) => {

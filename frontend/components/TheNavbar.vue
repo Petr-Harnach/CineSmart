@@ -3,13 +3,9 @@
     <div class="container mx-auto flex flex-wrap items-center gap-4">
 
       <!-- LEFT: LOGO -->
-      <a
-        @click.prevent="$emit('navigate', 'home')"
-        href="#"
-        class="text-white text-lg font-bold flex-shrink-0"
-      >
+      <NuxtLink to="/" class="text-white text-lg font-bold flex-shrink-0">
         CineSmart
-      </a>
+      </NuxtLink>
 
       <!-- CENTER: SEARCH + FILTERS -->
       <div class="flex-1 flex justify-center">
@@ -79,7 +75,7 @@
           <!-- Filters Button -->
           <div class="relative">
             <button 
-              @click="$emit('navigate', 'browse')"
+              @click="toggleFilterMenu"
               class="w-full md:w-auto p-3 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 flex items-center justify-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -87,6 +83,87 @@
               </svg>
               <span>Filters</span>
             </button>
+
+            <!-- Filter Menu (Dropdown logic remains same, but applyFilters navigates) -->
+            <div 
+              v-if="isFilterMenuOpen"
+              class="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-full md:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20 p-4"
+            >
+              <div class="space-y-4">
+                <!-- TYPE -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                  <select
+                    v-model="selectedType"
+                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    <option value="">All</option>
+                    <option value="movie">Movies</option>
+                    <option value="series">Series</option>
+                  </select>
+                </div>
+
+                <!-- GENRE -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Genre</label>
+                  <select
+                    v-model="selectedGenre"
+                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    <option value="">All</option>
+                    <option v-for="genre in genres" :key="genre.id" :value="genre.id">
+                      {{ genre.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- YEAR -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
+                  <div class="flex items-center gap-2 mt-1">
+                    <input 
+                      type="number" 
+                      v-model="yearFrom" 
+                      placeholder="From" 
+                      class="w-full p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    >
+                    <span class="text-gray-500">-</span>
+                    <input 
+                      type="number" 
+                      v-model="yearTo" 
+                      placeholder="To"
+                      class="w-full p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    >
+                  </div>
+                </div>
+
+                <!-- SORT -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort by</label>
+                  <select
+                    v-model="selectedSort"
+                    class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    <option value="">Default</option>
+                    <option value="-avg_rating">Top Rated</option>
+                    <option value="title">Title (A-Z)</option>
+                    <option value="-title">Title (Z-A)</option>
+                    <option value="-release_date">Newest First</option>
+                    <option value="release_date">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button @click="resetFilters" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500">
+                  Reset
+                </button>
+                <button @click="applyFilters" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                  Apply Filters
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -95,22 +172,22 @@
       <!-- RIGHT: AUTH / THEME -->
       <div class="flex items-center space-x-4 flex-shrink-0">
         <template v-if="!authStore.isLoggedIn">
-          <a @click.prevent="$emit('navigate', 'login')" href="#" class="text-gray-300 hover:text-white">
+          <a @click.prevent="openAuthModal('login')" href="#" class="text-gray-300 hover:text-white">
             Login
           </a>
-          <a @click.prevent="$emit('navigate', 'register')" href="#" class="text-gray-300 hover:text-white">
+          <a @click.prevent="openAuthModal('register')" href="#" class="text-gray-300 hover:text-white">
             Register
           </a>
         </template>
 
         <template v-else>
-          <a @click.prevent="$emit('navigate', 'watchlist')" href="#" class="text-gray-300 hover:text-white">
+          <NuxtLink to="/watchlist" class="text-gray-300 hover:text-white">
             Watchlist
-          </a>
-          <a @click.prevent="$emit('navigate', 'collections')" href="#" class="text-gray-300 hover:text-white">
+          </NuxtLink>
+          <NuxtLink to="/collections" class="text-gray-300 hover:text-white">
             Collections
-          </a>
-          <a @click.prevent="$emit('navigate', 'profile')" href="#" class="flex items-center gap-2 text-white cursor-pointer">
+          </NuxtLink>
+          <NuxtLink to="/profile" class="flex items-center gap-2 text-white cursor-pointer">
             <img 
               v-if="authStore.user && authStore.user.profile_picture" 
               :src="authStore.user.profile_picture" 
@@ -120,7 +197,7 @@
             <span v-if="authStore.user">
               {{ authStore.user.username }}
             </span>
-          </a>
+          </NuxtLink>
           <a
             @click.prevent="handleLogout"
             href="#"
@@ -135,11 +212,9 @@
 
         <!-- THEME TOGGLE -->
         <button @click="toggleTheme" class="text-gray-300 hover:text-white transition-colors" title="Toggle Theme">
-          <!-- Sun Icon (Light Mode) -->
           <svg v-if="colorMode.value === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707m-12.728 0l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
-          <!-- Moon Icon (Dark Mode) -->
           <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21 a9.003 9.003 0 008.354-5.646z" />
           </svg>
@@ -151,14 +226,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, inject } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
+import { useRouter } from 'vue-router';
 
 const colorMode = useColorMode();
-const emit = defineEmits(['navigate', 'filter-change', 'show-detail']);
+const router = useRouter();
 const authStore = useAuthStore();
 const { getGenres, getMovies, getRandomMovieId } = useApi();
+const openAuthModal = inject('openAuthModal');
 
 // Stavy pro filtry
 const searchQuery = ref('');
@@ -187,8 +264,16 @@ const toggleFilterMenu = () => {
 };
 
 const applyFilters = () => {
-  handleFilterChange();
+  const params = {};
+  if (searchQuery.value) params.search = searchQuery.value;
+  if (selectedGenre.value) params.genres = selectedGenre.value;
+  if (selectedSort.value) params.ordering = selectedSort.value;
+  if (selectedType.value) params.type = selectedType.value;
+  if (yearFrom.value) params.release_date__year__gte = yearFrom.value;
+  if (yearTo.value) params.release_date__year__lte = yearTo.value;
+
   isFilterMenuOpen.value = false;
+  router.push({ path: '/browse', query: params });
 };
 
 const resetFilters = () => {
@@ -197,15 +282,16 @@ const resetFilters = () => {
   selectedType.value = '';
   yearFrom.value = null;
   yearTo.value = null;
-  handleFilterChange();
-  isFilterMenuOpen.value = false;
+  // Ne-resetujeme searchQuery, pokud chceme zachovat kontext, ale zde asi ano?
+  // searchResults resetujeme.
+  applyFilters(); // Aplikovat resetované filtry
 };
 
 const handleRandomPick = async () => {
   try {
     const randomId = await getRandomMovieId();
     if (randomId) {
-      emit('show-detail', randomId);
+      router.push(`/movies/${randomId}`);
     }
   } catch (err) {
     console.error('Error during random pick:', err);
@@ -214,15 +300,11 @@ const handleRandomPick = async () => {
 
 const handleLogout = () => {
   authStore.logout();
-  emit('navigate', 'home');
+  router.push('/');
 };
 
 const handleFilterChange = () => {
-  // Tato funkce se nyní volá jen při odeslání vyhledávacího formuláře,
-  // aby se zobrazil seznam filmů na nové stránce.
-  emit('navigate', 'browse');
-  // Parametry se budou předávat jinak, přímo na stránce browse
-  emit('filter-change', { search: searchQuery.value });
+  router.push({ path: '/browse', query: { search: searchQuery.value } });
 };
 
 watch(searchQuery, (newValue) => {
@@ -257,9 +339,22 @@ const onSearchBlur = () => {
 };
 
 const selectMovie = (movieId) => {
-  emit('show-detail', movieId);
   searchQuery.value = '';
   searchResults.value = [];
   isSearchFocused.value = false;
+  router.push(`/movies/${movieId}`);
 };
+
+const fetchGenres = async () => {
+  try {
+    const response = await getGenres();
+    genres.value = response.data.results;
+  } catch (err) {
+    console.error('Error fetching genres:', err);
+  }
+};
+
+onMounted(() => {
+  fetchGenres();
+});
 </script>
