@@ -1,8 +1,8 @@
 from rest_framework import viewsets, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Movie, Genre, Director, Review, Actor, CustomUser, Collection, CollectionItem
+from .models import Movie, Genre, Director, Review, Actor, CustomUser, Collection, CollectionItem, Season, Episode
 from .serializers import (
-    MovieSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer,
+    MovieSerializer, MovieDetailSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer,
     MyProfileSerializer, PublicUserSerializer, CollectionSerializer, CollectionItemSerializer
 )
 from drf_spectacular.utils import extend_schema, OpenApiExample
@@ -117,12 +117,17 @@ from django.db.models.functions import Lower
 
 class MovieViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Movie.objects.all()  # This is required for the router to determine the basename
-    serializer_class = MovieSerializer
+    queryset = Movie.objects.all()
+    # serializer_class is handled by get_serializer_class
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = MovieFilter
-    search_fields = ['title'] # Removed description to improve search relevance
-    ordering_fields = ['release_date', 'title', 'avg_rating', '?'] # Přidáno '?' pro náhodné řazení
+    search_fields = ['title'] 
+    ordering_fields = ['release_date', 'title', 'avg_rating', '?'] 
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return MovieDetailSerializer
+        return MovieSerializer
 
     def get_queryset(self):
         queryset = Movie.objects.annotate(avg_rating=Avg('reviews__rating'))
@@ -153,7 +158,7 @@ class MovieViewSet(viewsets.ModelViewSet):
                     'release_date': '2020-01-01',
                     'duration_minutes': 100,
                     'genre_ids': [1],
-                    'director_id': 1,
+                    'director_ids': [1],
                 },
             )
         ],

@@ -36,8 +36,9 @@
               <div>
                 <h3 
                   class="text-xl font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  @click="goToDetail(review.movie)"
                 >
-                  <NuxtLink :to="`/movies/${review.movie.id}`">{{ review.movie.title }}</NuxtLink>
+                  {{ review.movie.title }}
                 </h3>
                 <p class="text-sm text-gray-500">{{ new Date(review.created_at).toLocaleDateString() }}</p>
               </div>
@@ -83,7 +84,7 @@
                   v-for="item in collection.items" 
                   :key="item.id" 
                   class="bg-white dark:bg-gray-800 rounded shadow-sm overflow-hidden cursor-pointer transform hover:-translate-y-1 transition-transform"
-                  @click="navigateTo(`/movies/${item.movie.id}`)"
+                  @click="goToDetail(item.movie)"
                 >
                   <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-40 w-full object-cover">
                   <div v-else class="h-40 w-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-500">Žádný obrázek</div>
@@ -105,10 +106,11 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useApi } from '../../composables/useApi'; // upravena cesta
-import { useRoute, navigateTo } from '#app';
+import { useApi } from '../../composables/useApi'; 
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const userId = route.params.id;
 
 const { getUserById } = useApi();
@@ -129,6 +131,14 @@ const fetchUser = async (id) => {
     error.value = err;
   } finally {
     loading.value = false;
+  }
+};
+
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
   }
 };
 

@@ -29,10 +29,10 @@
             v-for="item in moviesToWatch" 
             :key="item.id" 
             class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
-            @click.self="goToMovie(item.movie.id)"
+            @click.self="goToDetail(item.movie)"
           >
-            <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="goToMovie(item.movie.id)">
-            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="goToMovie(item.movie.id)"></div>
+            <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="goToDetail(item.movie)">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="goToDetail(item.movie)"></div>
             
             <div class="p-4">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
@@ -60,10 +60,10 @@
             v-for="item in moviesWatched" 
             :key="item.id" 
             class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
-            @click.self="goToMovie(item.movie.id)"
+            @click.self="goToDetail(item.movie)"
           >
-            <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="goToMovie(item.movie.id)">
-            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="goToMovie(item.movie.id)"></div>
+            <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="goToDetail(item.movie)">
+            <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full" @click="goToDetail(item.movie)"></div>
             
             <div class="p-4">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
@@ -164,8 +164,12 @@ const goToPrevPage = () => {
   }
 };
 
-const goToMovie = (id) => {
-  router.push(`/movies/${id}`);
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
+  }
 };
 
 onMounted(() => {

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Genre, Director, Review, Actor, Screenwriter
+from .models import Movie, Genre, Director, Review, Actor, Screenwriter, Season, Episode
 
 
 # Vlastní pole pro generování absolutních URL pro obrázky
@@ -24,7 +24,7 @@ class BasicMovieSerializer(serializers.ModelSerializer):
     poster = AbsoluteImageField(read_only=True)
     class Meta:
         model = Movie
-        fields = ['id', 'title', 'poster', 'release_date']
+        fields = ['id', 'title', 'poster', 'release_date', 'type']
 
 
 class DirectorSerializer(serializers.ModelSerializer):
@@ -127,11 +127,39 @@ class PublicUserSerializer(serializers.ModelSerializer):
         return CollectionSerializer(public_collections, many=True, context=self.context).data
 
 
+class EpisodeSerializer(serializers.ModelSerializer):
+    still_path = AbsoluteImageField(read_only=True)
+    directors = DirectorSerializer(many=True, read_only=True)
+    screenwriters = ScreenwriterSerializer(many=True, read_only=True)
+    guest_stars = ActorSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Episode
+        fields = [
+            'id', 'episode_number', 'title', 'overview', 'air_date', 'runtime', 'still_path',
+            'directors', 'screenwriters', 'guest_stars'
+        ]
+
+
+class SeasonSerializer(serializers.ModelSerializer):
+    episodes = EpisodeSerializer(many=True, read_only=True)
+    directors = DirectorSerializer(many=True, read_only=True)
+    screenwriters = ScreenwriterSerializer(many=True, read_only=True)
+    actors = ActorSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Season
+        fields = [
+            'id', 'season_number', 'title', 'overview', 'release_date',
+            'directors', 'screenwriters', 'actors', 'episodes'
+        ]
+
+
 class MovieSerializer(serializers.ModelSerializer):
     poster = AbsoluteImageField(read_only=True)
     genres = GenreSerializer(many=True, read_only=True)
-    directors = DirectorSerializer(many=True, read_only=True) # Changed to Many-to-Many
-    screenwriters = ScreenwriterSerializer(many=True, read_only=True) # New field
+    directors = DirectorSerializer(many=True, read_only=True)
+    screenwriters = ScreenwriterSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
     avg_rating = serializers.FloatField(read_only=True)
@@ -152,10 +180,17 @@ class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = [
-            'id', 'title', 'description', 'release_date', 'duration_minutes', 'country', 'type', 'poster', 'trailer_url',
+            'id', 'title', 'description', 'release_date', 'end_date', 'duration_minutes', 'country', 'type', 'poster', 'trailer_url',
             'genres', 'directors', 'screenwriters', 'reviews', 'actors', 'avg_rating',
             'genre_ids', 'director_ids', 'screenwriter_ids', 'actor_ids'
         ]
+
+
+class MovieDetailSerializer(MovieSerializer):
+    seasons = SeasonSerializer(many=True, read_only=True)
+
+    class Meta(MovieSerializer.Meta):
+        fields = MovieSerializer.Meta.fields + ['seasons']
 
 
 class RegisterSerializer(serializers.ModelSerializer):

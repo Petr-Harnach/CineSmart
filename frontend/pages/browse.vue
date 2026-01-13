@@ -69,7 +69,7 @@
         <div v-else-if="movies.length === 0" class="text-center text-gray-600 dark:text-gray-400"><p>Nebyly nalezeny žádné filmy odpovídající vašim kritériím.</p></div>
         <div v-else>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div v-for="movie in movies" :key="movie.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" @click="goToMovie(movie.id)">
+            <div v-for="movie in movies" :key="movie.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" @click="goToDetail(movie)">
               <div class="aspect-w-2 aspect-h-3"> <!-- Typical poster aspect ratio (2:3) -->
                 <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="object-cover w-full h-full">
                 <div v-else class="bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
@@ -164,8 +164,12 @@ const fetchGenres = async () => {
 const goToNextPage = () => nextPageUrl.value && fetchMovies(nextPageUrl.value);
 const goToPrevPage = () => prevPageUrl.value && fetchMovies(prevPageUrl.value);
 
-const goToMovie = (id) => {
-  router.push(`/movies/${id}`);
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
+  }
 };
 
 watch(filters, (newFilters) => {

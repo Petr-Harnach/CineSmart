@@ -16,7 +16,7 @@
       <div class="md:w-2/3">
         <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">{{ actor.name }}</h1>
         <p v-if="actor.bio" class="mt-4 text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{{ actor.bio }}</p>
-        <p v-else class="mt-4 text-gray-500 italic">Biografie není k dispozici.</p>
+        <p v-else class="mt-4 text-gray-500 italic">Životopis není k dispozici.</p>
       </div>
     </div>
 
@@ -29,7 +29,7 @@
           v-for="movie in actor.movies" 
           :key="movie.id" 
           class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-          @click="navigateTo(`/movies/${movie.id}`)"
+          @click="goToDetail(movie)"
         >
           <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
@@ -47,9 +47,10 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useApi } from '../../composables/useApi';
-import { useRoute, navigateTo } from '#app';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const actorId = route.params.id;
 
 const { getActorById } = useApi();
@@ -70,6 +71,14 @@ const fetchActor = async (id) => {
     error.value = err;
   } finally {
     loading.value = false;
+  }
+};
+
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
   }
 };
 

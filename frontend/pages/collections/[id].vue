@@ -27,7 +27,7 @@
           v-for="item in collection.items" 
           :key="item.id" 
           class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative group"
-          @click="navigateTo(`/movies/${item.movie.id}`)"
+          @click="goToDetail(item.movie)"
         >
           <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
@@ -65,9 +65,10 @@ import { useApi } from '../../composables/useApi';
 import { useAuthStore } from '../../stores/auth';
 import { useToast } from '../../composables/useToast';
 import ConfirmModal from '../../components/ConfirmModal.vue';
-import { useRoute, navigateTo } from '#app';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const collectionId = route.params.id;
 
 const authStore = useAuthStore();
@@ -132,7 +133,7 @@ const confirmAction = async () => {
   if (actionType.value === 'deleteCollection') {
     try {
       await deleteCollection(collectionId);
-      navigateTo('/collections');
+      router.push('/collections');
     } catch (err) {
       console.error('Failed to delete collection:', err);
       toast.error('Nepodařilo se smazat kolekci.');
@@ -147,6 +148,14 @@ const confirmAction = async () => {
     }
   }
   closeModal();
+};
+
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
+  }
 };
 
 onMounted(fetchCollection);

@@ -3,7 +3,7 @@
     <!-- Hlavní banner s trailery -->
     <div class="mb-12">
       <div v-if="loadingMainTrailer" class="text-center text-gray-500 py-24">
-        <p>Načítám trailery...</p>
+        <p>Načítám skvělé trailery...</p>
       </div>
       <div v-else-if="currentTrailerMovie && currentTrailerMovie.trailer_url"
            class="relative max-w-6xl mx-auto overflow-hidden rounded-2xl shadow-2xl group">
@@ -30,7 +30,8 @@
         >
           <div class="flex flex-col md:flex-row items-center gap-6">
             <div class="relative flex-shrink-0 self-end pointer-events-auto">
-              <img v-if="currentTrailerMovie.poster" :src="currentTrailerMovie.poster" :alt="currentTrailerMovie.title" class="hidden md:block w-32 lg:w-40 rounded-lg shadow-lg object-cover cursor-pointer" @click="goToMovie(currentTrailerMovie.id)">
+              <!-- KLIKATELNÝ PLAKÁT -> goToDetail -->
+              <img v-if="currentTrailerMovie.poster" :src="currentTrailerMovie.poster" :alt="currentTrailerMovie.title" class="hidden md:block w-32 lg:w-40 rounded-lg shadow-lg object-cover cursor-pointer" @click="goToDetail(currentTrailerMovie)">
               <button 
                 @click.stop="toggleWatchlist"
                 class="absolute top-0 right-0 transform -translate-y-1/2 translate-x-1/2 bg-gray-800 bg-opacity-75 rounded-full p-2 text-white hover:bg-opacity-100 hover:scale-110 transition-transform"
@@ -49,7 +50,8 @@
               <p v-if="currentTrailerMovie.release_date" class="text-lg font-medium mt-2 opacity-80">
                   Vydáno: {{ new Date(currentTrailerMovie.release_date).getFullYear() }}
               </p>
-              <button @click="goToMovie(currentTrailerMovie.id)" class="mt-4 inline-flex items-center px-6 py-3 bg-white/10 border border-white/20 backdrop-blur-md rounded-lg text-lg font-semibold transition hover:bg-white/20">
+              <!-- TLAČÍTKO DETAIL -> goToDetail -->
+              <button @click="goToDetail(currentTrailerMovie)" class="mt-4 inline-flex items-center px-6 py-3 bg-white/10 border border-white/20 backdrop-blur-md rounded-lg text-lg font-semibold transition hover:bg-white/20">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                   Zobrazit detaily
               </button>
@@ -65,7 +67,7 @@
 
     <!-- Sekce Nejlépe hodnocené -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nejlépe hodnocené filmy</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nejlépe hodnocené</h2>
       <div v-if="loadingTopRated" class="text-center text-gray-500">
         <p>Načítám filmy...</p>
       </div>
@@ -74,7 +76,7 @@
           v-for="movie in topRatedMovies" 
           :key="movie.id" 
           class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-          @click="goToMovie(movie.id)"
+          @click="goToDetail(movie)"
         >
           <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
@@ -112,7 +114,7 @@
           v-for="item in userWatchlist" 
           :key="item.id" 
           class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-          @click="goToMovie(item.movie.id)"
+          @click="goToDetail(item.movie)"
         >
           <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
@@ -163,7 +165,7 @@
           v-for="movie in inTheatersMovies" 
           :key="movie.id" 
           class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-          @click="goToMovie(movie.id)"
+          @click="goToDetail(movie)"
         >
           <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
@@ -189,7 +191,7 @@
           v-for="movie in comingSoonMovies" 
           :key="movie.id" 
           class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer opacity-90 hover:opacity-100"
-          @click="goToMovie(movie.id)"
+          @click="goToDetail(movie)"
         >
           <div class="relative">
             <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-64 w-full object-cover">
@@ -241,8 +243,12 @@ const error = ref(null);
 const player = ref(null);
 const isVideoPlaying = ref(false);
 
-const goToMovie = (id) => {
-  router.push(`/movies/${id}`);
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
+  }
 };
 
 const goToActor = (id) => {

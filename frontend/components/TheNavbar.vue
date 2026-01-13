@@ -45,7 +45,7 @@
               <div v-else-if="searchResults.length === 0 && searchQuery.length > 0" class="p-4 text-gray-500">Žádné výsledky.</div>
               <ul v-else>
                 <li v-for="movie in searchResults" :key="movie.id" 
-                    @click="selectMovie(movie.id)"
+                    @click="selectMovie(movie)"
                     class="p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0">
                   <div class="flex items-center">
                     <img v-if="movie.poster" :src="movie.poster" class="h-12 w-8 object-cover rounded-sm mr-3">
@@ -167,7 +167,9 @@ const handleRandomPick = async () => {
   try {
     const randomId = await getRandomMovieId();
     if (randomId) {
-      router.push(`/movies/${randomId}`);
+        // Pokud nemáme typ (API vrací jen ID), pošleme na movie.
+        // Detail filmu má fallback přesměrování na /series/ pokud zjistí, že je to seriál.
+        router.push(`/movies/${randomId}`);
     }
   } catch (err) {
     console.error('Error during random pick:', err);
@@ -214,10 +216,14 @@ const onSearchBlur = () => {
   }, 200);
 };
 
-const selectMovie = (movieId) => {
+const selectMovie = (movie) => {
   searchQuery.value = '';
   searchResults.value = [];
   isSearchFocused.value = false;
-  router.push(`/movies/${movieId}`);
+  if (movie.type === 'series') {
+    router.push(`/series/${movie.id}`);
+  } else {
+    router.push(`/movies/${movie.id}`);
+  }
 };
 </script>
