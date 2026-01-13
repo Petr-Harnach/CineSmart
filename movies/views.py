@@ -121,7 +121,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = MovieFilter
-    search_fields = ['title', 'description']
+    search_fields = ['title'] # Removed description to improve search relevance
     ordering_fields = ['release_date', 'title', 'avg_rating', '?'] # Přidáno '?' pro náhodné řazení
 
     def get_queryset(self):

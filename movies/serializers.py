@@ -84,7 +84,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     movie_id = serializers.PrimaryKeyRelatedField(
         queryset=Movie.objects.all(), write_only=True, source='movie'
     )
-    comment = serializers.CharField(required=False, allow_blank=True)
+    comment = serializers.CharField(required=False, allow_blank=True, max_length=1000)
     likes_count = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
 

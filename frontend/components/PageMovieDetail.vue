@@ -69,7 +69,18 @@
             </div>
           </div>
           
-          <p v-if="movie.description" class="text-gray-700 dark:text-gray-200 mb-4">{{ movie.description }}</p>
+          <div v-if="movie.description" class="mb-4">
+            <p class="text-gray-700 dark:text-gray-200 inline">
+              {{ truncatedDescription }}
+            </p>
+            <button 
+              v-if="movie.description.length > 250" 
+              @click="isDescriptionExpanded = !isDescriptionExpanded" 
+              class="text-blue-600 dark:text-blue-400 hover:underline ml-1 text-sm font-semibold"
+            >
+              {{ isDescriptionExpanded ? 'Show less' : 'Read more' }}
+            </button>
+          </div>
           <p v-else class="text-gray-500 italic mb-4">No description available.</p>
           
           <div class="mb-4 dark:text-gray-100">
@@ -128,7 +139,16 @@
                 </div>
                 <div class="mb-2">
                   <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Comment</label>
-                  <textarea v-model="editedReviewComment" id="edit-comment" rows="2" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
+                  <textarea 
+                    v-model="editedReviewComment" 
+                    id="edit-comment" 
+                    rows="2" 
+                    maxlength="1000"
+                    class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"
+                  ></textarea>
+                  <div class="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {{ editedReviewComment.length }} / 1000
+                  </div>
                 </div>
                 <div class="flex justify-end space-x-2">
                   <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 dark:bg-gray-500 dark:text-gray-100 dark:hover:bg-gray-400">Cancel</button>
@@ -214,7 +234,16 @@
             </div>
             <div class="mb-4">
               <label for="comment" class="block text-gray-700 dark:text-gray-300">Comment</label>
-              <textarea v-model="newReview.comment" id="comment" rows="4" class="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"></textarea>
+              <textarea 
+                v-model="newReview.comment" 
+                id="comment" 
+                rows="4" 
+                maxlength="1000"
+                class="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+              ></textarea>
+              <div class="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {{ newReview.comment.length }} / 1000
+              </div>
             </div>
             <button type="submit" :disabled="submittingReview" class="w-full bg-blue-500 text-white p-2 rounded disabled:bg-blue-300">
               {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
@@ -291,6 +320,8 @@ const relatedMovies = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+const isDescriptionExpanded = ref(false); // New state
+
 const newReview = reactive({ rating: 5, comment: '' });
 const submittingReview = ref(false);
 const submitError = ref(null);
@@ -307,6 +338,14 @@ const isConfirmModalOpen = ref(false);
 const pendingDeleteReviewId = ref(null);
 
 const watchlistItem = computed(() => watchlist.value.find(item => item.movie.id === props.movieId));
+
+const truncatedDescription = computed(() => {
+  if (!movie.value || !movie.value.description) return '';
+  if (isDescriptionExpanded.value || movie.value.description.length <= 250) {
+    return movie.value.description;
+  }
+  return movie.value.description.substring(0, 250) + '...';
+});
 
 const userReview = computed(() => {
   if (!authStore.user || !reviews.value) return null;
