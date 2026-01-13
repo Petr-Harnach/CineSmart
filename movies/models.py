@@ -92,6 +92,7 @@ class Movie(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True) # Optional
     release_date = models.DateField(null=True, blank=True) # Optional
+    end_date = models.DateField(null=True, blank=True) # New field for series end date
     duration_minutes = models.IntegerField(validators=[MinValueValidator(1)], null=True, blank=True) # Optional
     country = models.CharField(max_length=100, blank=True)
     type = models.CharField(max_length=10, choices=MOVIE_TYPE_CHOICES, default='movie')
@@ -116,6 +117,41 @@ class Movie(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Season(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='seasons')
+    season_number = models.IntegerField()
+    title = models.CharField(max_length=200, blank=True)
+    overview = models.TextField(blank=True)
+    release_date = models.DateField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['season_number']
+
+    def __str__(self):
+        return f"{self.movie.title} - Season {self.season_number}"
+
+
+class Episode(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='episodes')
+    episode_number = models.IntegerField()
+    title = models.CharField(max_length=200)
+    overview = models.TextField(blank=True)
+    air_date = models.DateField(null=True, blank=True)
+    runtime = models.IntegerField(null=True, blank=True)
+    
+    # LOCAL (Aktivní):
+    # still_path = models.ImageField(upload_to='episode_stills/', null=True, blank=True)
+    
+    # PRODUCTION (Zakomentované):
+    still_path = CloudinaryField('image', null=True, blank=True)
+
+    class Meta:
+        ordering = ['episode_number']
+
+    def __str__(self):
+        return f"{self.season.movie.title} - S{self.season.season_number}E{self.episode_number} - {self.title}"
 
 
 class WatchlistItem(models.Model):

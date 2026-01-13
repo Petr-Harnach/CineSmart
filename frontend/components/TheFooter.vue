@@ -3,7 +3,7 @@
     <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
       <div>
         <h3 class="text-xl font-bold mb-4">CineSmart</h3>
-        <p class="text-gray-400">Nejlepší místo pro objevování filmů a správu vašeho seznamu ke shlédnutí.</p>
+        <p class="text-gray-400">Nejlepší místo pro objevování filmů a seriálů na jednom místě.</p>
       </div>
       <div>
         <h4 class="text-lg font-semibold mb-4">Rychlé odkazy</h4>
