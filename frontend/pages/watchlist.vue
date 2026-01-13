@@ -1,19 +1,19 @@
 <template>
   <div class="max-w-6xl mx-auto mt-10 p-4">
-    <h1 class="text-3xl font-bold mb-8 text-gray-800 dark:text-gray-100">Watchlist</h1>
+    <h1 class="text-3xl font-bold mb-8 text-gray-800 dark:text-gray-100">Seznam ke shlédnutí</h1>
     
     <div v-if="loading" class="text-center text-gray-500">
-      <p>Loading watchlist...</p>
+      <p>Načítám seznam...</p>
     </div>
     
     <div v-else-if="error" class="text-center text-red-500">
-      <p>Failed to load watchlist: {{ error.message }}</p>
+      <p>Nepodařilo se načíst seznam: {{ error.message }}</p>
     </div>
 
     <div v-else-if="watchlist.length === 0" class="text-center text-gray-600 dark:text-gray-400 py-12">
-      <p class="text-lg">Your watchlist is empty. Add some movies!</p>
+      <p class="text-lg">Váš seznam je prázdný. Přidejte nějaké filmy!</p>
       <NuxtLink to="/" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition inline-block">
-        Browse Movies
+        Procházet filmy
       </NuxtLink>
     </div>
 
@@ -21,7 +21,7 @@
       <!-- To Watch Section -->
       <section>
         <h2 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200 border-b-2 border-blue-500 pb-2">
-          To Watch
+          Ke shlédnutí
           <span class="text-lg text-gray-500 dark:text-gray-400">({{ moviesToWatch.length }})</span>
         </h2>
         <div v-if="moviesToWatch.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-6">
@@ -38,12 +38,12 @@
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
               <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date ? item.movie.release_date.substring(0, 4) : 'TBA' }}</p>
               <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition">
-                Mark as Watched
+                Označit jako shlédnuté
               </button>
             </div>
           </div>
         </div>
-        <p v-else class="text-center text-gray-500 dark:text-gray-400 py-8">You've watched all the movies on your list!</p>
+        <p v-else class="text-center text-gray-500 dark:text-gray-400 py-8">Viděli jste všechny filmy ze svého seznamu!</p>
       </section>
 
       <!-- Divider -->
@@ -52,7 +52,7 @@
       <!-- Already Watched Section -->
       <section>
         <h2 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200 border-b-2 border-gray-500 pb-2">
-          Already Watched
+          Již shlédnuté
           <span class="text-lg text-gray-500 dark:text-gray-400">({{ moviesWatched.length }})</span>
         </h2>
         <div v-if="moviesWatched.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-6">
@@ -69,12 +69,12 @@
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
               <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date ? item.movie.release_date.substring(0, 4) : 'TBA' }}</p>
               <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-2 rounded-md bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition">
-                Mark as Unwatched
+                Označit jako neshlédnuté
               </button>
             </div>
           </div>
         </div>
-        <p v-else class="text-center text-gray-500 dark:text-gray-400 py-8">You haven't marked any movies as watched yet.</p>
+        <p v-else class="text-center text-gray-500 dark:text-gray-400 py-8">Zatím jste neoznačili žádné filmy jako shlédnuté.</p>
       </section>
 
       <!-- Pagination -->
@@ -84,14 +84,14 @@
           :disabled="!prevPageUrl" 
           class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-400 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
         >
-          Previous
+          Předchozí
         </button>
         <button 
           @click="goToNextPage" 
           :disabled="!nextPageUrl" 
           class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-400 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600"
         >
-          Next
+          Další
         </button>
       </div>
     </div>

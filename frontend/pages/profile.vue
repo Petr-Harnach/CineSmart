@@ -1,13 +1,12 @@
 <template>
   <div class="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">My Profile</h1>
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Můj profil</h1>
     
     <div v-if="!authStore.user" class="text-center text-gray-500">
-      Loading user data...
+      Načítám data uživatele...
     </div>
 
     <form v-else @submit.prevent="saveProfile">
-      <!-- ... (Same form content as PageProfile.vue) ... -->
       <div class="flex flex-col items-center space-y-4 mb-8">
         <img 
           v-if="previewImageUrl || authStore.user.profile_picture"
@@ -27,13 +26,13 @@
             id="file-upload"
           >
           <label for="file-upload" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-            Change Picture
+            Změnit obrázek
           </label>
         </div>
       </div>
 
       <div class="mb-6">
-        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
         <input 
           type="text" 
           id="username"
@@ -43,13 +42,13 @@
       </div>
 
       <div class="mb-6">
-        <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+        <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">O mně</label>
         <textarea 
           id="bio" 
           v-model="bio"
           rows="4"
           class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
-          placeholder="Tell us something about yourself..."
+          placeholder="Řekněte nám něco o sobě..."
         ></textarea>
       </div>
 
@@ -66,20 +65,20 @@
           :disabled="isSaving"
           class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
         >
-          {{ isSaving ? 'Saving...' : 'Save Profile' }}
+          {{ isSaving ? 'Ukládám...' : 'Uložit profil' }}
         </button>
       </div>
     </form>
 
     <hr class="my-8 border-gray-200 dark:border-gray-700">
     <section class="mt-8">
-      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Security</h2>
+      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Zabezpečení</h2>
       <form @submit.prevent="handleChangePassword" class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
         <div v-if="passwordSuccess" class="mb-4 text-green-600 dark:text-green-400">{{ passwordSuccess }}</div>
         <div v-if="passwordError" class="mb-4 text-red-600 dark:text-red-400">{{ passwordError }}</div>
 
         <div class="mb-4">
-          <label for="old_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Old Password</label>
+          <label for="old_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staré heslo</label>
           <input 
             type="password" 
             id="old_password" 
@@ -89,7 +88,7 @@
           >
         </div>
         <div class="mb-4">
-          <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+          <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nové heslo</label>
           <input 
             type="password" 
             id="new_password" 
@@ -100,7 +99,7 @@
           >
         </div>
         <div class="mb-4">
-          <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
+          <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Potvrzení nového hesla</label>
           <input 
             type="password" 
             id="confirm_password" 
@@ -115,7 +114,7 @@
             :disabled="isChangingPassword"
             class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-red-400"
           >
-            {{ isChangingPassword ? 'Changing...' : 'Change Password' }}
+            {{ isChangingPassword ? 'Měním...' : 'Změnit heslo' }}
           </button>
         </div>
       </form>
@@ -123,27 +122,27 @@
 
     <hr class="my-8 border-gray-200 dark:border-gray-700">
     <section class="mt-8">
-      <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Your Stats</h2>
+      <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Vaše statistiky</h2>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Stats are calculated from movies in your watchlist that you've marked as "watched".
+        Statistiky se počítají z filmů ve vašem seznamu, které jste označili jako "shlédnuto".
       </p>
       <div v-if="isLoadingStats" class="text-center text-gray-500">
-        Loading stats...
+        Načítám statistiky...
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
         <!-- Stat Card: Movies Watched -->
         <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Movies Watched</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Shlédnuté filmy</p>
           <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalCount }}</p>
         </div>
         <!-- Stat Card: Time on Screen -->
         <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Time on Screen</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Čas u obrazovky</p>
           <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.formattedTime }}</p>
         </div>
         <!-- Stat Card: Favorite Genre -->
         <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Favorite Genre</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Oblíbený žánr</p>
           <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.favoriteGenre }}</p>
         </div>
       </div>
@@ -151,36 +150,36 @@
 
     <hr class="my-8 border-gray-200 dark:border-gray-700">
     <section class="mt-8">
-      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">My Collections</h2>
+      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Moje kolekce</h2>
       
       <form @submit.prevent="handleCreateCollection" class="mb-8 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-        <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Create New Collection</h3>
+        <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Vytvořit novou kolekci</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input 
             type="text" 
             v-model="newCollection.name" 
-            placeholder="Collection Name" 
+            placeholder="Název kolekce" 
             class="p-2 border rounded bg-white dark:bg-gray-600 dark:text-white dark:border-gray-500" 
             required
           >
           <input 
             type="text" 
             v-model="newCollection.description" 
-            placeholder="Description (optional)" 
+            placeholder="Popis (volitelné)" 
             class="p-2 border rounded bg-white dark:bg-gray-600 dark:text-white dark:border-gray-500"
           >
         </div>
         <div class="flex items-center justify-between mt-3">
           <label class="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
             <input type="checkbox" v-model="newCollection.is_public" class="form-checkbox">
-            <span>Public</span>
+            <span>Veřejná</span>
           </label>
           <button 
             type="submit" 
             :disabled="isCreatingCollection"
             class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-green-400"
           >
-            {{ isCreatingCollection ? 'Creating...' : 'Create' }}
+            {{ isCreatingCollection ? 'Vytvářím...' : 'Vytvořit' }}
           </button>
         </div>
       </form>
@@ -196,9 +195,9 @@
             <p class="text-gray-600 dark:text-gray-400 text-sm">{{ collection.description }}</p>
             <div class="flex gap-2 mt-1 text-xs">
               <span :class="collection.is_public ? 'text-green-600' : 'text-yellow-600'">
-                {{ collection.is_public ? 'Public' : 'Private' }}
+                {{ collection.is_public ? 'Veřejná' : 'Soukromá' }}
               </span>
-              <span class="text-gray-400">• {{ collection.items.length }} items</span>
+              <span class="text-gray-400">• {{ collection.items.length }} položek</span>
             </div>
           </div>
           <button @click="handleDeleteCollection(collection.id)" class="text-red-500 hover:text-red-700">
@@ -208,14 +207,14 @@
           </button>
         </div>
       </div>
-      <p v-else class="text-center text-gray-500 italic">No collections yet.</p>
+      <p v-else class="text-center text-gray-500 italic">Zatím žádné kolekce.</p>
     </section>
 
     <!-- Confirm Modal -->
     <ConfirmModal 
       :is-open="isConfirmModalOpen"
-      :title="'Delete Collection'"
-      :message="'Are you sure you want to delete this collection? This action cannot be undone.'"
+      :title="'Smazat kolekci'"
+      :message="'Opravdu chcete smazat tuto kolekci? Tuto akci nelze vrátit zpět.'"
       @confirm="confirmDeleteCollection"
       @close="isConfirmModalOpen = false"
     />
@@ -307,7 +306,7 @@ const handleCreateCollection = async () => {
     await fetchCollections();
   } catch (err) {
     console.error('Error creating collection:', err);
-    toast.error('Failed to create collection.');
+    toast.error('Nepodařilo se vytvořit kolekci.');
   } finally {
     isCreatingCollection.value = false;
   }
@@ -324,10 +323,10 @@ const confirmDeleteCollection = async () => {
   try {
     await deleteCollection(pendingDeleteCollectionId.value);
     await fetchCollections();
-    toast.success('Collection deleted.');
+    toast.success('Kolekce smazána.');
   } catch (err) {
     console.error('Error deleting collection:', err);
-    toast.error('Failed to delete collection.');
+    toast.error('Nepodařilo se smazat kolekci.');
   } finally {
     isConfirmModalOpen.value = false;
     pendingDeleteCollectionId.value = null;
@@ -361,10 +360,10 @@ const saveProfile = async () => {
   try {
     await updateProfile(formData);
     await authStore.fetchProfile();
-    toast.success('Profile updated successfully!');
+    toast.success('Profil úspěšně aktualizován!');
   } catch (err) {
     console.error('Error updating profile:', err);
-    toast.error('Failed to update profile. Username might be taken.');
+    toast.error('Nepodařilo se aktualizovat profil. Uživatelské jméno je možná obsazené.');
   } finally {
     isSaving.value = false;
   }
@@ -372,8 +371,8 @@ const saveProfile = async () => {
 
 const handleChangePassword = async () => {
   if (passwordForm.new_password !== passwordForm.confirm_password) {
-    passwordError.value = "New passwords do not match.";
-    toast.error("New passwords do not match.");
+    passwordError.value = "Nová hesla se neshodují.";
+    toast.error("Nová hesla se neshodují.");
     return;
   }
   
@@ -386,13 +385,13 @@ const handleChangePassword = async () => {
       old_password: passwordForm.old_password,
       new_password: passwordForm.new_password
     });
-    toast.success("Password changed successfully.");
+    toast.success("Heslo úspěšně změněno.");
     passwordForm.old_password = '';
     passwordForm.new_password = '';
     passwordForm.confirm_password = '';
   } catch (err) {
     console.error('Password change failed:', err);
-    const msg = err.response?.data?.detail || "Failed to change password.";
+    const msg = err.response?.data?.detail || "Nepodařilo se změnit heslo.";
     passwordError.value = msg;
     toast.error(msg);
   } finally {

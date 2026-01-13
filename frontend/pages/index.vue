@@ -3,7 +3,7 @@
     <!-- Main Trailer Banner -->
     <div class="mb-12">
       <div v-if="loadingMainTrailer" class="text-center text-gray-500 py-24">
-        <p>Loading epic trailers...</p>
+        <p>Načítám trailery...</p>
       </div>
       <div v-else-if="currentTrailerMovie && currentTrailerMovie.trailer_url"
            class="relative max-w-6xl mx-auto overflow-hidden rounded-2xl shadow-2xl group">
@@ -49,27 +49,27 @@
             <div class="pointer-events-auto">
               <h2 class="text-4xl md:text-5xl font-black tracking-tight">{{ currentTrailerMovie.title }}</h2>
               <p v-if="currentTrailerMovie.release_date" class="text-lg font-medium mt-2 opacity-80">
-                  Released: {{ new Date(currentTrailerMovie.release_date).getFullYear() }}
+                  Vydáno: {{ new Date(currentTrailerMovie.release_date).getFullYear() }}
               </p>
               <button @click="goToMovie(currentTrailerMovie.id)" class="mt-4 inline-flex items-center px-6 py-3 bg-white/10 border border-white/20 backdrop-blur-md rounded-lg text-lg font-semibold transition hover:bg-white/20">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  View Details
+                  Zobrazit detaily
               </button>
             </div>
           </div>
         </div>
       </div>
       <div v-else class="text-center bg-gray-100 dark:bg-gray-800 rounded-lg py-24 max-w-6xl mx-auto">
-        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300">No Featured Trailer Available</h3>
-        <p class="text-gray-500 dark:text-gray-400 mt-2">Check back later for more epic content.</p>
+        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300">Žádný trailer není k dispozici</h3>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Zkuste to později.</p>
       </div>
     </div>
 
     <!-- Top Rated Movies Section -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Top Rated Movies</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nejlépe hodnocené</h2>
       <div v-if="loadingTopRated" class="text-center text-gray-500">
-        <p>Loading top rated movies...</p>
+        <p>Načítám filmy...</p>
       </div>
       <Carousel v-else>
         <div 
@@ -90,24 +90,24 @@
 
     <!-- From your Watchlist Section -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">From Your Watchlist</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Z vašeho seznamu</h2>
       <div v-if="loadingWatchlist" class="text-center text-gray-500">
-        <p>Loading watchlist...</p>
+        <p>Načítám seznam...</p>
       </div>
       <div v-else-if="!authStore.isLoggedIn" class="text-center p-8 bg-gray-100 dark:bg-gray-800 rounded-lg">
         <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Your Watchlist is a click away</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log in to keep track of movies you want to watch.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Váš seznam filmů je na dosah</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Přihlaste se a sledujte filmy, které chcete vidět.</p>
         <div class="mt-6">
           <button @click="openAuthModal('login')" type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            Log in
+            Přihlásit se
           </button>
         </div>
       </div>
       <div v-else-if="userWatchlist.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>Your watchlist is empty. Add some movies!</p>
+        <p>Váš seznam je prázdný. Přidejte nějaké filmy!</p>
       </div>
       <Carousel v-else>
         <div 
@@ -128,12 +128,12 @@
 
     <!-- Popular Actors Section -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Popular Actors</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Populární herci</h2>
       <div v-if="loadingPopularActors" class="text-center text-gray-500">
-        <p>Loading popular actors...</p>
+        <p>Načítám herce...</p>
       </div>
       <div v-else-if="popularActors.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>No popular actors found.</p>
+        <p>Žádní herci nenalezeni.</p>
       </div>
       <Carousel v-else>
         <div 
@@ -154,12 +154,12 @@
 
     <!-- In Theaters Section -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">In Theaters Now</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Právě v kinech</h2>
       <div v-if="loadingInTheaters" class="text-center text-gray-500">
-        <p>Loading what's in theaters...</p>
+        <p>Načítám filmy v kinech...</p>
       </div>
       <div v-else-if="inTheatersMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>No movies in theaters found.</p>
+        <p>Žádné filmy v kinech.</p>
       </div>
       <Carousel v-else>
         <div 
@@ -180,12 +180,12 @@
 
     <!-- Coming Soon Section -->
     <div class="mb-12 reveal">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Coming Soon</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Brzy v kinech</h2>
       <div v-if="loadingComingSoon" class="text-center text-gray-500">
-        <p>Loading upcoming movies...</p>
+        <p>Načítám nadcházející filmy...</p>
       </div>
       <div v-else-if="comingSoonMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>No upcoming movies found.</p>
+        <p>Žádné nadcházející filmy.</p>
       </div>
       <Carousel v-else>
         <div 
@@ -203,7 +203,7 @@
           </div>
           <div class="p-4">
             <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Coming Soon</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Brzy v kinech</p>
           </div>
         </div>
       </Carousel>

@@ -42,10 +42,10 @@
             <div class="px-8 py-8">
               <div class="text-center mb-8">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white" id="modal-title">
-                  {{ currentView === 'login' ? 'Welcome Back!' : 'Join CineSmart' }}
+                  {{ currentView === 'login' ? 'Vítejte zpět!' : 'Připojte se k CineSmart' }}
                 </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  {{ currentView === 'login' ? 'Please sign in to your account' : 'Create an account to start your journey' }}
+                  {{ currentView === 'login' ? 'Přihlašte se prosím do svého účtu' : 'Vytvořte si účet a začněte objevovat' }}
                 </p>
               </div>
               
@@ -61,13 +61,13 @@
                 </div>
                 
                 <div>
-                  <label for="login-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                  <label for="login-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uživatelské jméno</label>
                   <input type="text" v-model="loginForm.username" id="login-username" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors" required />
                 </div>
                 <div>
                   <div class="flex justify-between items-center mb-1">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                    <a href="#" @click.prevent="$emit('forgot-password')" class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">Forgot password?</a>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Heslo</label>
+                    <a href="#" @click.prevent="$emit('forgot-password')" class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">Zapomenuté heslo?</a>
                   </div>
                   <input type="password" v-model="loginForm.password" id="login-password" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors" required />
                 </div>
@@ -75,9 +75,9 @@
                 <button type="submit" :disabled="loading" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]">
                   <span v-if="loading" class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Signing in...
+                    Přihlašování...
                   </span>
-                  <span v-else>Sign In</span>
+                  <span v-else>Přihlásit se</span>
                 </button>
               </form>
 
@@ -88,7 +88,7 @@
                 </div>
                 
                 <div>
-                  <label for="reg-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                  <label for="reg-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uživatelské jméno</label>
                   <input type="text" v-model="registerForm.username" id="reg-username" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors" required />
                   <p v-if="registerErrors.username" class="text-red-500 text-xs mt-1">{{ registerErrors.username[0] }}</p>
                 </div>
@@ -98,7 +98,7 @@
                   <p v-if="registerErrors.email" class="text-red-500 text-xs mt-1">{{ registerErrors.email[0] }}</p>
                 </div>
                 <div>
-                  <label for="reg-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                  <label for="reg-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Heslo</label>
                   <input type="password" v-model="registerForm.password" id="reg-password" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors" required />
                   <p v-if="registerErrors.password" class="text-red-500 text-xs mt-1">{{ registerErrors.password[0] }}</p>
                 </div>
@@ -106,9 +106,9 @@
                 <button type="submit" :disabled="loading" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]">
                   <span v-if="loading" class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Creating Account...
+                    Vytváření účtu...
                   </span>
-                  <span v-else>Create Account</span>
+                  <span v-else>Vytvořit účet</span>
                 </button>
               </form>
             </div>
@@ -116,9 +116,9 @@
             <!-- Toggle View -->
             <div class="bg-gray-50 dark:bg-gray-700/50 px-8 py-4 border-t border-gray-100 dark:border-gray-700">
               <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-                {{ currentView === 'login' ? "Don't have an account?" : "Already have an account?" }}
+                {{ currentView === 'login' ? "Nemáte účet?" : "Již máte účet?" }}
                 <a href="#" @click.prevent="toggleView" class="font-semibold text-blue-600 hover:text-blue-700 ml-1 transition-colors">
-                  {{ currentView === 'login' ? 'Sign up' : 'Log in' }}
+                  {{ currentView === 'login' ? 'Zaregistrovat se' : 'Přihlásit se' }}
                 </a>
               </p>
             </div>
@@ -179,7 +179,7 @@ const handleLogin = async () => {
     loginForm.username = '';
     loginForm.password = '';
   } else {
-    error.value = 'Login failed. Please check your credentials.';
+    error.value = 'Přihlášení selhalo. Zkontrolujte prosím své údaje.';
   }
 };
 
@@ -207,14 +207,14 @@ const handleRegister = async () => {
         registerForm.password = '';
       } else {
         // Fallback: přihlášení selhalo, ale registrace prošla
-        successMessage.value = 'Registration successful! Please log in manually.';
+        successMessage.value = 'Registrace úspěšná! Prosím, přihlašte se ručně.';
         currentView.value = 'login';
         loginForm.username = registerForm.username;
         loginForm.password = '';
       }
     } catch (e) {
       // Fallback při chybě
-      successMessage.value = 'Registration successful! Please log in manually.';
+      successMessage.value = 'Registrace úspěšná! Prosím, přihlašte se ručně.';
       currentView.value = 'login';
     }
   } else {

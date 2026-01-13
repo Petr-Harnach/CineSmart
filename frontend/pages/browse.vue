@@ -4,33 +4,33 @@
       <!-- Left Column: Filters -->
       <aside class="md:col-span-1 bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl shadow-lg h-fit sticky top-4">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Filters</h2>
-          <button @click="resetFilters" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors">Reset</button>
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Filtry</h2>
+          <button @click="resetFilters" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors">Resetovat</button>
         </div>
         
         <div class="space-y-6">
           <!-- SEARCH -->
           <div>
-            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Search</label>
+            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Hledat</label>
             <input
               type="text"
               v-model="filters.search"
-              placeholder="Movie title..."
+              placeholder="Název filmu..."
               class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
           <!-- TYPE -->
           <div>
-            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Type</label>
+            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Typ</label>
             <select v-model="filters.type" class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-              <option :value="null">All</option>
-              <option value="movie">Movies</option>
-              <option value="series">Series</option>
+              <option :value="null">Vše</option>
+              <option value="movie">Filmy</option>
+              <option value="series">Seriály</option>
             </select>
           </div>
           <!-- GENRE -->
           <div>
-            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Genre</label>
+            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Žánr</label>
             <div class="mt-1 grid grid-cols-2 gap-2 text-sm max-h-48 overflow-y-auto p-2 bg-white dark:bg-gray-700 rounded-md border border-gray-300 dark:border-gray-600">
               <div v-for="genre in genres" :key="genre.id" class="flex items-center">
                 <input type="checkbox" :id="`genre-${genre.id}`" :value="genre.id" v-model="selectedGenres" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition">
@@ -40,23 +40,23 @@
           </div>
           <!-- YEAR -->
           <div>
-            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Year</label>
+            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Rok</label>
             <div class="flex items-center gap-2 mt-1">
-              <input type="number" v-model="filters.release_date__year__gte" placeholder="From" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+              <input type="number" v-model="filters.release_date__year__gte" placeholder="Od" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
               <span class="text-gray-500">-</span>
-              <input type="number" v-model="filters.release_date__year__lte" placeholder="To" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+              <input type="number" v-model="filters.release_date__year__lte" placeholder="Do" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
             </div>
           </div>
           <!-- SORT -->
           <div>
-            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Sort by</label>
+            <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Seřadit dle</label>
             <select v-model="filters.ordering" class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-              <option :value="null">Default</option>
-              <option value="-avg_rating">Top Rated</option>
-              <option value="title">Title (A-Z)</option>
-              <option value="-title">Title (Z-A)</option>
-              <option value="-release_date">Newest First</option>
-              <option value="release_date">Oldest First</option>
+              <option :value="null">Výchozí</option>
+              <option value="-avg_rating">Nejlépe hodnocené</option>
+              <option value="title">Název (A-Z)</option>
+              <option value="-title">Název (Z-A)</option>
+              <option value="-release_date">Od nejnovějších</option>
+              <option value="release_date">Od nejstarších</option>
             </select>
           </div>
         </div>
@@ -64,21 +64,16 @@
 
       <!-- Right Column: Movie Grid -->
       <main class="md:col-span-3">
-        <div v-if="loading" class="text-center text-gray-500"><p>Loading movies...</p></div>
-        <div v-else-if="error" class="text-center text-red-500"><p>Failed to load movies: {{ error.message }}</p></div>
-        <div v-else-if="movies.length === 0" class="text-center text-gray-600 dark:text-gray-400"><p>No movies found matching your criteria.</p></div>
+        <div v-if="loading" class="text-center text-gray-500"><p>Načítám filmy...</p></div>
+        <div v-else-if="error" class="text-center text-red-500"><p>Nepodařilo se načíst filmy: {{ error.message }}</p></div>
+        <div v-else-if="movies.length === 0" class="text-center text-gray-600 dark:text-gray-400"><p>Nebyly nalezeny žádné filmy odpovídající vašim kritériím.</p></div>
         <div v-else>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div 
-              v-for="movie in movies" 
-              :key="movie.id" 
-              class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" 
-              @click="goToMovie(movie.id)"
-            >
+            <div v-for="movie in movies" :key="movie.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" @click="goToMovie(movie.id)">
               <div class="aspect-w-2 aspect-h-3"> <!-- Typical poster aspect ratio (2:3) -->
                 <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="object-cover w-full h-full">
                 <div v-else class="bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                  No Poster
+                  Žádný plakát
                 </div>
               </div>
               <div class="p-4">
@@ -89,8 +84,8 @@
           </div>
           <!-- Pagination -->
           <div class="flex justify-center mt-8 space-x-4">
-            <button @click="goToPrevPage" :disabled="!prevPageUrl" class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600">Previous</button>
-            <button @click="goToNextPage" :disabled="!nextPageUrl" class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600">Next</button>
+            <button @click="goToPrevPage" :disabled="!prevPageUrl" class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600">Předchozí</button>
+            <button @click="goToNextPage" :disabled="!nextPageUrl" class="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-blue-300 dark:bg-blue-700 dark:disabled:bg-blue-900 hover:bg-blue-700 dark:hover:bg-blue-600">Další</button>
           </div>
         </div>
       </main>

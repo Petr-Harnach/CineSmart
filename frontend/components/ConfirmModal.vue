@@ -9,13 +9,13 @@
           @click="cancel"
           class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition"
         >
-          Cancel
+          Zrušit
         </button>
         <button 
           @click="confirm"
           class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
         >
-          Confirm
+          Potvrdit
         </button>
       </div>
     </div>
@@ -27,11 +27,11 @@ const props = defineProps({
   isOpen: Boolean,
   title: {
     type: String,
-    default: 'Confirm Action'
+    default: 'Potvrdit akci'
   },
   message: {
     type: String,
-    default: 'Are you sure you want to proceed?'
+    default: 'Opravdu chcete pokračovat?'
   }
 });
 

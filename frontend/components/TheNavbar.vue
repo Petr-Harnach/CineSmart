@@ -18,7 +18,7 @@
                 <input
                   type="text"
                   v-model="searchQuery"
-                  placeholder="Search movies, series..."
+                  placeholder="Hledat filmy, seriály..."
                   class="w-full p-3 pr-12 border rounded-md text-sm
                          bg-gray-50 dark:bg-gray-700
                          dark:border-gray-600 dark:text-gray-200"
@@ -41,8 +41,8 @@
             <!-- Search Results Dropdown -->
             <div v-if="isSearchFocused && (searchResults.length > 0 || isSearchLoading || searchQuery.length > 0)"
                  class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20">
-              <div v-if="isSearchLoading" class="p-4 text-gray-500">Loading...</div>
-              <div v-else-if="searchResults.length === 0 && searchQuery.length > 0" class="p-4 text-gray-500">No results found.</div>
+              <div v-if="isSearchLoading" class="p-4 text-gray-500">Načítání...</div>
+              <div v-else-if="searchResults.length === 0 && searchQuery.length > 0" class="p-4 text-gray-500">Žádné výsledky.</div>
               <ul v-else>
                 <li v-for="movie in searchResults" :key="movie.id" 
                     @click="selectMovie(movie.id)"
@@ -63,7 +63,7 @@
           <!-- Random Pick Button -->
           <button 
             @click="handleRandomPick"
-            title="Random Pick"
+            title="Zkusit štěstí"
             class="p-3 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -80,7 +80,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9M3 12h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
             </svg>
-            <span>Filters</span>
+            <span>Filtry</span>
           </NuxtLink>
         </div>
       </div>
@@ -89,19 +89,19 @@
       <div class="flex items-center space-x-4 flex-shrink-0">
         <template v-if="!authStore.isLoggedIn">
           <a @click.prevent="openAuthModal('login')" href="#" class="text-gray-300 hover:text-white">
-            Login
+            Přihlásit
           </a>
           <a @click.prevent="openAuthModal('register')" href="#" class="text-gray-300 hover:text-white">
-            Register
+            Registrovat
           </a>
         </template>
 
         <template v-else>
           <NuxtLink to="/watchlist" class="text-gray-300 hover:text-white">
-            Watchlist
+            Chci vidět
           </NuxtLink>
           <NuxtLink to="/collections" class="text-gray-300 hover:text-white">
-            Collections
+            Kolekce
           </NuxtLink>
           <NuxtLink to="/profile" class="flex items-center gap-2 text-white cursor-pointer">
             <img 
@@ -118,7 +118,7 @@
             @click.prevent="handleLogout"
             href="#"
             class="text-gray-300 hover:text-red-500 transition-colors"
-            title="Logout"
+            title="Odhlásit se"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -127,7 +127,7 @@
         </template>
 
         <!-- THEME TOGGLE -->
-        <button @click="toggleTheme" class="text-gray-300 hover:text-white transition-colors" title="Toggle Theme">
+        <button @click="toggleTheme" class="text-gray-300 hover:text-white transition-colors" title="Přepnout motiv">
           <svg v-if="colorMode.value === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707m-12.728 0l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>

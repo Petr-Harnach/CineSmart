@@ -4,7 +4,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode'],
   colorMode: {
-    classSuffix: ''
+    classSuffix: '',
+    preference: 'dark', // Default to dark mode
+    fallback: 'dark'
   },
   runtimeConfig: {
     public: {
