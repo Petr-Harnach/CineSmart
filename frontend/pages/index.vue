@@ -87,7 +87,7 @@
                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </div>
             <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-               <AvgRating :rating="movie.avg_rating" class="shadow-2xl" />
+               <AvgRating :rating="movie.avg_rating" size="sm" class="shadow-2xl" />
             </div>
           </div>
           <div class="p-4">
@@ -162,6 +162,9 @@
       <div v-if="loadingPopularActors" class="flex justify-center py-12">
         <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
+      <div v-else-if="popularActors.length === 0" class="text-center text-gray-600 dark:text-gray-400">
+        <p>Žádní populární herci nenalezeni.</p>
+      </div>
       <Carousel v-else>
         <div 
           v-for="actor in popularActors" 
@@ -183,6 +186,12 @@
     <!-- Sekce Právě v kinech -->
     <section class="reveal">
       <h2 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-8 tracking-tight px-1">Právě v kinech</h2>
+      <div v-if="loadingInTheaters" class="flex justify-center py-12">
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <div v-else-if="inTheatersMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
+        <p>Žádné filmy v kinech nenalezeny.</p>
+      </div>
       <Carousel v-else>
         <div 
           v-for="movie in inTheatersMovies" 
@@ -205,6 +214,12 @@
     <!-- Sekce Brzy v kinech -->
     <section class="reveal">
       <h2 class="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-8 tracking-tight px-1">Brzy v kinech</h2>
+      <div v-if="loadingComingSoon" class="flex justify-center py-12">
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <div v-else-if="comingSoonMovies.length === 0" class="text-center text-gray-600 dark:text-gray-400">
+        <p>Žádné nadcházející filmy nenalezeny.</p>
+      </div>
       <Carousel v-else>
         <div 
           v-for="movie in comingSoonMovies" 
@@ -540,7 +555,7 @@ onMounted(() => {
 .reveal {
   opacity: 0;
   transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.8s ease-out;
 }
 
 .reveal.active {
