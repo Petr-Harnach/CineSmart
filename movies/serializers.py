@@ -54,8 +54,8 @@ class ActorSerializer(serializers.ModelSerializer):
 # Serializer pro přihlášeného uživatele (vlastní profil)
 # PŘESUNUTO SEM, ABY BYLO DOSTUPNÉ PRO REVIEW A COLLECTION SERIALIZERY
 class MyProfileSerializer(serializers.ModelSerializer):
-    profile_picture = AbsoluteImageField(read_only=True)
-    cover_picture = AbsoluteImageField(read_only=True) # New field
+    profile_picture = AbsoluteImageField(required=False)
+    cover_picture = AbsoluteImageField(required=False)
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
         fields = ['id', 'username', 'email', 'bio', 'profile_picture', 'cover_picture']

@@ -18,6 +18,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from datetime import timedelta
 from django.conf import settings
+from rest_framework.parsers import MultiPartParser, FormParser # Added imports
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
@@ -107,6 +108,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     """Retrieve or update the authenticated user's profile."""
     serializer_class = MyProfileSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser) # Allow file uploads
 
     def get_object(self):
         return self.request.user
