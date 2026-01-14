@@ -1,6 +1,6 @@
 <template>
-  <!-- Main Background -->
-  <div class="bg-gray-100 dark:bg-gray-900 min-h-screen pb-12 transition-colors duration-500">
+  <!-- Main Background: Dark gradient restored -->
+  <div class="bg-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-950 dark:to-black min-h-screen pb-12 transition-colors duration-500">
     <!-- Loading State -->
     <div v-if="isLoadingProfile" class="flex justify-center items-center h-64">
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -21,7 +21,7 @@
             <span class="text-gray-600 text-lg">Bez pozadí</span>
           </div>
           <!-- Gradient pro čitelnost -->
-          <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-90"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#141419] via-transparent to-transparent opacity-90"></div>
         </div>
 
         <button 
@@ -37,8 +37,8 @@
       <div class="container mx-auto px-4 relative -mt-24 mb-12 flex flex-col md:flex-row items-center md:items-end gap-8 z-20">
         <!-- Avatar (Circle + Thin Black Frame) -->
         <div class="relative flex-shrink-0">
-          <div class="w-40 h-40 md:w-48 md:h-48 rounded-full p-0.5 bg-black shadow-xl relative z-10">
-            <div class="w-full h-full rounded-full overflow-hidden bg-gray-800 border-2 border-gray-900"> <!-- Tenký rámeček border-2 -->
+          <div class="w-40 h-40 md:w-48 md:h-48 rounded-full p-0.5 bg-black shadow-2xl relative z-10">
+            <div class="w-full h-full rounded-full overflow-hidden bg-gray-800 border-2 border-gray-900">
               <img 
                 v-if="authStore.user.profile_picture" 
                 :src="authStore.user.profile_picture" 
@@ -58,15 +58,15 @@
 
         <!-- Name, Bio & Stats -->
         <div class="flex-grow text-center md:text-left pb-4">
-          <!-- Standardní font, žádná kurzíva -->
+          <!-- Standardní font, Bold (ne Black/Italic) -->
           <h1 class="text-4xl md:text-5xl font-bold text-white drop-shadow-md mb-2">
             {{ authStore.user.username }}
           </h1>
-          <p class="text-gray-300 text-sm md:text-base max-w-2xl mx-auto md:mx-0 leading-relaxed mb-4">
+          <p class="text-gray-300 text-sm md:text-base max-w-2xl mx-auto md:mx-0 leading-relaxed mb-4 font-medium">
             {{ authStore.user.bio || 'Tento uživatel zatím nemá žádný příběh...' }}
           </p>
           
-          <!-- Stats Chips (Clean Style) -->
+          <!-- Stats Chips -->
           <div class="flex flex-wrap justify-center md:justify-start gap-3">
             <div class="bg-gray-800/80 backdrop-blur border border-gray-700 px-4 py-2 rounded-lg flex items-center gap-3 shadow-lg">
               <span class="text-white font-bold text-lg">{{ stats.totalCount }}</span>
@@ -131,7 +131,7 @@
                   class="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-all cursor-pointer border border-transparent hover:border-gray-300 dark:hover:border-gray-600 group"
                   @click="navigateTo(`/collections/${collection.id}`)"
                 >
-                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex-shrink-0 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-500">
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex-shrink-0 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                   </div>
                   <div class="overflow-hidden">
@@ -151,7 +151,7 @@
         <!-- RIGHT COLUMN (Sidebar) -->
         <div class="lg:col-span-1 space-y-8">
           
-          <!-- Odznaky (Logika opravena: Lvl 1 není Mistr) -->
+          <!-- Odznaky -->
           <div class="bg-white/5 dark:bg-gray-900/60 backdrop-blur-xl rounded-xl shadow-xl border border-gray-200 dark:border-gray-700/50 p-6">
             <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">Úspěchy</h3>
             <div class="flex flex-col gap-3">
@@ -216,77 +216,92 @@
       </div>
     </div>
 
-    <!-- EDIT PROFILE MODAL (Upravený editor) -->
+    <!-- EDIT PROFILE MODAL (VRÁCENO ZPĚT + STANDARDNÍ FONT) -->
     <transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
       <div v-if="isEditModalOpen" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 text-center">
-          <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" @click="closeEditModal"></div>
+          <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity" @click="closeEditModal"></div>
 
-          <div class="inline-block align-bottom bg-gray-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-700">
-            <div class="px-6 py-6">
-              <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-                <h3 class="text-xl font-bold text-white">Nastavení Profilu</h3>
-                <button @click="closeEditModal" class="text-gray-400 hover:text-white">
+          <div class="inline-block align-bottom bg-[#1a1a21] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-white/10">
+            <div class="px-8 py-8">
+              <div class="flex justify-between items-center mb-8">
+                <!-- Standardní font -->
+                <h3 class="text-2xl font-bold text-white">Nastavení Profilu</h3>
+                <button @click="closeEditModal" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-full transition-all">
                   <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
 
               <form @submit.prevent="saveProfile" class="space-y-6">
                 
-                <!-- COVER IMAGE SETTINGS (Standardní Input) -->
+                <!-- COVER IMAGE SETTINGS (Vizuální editor vrácen) -->
                 <div>
-                  <label class="block text-sm font-bold text-gray-300 mb-2">Pozadí profilu (Cover)</label>
-                  <p class="text-xs text-gray-500 mb-2">Doporučeno: 1920x500 px. Max 2MB.</p>
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Pozadí profilu (Cover)</label>
+                  <p class="text-xs text-gray-500 mb-2">Doporučená velikost: 1920x500 px. Max 2MB.</p>
                   
-                  <div class="flex flex-col gap-3">
-                    <img v-if="coverPreviewUrl || authStore.user.cover_picture" :src="coverPreviewUrl || authStore.user.cover_picture" class="w-full h-32 object-cover rounded-lg border border-gray-700">
-                    <input type="file" @change="handleCoverChange" accept="image/*" class="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                  <div class="relative h-32 w-full rounded-2xl overflow-hidden bg-gray-800 border-2 border-dashed border-white/10 hover:border-blue-500 transition-colors group/cover cursor-pointer">
+                    <!-- Preview -->
+                    <img v-if="coverPreviewUrl || authStore.user.cover_picture" :src="coverPreviewUrl || authStore.user.cover_picture" class="w-full h-full object-cover">
+                    
+                    <!-- Overlay with input -->
+                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      <span class="text-white text-xs font-bold">Nahrát obrázek</span>
+                      <input type="file" @change="handleCoverChange" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                    </div>
                   </div>
                 </div>
 
-                <!-- AVATAR SETTINGS (Standardní Input) -->
+                <!-- AVATAR SETTINGS (Vizuální editor vrácen) -->
                 <div>
-                  <label class="block text-sm font-bold text-gray-300 mb-2">Avatar</label>
-                  <p class="text-xs text-gray-500 mb-2">Doporučeno: 500x500 px (Čtverec). Max 2MB.</p>
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Avatar</label>
+                  <p class="text-xs text-gray-500 mb-2">Doporučená velikost: 500x500 px (Čtverec). Max 2MB.</p>
                   
-                  <div class="flex items-center gap-4">
-                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/100'" class="w-16 h-16 rounded-full object-cover border border-gray-700">
-                    <input type="file" @change="handleFileChange" accept="image/*" class="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                  <div class="flex items-end gap-6">
+                    <div class="relative group/avatar flex-shrink-0">
+                      <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border-4 border-[#1a1a21] shadow-2xl relative">
+                        <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/100'" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                          <input type="file" @change="handleFileChange" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex-grow">
+                      <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Uživatelské jméno</label>
+                      <input type="text" v-model="editForm.username" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
                   </div>
                 </div>
 
                 <!-- INFO FIELDS -->
                 <div class="grid grid-cols-1 gap-4">
                   <div>
-                    <label class="block text-sm font-bold text-gray-300 mb-1">Uživatelské jméno</label>
-                    <input type="text" v-model="editForm.username" class="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                  </div>
-                  <div>
-                    <label class="block text-sm font-bold text-gray-300 mb-1">Bio (Příběh)</label>
-                    <textarea v-model="editForm.bio" rows="3" class="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-600" placeholder="Napište něco o sobě..."></textarea>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Příběh (Bio)</label>
+                    <textarea v-model="editForm.bio" rows="3" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder-gray-600" placeholder="Napište něco o sobě..."></textarea>
                   </div>
                 </div>
 
                 <!-- Password Toggle -->
                 <div class="border-t border-gray-800 pt-4">
-                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-sm font-bold text-blue-400 hover:text-blue-300">
+                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-xs font-bold text-blue-400 hover:text-blue-300 uppercase tracking-wider">
                     {{ showPasswordSection ? 'Skrýt změnu hesla' : 'Změnit heslo' }}
                   </button>
                   
-                  <div v-if="showPasswordSection" class="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700 space-y-3">
-                    <input type="password" v-model="passwordForm.old_password" placeholder="Současné heslo" class="w-full p-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
-                    <div class="grid grid-cols-2 gap-3">
-                      <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="w-full p-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
-                      <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové" class="w-full p-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
+                  <div v-if="showPasswordSection" class="mt-4 p-6 bg-black/20 rounded-2xl border border-white/5 space-y-4">
+                    <input type="password" v-model="passwordForm.old_password" placeholder="Současné heslo" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all">
+                    <div class="grid grid-cols-2 gap-4">
+                      <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all">
+                      <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all">
                     </div>
-                    <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-2 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white rounded border border-red-600/30 text-xs font-bold transition-colors">
-                      AKTUALIZOVAT HESLO
+                    <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white font-bold uppercase tracking-widest rounded-xl transition-all border border-red-600/20 text-xs">
+                      Aktualizovat heslo
                     </button>
                   </div>
                 </div>
 
-                <div class="flex justify-end pt-4 border-t border-gray-800">
-                  <button type="submit" :disabled="isSaving" class="px-8 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg shadow-lg transition-transform hover:scale-105 disabled:opacity-50 disabled:scale-100">
+                <div class="flex justify-end pt-6 border-t border-gray-800 mt-4">
+                  <button type="submit" :disabled="isSaving" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-2xl shadow-2xl shadow-blue-600/20 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50">
                     {{ isSaving ? 'Ukládám...' : 'Uložit Profil' }}
                   </button>
                 </div>
