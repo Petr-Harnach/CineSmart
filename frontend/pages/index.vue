@@ -19,9 +19,15 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
           </button>
         </template>
-        <!-- Překryvy -->
+        <!-- Překryvy (Gradients pro čitelnost textu) -->
+        <!-- 1. Spodní gradient (tmavý dole -> průhledný nahoře) -->
         <div 
-          class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none transition-opacity duration-700"
+          class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none transition-opacity duration-700"
+          :class="{'opacity-0': isVideoPlaying}"
+        ></div>
+        <!-- 2. Levý gradient (tmavý vlevo -> průhledný vpravo) - Klíčové pro text -->
+        <div 
+          class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent pointer-events-none transition-opacity duration-700"
           :class="{'opacity-0': isVideoPlaying}"
         ></div>
         <div 
