@@ -222,7 +222,7 @@
         <div class="flex items-center justify-center min-h-screen px-4 text-center">
           <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity" @click="closeEditModal"></div>
 
-          <div class="inline-block align-bottom bg-[#1a1a21] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-white/10">
+          <div class="inline-block align-bottom bg-[#111827] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-white/10">
             <div class="px-8 py-8">
               <div class="flex justify-between items-center mb-8">
                 <!-- Standardní font -->
@@ -311,6 +311,45 @@
         </div>
       </div>
     </transition>
+
+    <!-- CROPPER MODAL -->
+    <transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+      <div v-if="isCropperModalOpen" class="fixed inset-0 z-[101] overflow-y-auto" aria-labelledby="cropper-modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 text-center">
+          <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity" @click="closeCropperModal"></div>
+
+          <div class="inline-block align-bottom bg-[#111827] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full md:max-w-3xl border border-white/10">
+            <div class="px-8 py-8">
+              <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-bold text-white">Oříznout obrázek</h3>
+                <button @click="closeCropperModal" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-full transition-all">
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <div class="cropper-wrapper">
+                <Cropper
+                  ref="cropperRef"
+                  :src="imageToCrop"
+                  :stencil-props="{ aspectRatio: cropperAspectRatio }"
+                  image-restriction="stencil"
+                  class="cropper"
+                />
+              </div>
+
+              <div class="flex justify-end gap-4 pt-6 border-t border-gray-800 mt-4">
+                <button type="button" @click="closeCropperModal" class="px-6 py-3 text-gray-400 hover:text-white font-bold uppercase tracking-widest rounded-xl transition-all text-xs">
+                  Zrušit
+                </button>
+                <button type="button" @click="cropImage" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-blue-600/20 transition-all text-xs">
+                  Oříznout a uložit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -320,6 +359,8 @@ import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
 import { useToast } from '../composables/useToast';
 import { navigateTo } from '#app';
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 
 const authStore = useAuthStore();
 const { updateProfile, getWatchlist, getCollections, changePassword, getReviews } = useApi();
@@ -330,6 +371,13 @@ const isEditModalOpen = ref(false);
 const isSaving = ref(false);
 const showPasswordSection = ref(false);
 const isChangingPassword = ref(false);
+
+// Cropper State
+const isCropperModalOpen = ref(false);
+const imageToCrop = ref(null);
+const cropperCallback = ref(null);
+const cropperAspectRatio = ref(null);
+const cropperRef = ref(null); // Ref to the cropper component
 
 const editForm = reactive({
   username: '',
@@ -366,27 +414,65 @@ const closeEditModal = () => {
   passwordForm.confirm_password = '';
 };
 
+// New functions for cropper
+const openCropper = (image, callback, aspectRatio) => {
+  imageToCrop.value = image;
+  cropperCallback.value = callback;
+  cropperAspectRatio.value = aspectRatio;
+  isCropperModalOpen.value = true;
+};
+
+const closeCropperModal = () => {
+  isCropperModalOpen.value = false;
+  imageToCrop.value = null;
+  cropperCallback.value = null;
+  cropperAspectRatio.value = null;
+};
+
+const cropImage = () => {
+  if (cropperRef.value && cropperCallback.value) {
+    const { canvas } = cropperRef.value.getResult();
+    if (canvas) {
+      canvas.toBlob((blob) => {
+        cropperCallback.value(blob);
+        closeCropperModal();
+      });
+    }
+  }
+};
+
+const handleCroppedProfilePicture = (blob) => {
+  profilePictureFile.value = blob;
+  previewImageUrl.value = URL.createObjectURL(blob);
+};
+
+const handleCroppedCoverPicture = (blob) => {
+  coverPictureFile.value = blob;
+  coverPreviewUrl.value = URL.createObjectURL(blob);
+};
+
+// Modified handleFileChange and handleCoverChange
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    profilePictureFile.value = file;
     const reader = new FileReader();
     reader.onload = (e) => {
-      previewImageUrl.value = e.target.result;
+      openCropper(e.target.result, handleCroppedProfilePicture, 1); // 1:1 aspect ratio for profile picture
     };
     reader.readAsDataURL(file);
+    event.target.value = ''; // Clear the input so the same file can be selected again
   }
 };
 
 const handleCoverChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    coverPictureFile.value = file;
     const reader = new FileReader();
     reader.onload = (e) => {
-      coverPreviewUrl.value = e.target.result;
+      openCropper(e.target.result, handleCroppedCoverPicture, 16 / 9); // 16:9 aspect ratio for cover picture
     };
     reader.readAsDataURL(file);
+    event.target.value = ''; // Clear the input so the same file can be selected again
   }
 };
 
@@ -407,7 +493,8 @@ const saveProfile = async () => {
     await authStore.fetchProfile();
     toast.success('Profil uložen!');
     closeEditModal();
-  } catch (err) {
+  }
+   catch (err) {
     console.error('Error:', err);
     toast.error('Chyba při ukládání profilu.');
   } finally {
@@ -515,5 +602,18 @@ onMounted(() => {
 <style scoped>
 .backdrop-blur-xl {
   backdrop-filter: blur(24px);
+}
+
+/* Styles for the Cropper to ensure it's visible and functional */
+.cropper-wrapper {
+  max-width: 100%;
+  max-height: 50vh; /* Adjust as needed */
+  margin: 0 auto;
+  background-color: #333; /* Dark background for cropper */
+}
+
+.cropper {
+  height: 300px; /* Or a flexible height */
+  width: 100%;
 }
 </style>
