@@ -13,7 +13,7 @@
           <img v-if="series.poster" :src="series.poster" :alt="series.title" class="h-96 w-full object-cover md:w-80">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-96 w-full md:w-80 flex items-center justify-center text-gray-500">Žádný plakát</div>
           
-          <!-- Tlačítko Watchlist (Overlay) - Styl z trailer banneru -->
+          <!-- Tlačítko Watchlist (Overlay) -->
           <button 
             v-if="authStore.isLoggedIn"
             @click.stop="toggleWatchlist"
@@ -30,7 +30,42 @@
         </div>
         
         <div class="p-8 w-full">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ series.title }}</h1>
+          <div class="flex justify-between items-start mb-2">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ series.title }}</h1>
+            
+            <!-- Tlačítko Kolekce (Ikonka knížky) -->
+            <div v-if="authStore.isLoggedIn" class="relative">
+              <button 
+                @click="showCollectionDropdown = !showCollectionDropdown"
+                class="flex items-center gap-2 p-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm font-semibold"
+                title="Přidat do kolekce"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span>Kolekce</span>
+              </button>
+              
+              <div v-if="showCollectionDropdown" 
+                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
+                  Nemáte žádné kolekce.
+                </div>
+                <div v-else>
+                  <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Přidat do:</p>
+                  <button 
+                    v-for="col in userCollections" 
+                    :key="col.id"
+                    @click="handleAddToCollection(col.id)"
+                    class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                  >
+                    {{ col.name }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="flex flex-wrap items-center mb-6 text-gray-600 dark:text-gray-300 text-lg gap-4">
             <span v-if="series.release_date">
               {{ series.release_date.substring(0, 4) }}
@@ -51,7 +86,7 @@
             <p class="text-gray-700 dark:text-gray-200 leading-relaxed">{{ series.description }}</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
             <div v-if="series.directors && series.directors.length">
               <span class="font-bold text-gray-900 dark:text-gray-100">Tvůrci/Režie:</span>
               <span class="text-gray-600 dark:text-gray-300 ml-2">
@@ -189,13 +224,15 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
-const { getMovieById, getWatchlist, addToWatchlist, removeFromWatchlist } = useApi();
+const { getMovieById, getWatchlist, addToWatchlist, removeFromWatchlist, getCollections, addMovieToCollection } = useApi();
 
 const seriesId = route.params.id;
 const series = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const selectedSeasonIndex = ref(0);
+const userCollections = ref([]);
+const showCollectionDropdown = ref(false);
 
 const watchlist = ref([]);
 const isProcessingWatchlist = ref(false);
@@ -221,6 +258,7 @@ const fetchSeries = async () => {
     
     if (authStore.isLoggedIn) {
       await fetchWatchlistData();
+      await fetchUserCollections();
     }
   } catch (err) {
     console.error(err);
@@ -236,6 +274,26 @@ const fetchWatchlistData = async () => {
     watchlist.value = response.data.results;
   } catch (err) {
     console.error(err);
+  }
+};
+
+const fetchUserCollections = async () => {
+  try {
+    const response = await getCollections();
+    userCollections.value = response.data.results.filter(c => c.user.id === authStore.user?.id);
+  } catch (err) {
+    console.error('Failed to fetch collections:', err);
+  }
+};
+
+const handleAddToCollection = async (collectionId) => {
+  try {
+    await addMovieToCollection(collectionId, seriesId);
+    showCollectionDropdown.value = false;
+    toast.success('Přidáno do kolekce.');
+  } catch (err) {
+    console.error('Failed to add to collection:', err);
+    toast.error('Seriál už v této kolekci je.');
   }
 };
 

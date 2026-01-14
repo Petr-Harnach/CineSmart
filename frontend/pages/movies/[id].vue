@@ -1,10 +1,9 @@
 <template>
-  <div class="max-w-4xl mx-auto mt-10">
-    <NuxtLink to="/" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 mb-4 inline-block">&larr; Zpět na filmy</NuxtLink>
+  <div class="max-w-4xl mx-auto mt-10 p-4">
+    <NuxtLink to="/" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 mb-4 inline-block">&larr; Zpět</NuxtLink>
     
-    <div v-if="loading" class="text-center text-gray-500">Načítám detaily filmu...</div>
-    
-    <div v-else-if="error" class="text-center text-red-500">Nepodařilo se načíst film: {{ error.message }}</div>
+    <div v-if="loading" class="text-center text-gray-500 py-12">Načítám detaily filmu...</div>
+    <div v-else-if="error" class="text-center text-red-500 py-12">Nepodařilo se načíst film: {{ error.message }}</div>
 
     <div v-else-if="movie" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div class="md:flex">
@@ -13,18 +12,16 @@
           <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-96 w-full object-cover md:w-64">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-96 w-full md:w-64 flex items-center justify-center text-gray-500">Žádný plakát</div>
           
-          <!-- Tlačítko Watchlist (Overlay) - Stejný styl jako na HP banneru -->
+          <!-- Tlačítko Watchlist (Overlay) -->
           <button 
             v-if="authStore.isLoggedIn"
             @click.stop="toggleWatchlist"
             class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 hover:scale-110 transition-all shadow-lg border border-white/20"
             :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
           >
-            <!-- Plus Icon -->
             <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <!-- Check Icon -->
             <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
@@ -32,31 +29,26 @@
         </div>
 
         <div class="p-8 w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
-          <div class="flex items-center mb-4 text-gray-600 dark:text-gray-300 text-lg">
-            <span v-if="movie.release_date" class="mr-2">{{ movie.release_date.substring(0, 4) }}</span>
-            <span v-else class="mr-2">TBA</span>
-            <span v-if="movie.duration_minutes">| {{ movie.duration_minutes }} min</span>
-            <AvgRating :rating="movie.avg_rating" class="ml-4" />
-          </div>
-          
-          <div class="flex gap-2 mb-4">
-            <!-- Původní tlačítko odstraněno, ponecháno pouze pro kolekce -->
+          <div class="flex justify-between items-start mb-2">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ movie.title }}</h1>
+            
+            <!-- Tlačítko Kolekce (Přesunuto sem s ikonkou knížky) -->
             <div v-if="authStore.isLoggedIn" class="relative">
               <button 
                 @click="showCollectionDropdown = !showCollectionDropdown"
-                class="p-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition h-full flex items-center gap-2"
+                class="flex items-center gap-2 p-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm font-semibold"
+                title="Přidat do kolekce"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                Kolekce
+                <span>Kolekce</span>
               </button>
               
               <div v-if="showCollectionDropdown" 
-                   class="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
                 <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
-                  Nemáte žádné kolekce. Nejprve si nějakou vytvořte!
+                  Nemáte žádné kolekce.
                 </div>
                 <div v-else>
                   <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Přidat do:</p>
@@ -71,73 +63,70 @@
                 </div>
               </div>
             </div>
-            
-            <p v-else class="text-sm text-gray-500 italic self-center">
-              Přihlašte se pro přidání do seznamu nebo kolekcí.
-            </p>
+          </div>
+
+          <div class="flex items-center mb-6 text-gray-600 dark:text-gray-300 text-lg">
+            <span v-if="movie.release_date" class="mr-2">{{ movie.release_date.substring(0, 4) }}</span>
+            <span v-else class="mr-2">TBA</span>
+            <span v-if="movie.duration_minutes">| {{ movie.duration_minutes }} min</span>
+            <AvgRating :rating="movie.avg_rating" class="ml-4" />
           </div>
           
-          <div v-if="movie.description" class="mb-4">
-            <p class="text-gray-700 dark:text-gray-200 inline">
+          <div v-if="movie.description" class="mb-6">
+            <p class="text-gray-700 dark:text-gray-200 leading-relaxed">
               {{ truncatedDescription }}
             </p>
             <button 
               v-if="movie.description.length > 250" 
               @click="isDescriptionExpanded = !isDescriptionExpanded" 
-              class="text-blue-600 dark:text-blue-400 hover:underline ml-1 text-sm font-semibold"
+              class="text-blue-600 dark:text-blue-400 hover:underline mt-1 text-sm font-semibold"
             >
               {{ isDescriptionExpanded ? 'Zobrazit méně' : 'Číst více' }}
             </button>
           </div>
-          <p v-else class="text-gray-500 italic mb-4">Popis není k dispozici.</p>
+          <p v-else class="text-gray-500 italic mb-6">Popis není k dispozici.</p>
           
-          <div class="mb-4 dark:text-gray-100 text-sm">
-            <span class="font-semibold">Režie:</span> 
-            <span v-if="movie.directors && movie.directors.length" class="ml-2">
-              <template v-for="(director, index) in movie.directors" :key="director.id">
-                <NuxtLink :to="`/directors/${director.id}`" class="hover:underline cursor-pointer">
-                  {{ director.name }}
-                </NuxtLink>
-                <span v-if="index < movie.directors.length - 1">, </span>
-              </template>
-            </span>
-            <span v-else class="ml-2">N/A</span>
-          </div>
-          
-          <div class="mb-4 dark:text-gray-100 text-sm">
-            <span class="font-semibold">Žánry:</span> 
-            <span v-if="movie.genres && movie.genres.length" class="ml-2">
-              {{ movie.genres.map(g => g.name).join(', ') }}
-            </span>
-            <span v-else class="ml-2">N/A</span>
-          </div>
-
-          <div v-if="movie.screenwriters && movie.screenwriters.length" class="mb-4 dark:text-gray-100 text-sm">
-            <span class="font-semibold">Scénář:</span> 
-            <span class="ml-2">
-              <span v-for="(writer, index) in movie.screenwriters" :key="writer.id">
-                {{ writer.name }}<span v-if="index < movie.screenwriters.length - 1">, </span>
+          <div class="grid grid-cols-1 gap-3 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
+            <div v-if="movie.directors && movie.directors.length">
+              <span class="font-bold text-gray-900 dark:text-gray-100">Režie:</span> 
+              <span class="ml-2 dark:text-gray-300">
+                <template v-for="(director, index) in movie.directors" :key="director.id">
+                  <NuxtLink :to="`/directors/${director.id}`" class="hover:underline">{{ director.name }}</NuxtLink><span v-if="index < movie.directors.length - 1">, </span>
+                </template>
               </span>
-            </span>
-          </div>
+            </div>
+            
+            <div v-if="movie.genres && movie.genres.length">
+              <span class="font-bold text-gray-900 dark:text-gray-100">Žánry:</span> 
+              <span class="ml-2 dark:text-gray-300">{{ movie.genres.map(g => g.name).join(', ') }}</span>
+            </div>
 
-          <div v-if="movie.actors && movie.actors.length" class="mb-4 dark:text-gray-100 text-sm">
-            <span class="font-semibold">Hrají:</span> 
-            <span class="ml-2">
-              <template v-for="(actor, index) in movie.actors" :key="actor.id">
-                <NuxtLink :to="`/actors/${actor.id}`" class="hover:underline cursor-pointer">
-                  {{ actor.name }}
-                </NuxtLink>
-                <span v-if="index < movie.actors.length - 1">, </span>
-              </template>
-            </span>
+            <div v-if="movie.screenwriters && movie.screenwriters.length">
+              <span class="font-bold text-gray-900 dark:text-gray-100">Scénář:</span> 
+              <span class="ml-2 dark:text-gray-300">
+                <span v-for="(writer, index) in movie.screenwriters" :key="writer.id">
+                  {{ writer.name }}<span v-if="index < movie.screenwriters.length - 1">, </span>
+                </span>
+              </span>
+            </div>
+
+            <div v-if="movie.actors && movie.actors.length">
+              <span class="font-bold text-gray-900 dark:text-gray-100">Hrají:</span> 
+              <span class="ml-2 dark:text-gray-300">
+                <template v-for="(actor, index) in movie.actors" :key="actor.id">
+                  <NuxtLink :to="`/actors/${actor.id}`" class="hover:underline">{{ actor.name }}</NuxtLink><span v-if="index < movie.actors.length - 1">, </span>
+                </template>
+              </span>
+            </div>
           </div>
         </div>
       </div>
-      <div class="p-8 border-t border-gray-200 dark:border-gray-700">
-        <!-- Sekce recenzí zůstává stejná -->
+
+      <!-- Recenze -->
+      <div class="p-8 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30">
         <div v-if="userReview" class="mb-8">
           <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Vaše recenze</h3>
+          <!-- ... rest of user review ... -->
           <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
             <template v-if="editingReviewId === userReview.id">
               <form @submit.prevent="handleSaveEdit(userReview.id)">
@@ -147,119 +136,53 @@
                 </div>
                 <div class="mb-2">
                   <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Komentář</label>
-                  <textarea 
-                    v-model="editedReviewComment" 
-                    id="edit-comment" 
-                    rows="2" 
-                    maxlength="1000"
-                    class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"
-                  ></textarea>
-                  <div class="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {{ editedReviewComment.length }} / 1000
-                  </div>
+                  <textarea v-model="editedReviewComment" id="edit-comment" rows="2" maxlength="1000" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
                 </div>
                 <div class="flex justify-end space-x-2">
-                  <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 dark:bg-gray-500 dark:text-gray-100 dark:hover:bg-gray-400">Zrušit</button>
-                  <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Uložit změny</button>
+                  <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
+                  <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
                 </div>
               </form>
             </template>
             <template v-else>
               <div class="flex justify-between items-start mb-2">
                 <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
-                <p class="text-yellow-500 text-lg">{{ '⭐'.repeat(userReview.rating) }}</p>
+                <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
               </div>
-              <p class="text-gray-700 dark:text-gray-300 mb-3">{{ userReview.comment }}</p>
-              <div class="flex justify-between items-center">
-                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ new Date(userReview.created_at).toLocaleDateString() }}</p>
-                <div class="flex items-center gap-4">
-                  <button @click="handleToggleLike(userReview)" class="flex items-center gap-1 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
-                    <svg v-if="userReview.user_has_liked" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-blue-500 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span>{{ userReview.likes_count }}</span>
-                  </button>
-                  <button @click="handleEditReview(userReview)" class="px-3 py-1 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">Upravit</button>
-                  <button @click="handleDeleteReview(userReview.id)" class="px-3 py-1 text-sm bg-red-200 text-red-800 rounded hover:bg-red-300 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700">Smazat</button>
-                </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
+              <div class="flex justify-end gap-2 mt-3">
+                <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
+                <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
               </div>
             </template>
           </div>
         </div>
 
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold dark:text-gray-100">Recenze</h2>
-          <div v-if="reviews.length > 0">
-            <label for="sort-reviews" class="text-sm mr-2 dark:text-gray-300">Seřadit dle:</label>
-            <select id="sort-reviews" v-model="reviewSortOrder" class="p-1 border rounded-md text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
-              <option value="-created_at">Nejnovější</option>
-              <option value="created_at">Nejstarší</option>
-              <option value="-likes_count">Nejoblíbenější</option>
-            </select>
-          </div>
-        </div>
+        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Recenze</h2>
         <div v-if="otherReviews.length > 0" class="space-y-4">
-          <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+          <div v-for="review in otherReviews" :key="review.id" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
             <div class="flex justify-between items-start mb-2">
-              <p class="font-semibold dark:text-gray-100">
-                <NuxtLink v-if="authStore.isLoggedIn && review.user.id !== authStore.user?.id" :to="`/user/${review.user.id}`" class="hover:underline">
-                  {{ review.user.username }}
-                </NuxtLink>
-                <span v-else>{{ review.user.username }}</span>
-              </p>
-              <p class="text-yellow-500 text-lg">{{ '⭐'.repeat(review.rating) }}</p>
+              <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
+              <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
             </div>
-            <p class="text-gray-700 dark:text-gray-300 mb-3">{{ review.comment }}</p>
-            <div class="flex justify-between items-center">
-              <p class="text-gray-500 dark:text-gray-400 text-sm">{{ new Date(review.created_at).toLocaleDateString() }}</p>
-              <button @click="handleToggleLike(review)" class="flex items-center gap-1 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 disabled:opacity-50" :disabled="!authStore.isLoggedIn">
-                <svg v-if="review.user_has_liked" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-blue-500 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span>{{ review.likes_count }}</span>
-              </button>
-            </div>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
           </div>
         </div>
-        <p v-else-if="!userReview" class="text-gray-500 dark:text-gray-400">Zatím žádné recenze.</p>
-        
-        <div v-if="authStore.isLoggedIn && !userReview" class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-          <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
-          <form @submit.prevent="submitReview" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <div v-if="submitError" class="bg-red-100 text-red-700 p-3 mb-4 rounded">{{ submitError }}</div>
-            <div class="mb-4">
-              <label class="block text-gray-700 dark:text-gray-300 mb-1">Hodnocení</label>
-              <RatingInput v-model="newReview.rating" />
-            </div>
-            <div class="mb-4">
-              <label for="comment" class="block text-gray-700 dark:text-gray-300">Komentář</label>
-              <textarea 
-                v-model="newReview.comment" 
-                id="comment" 
-                rows="4" 
-                maxlength="1000"
-                class="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
-              ></textarea>
-              <div class="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {{ newReview.comment.length }} / 1000
-              </div>
-            </div>
-            <button type="submit" :disabled="submittingReview" class="w-full bg-blue-500 text-white p-2 rounded disabled:bg-blue-300">
-              {{ submittingReview ? 'Odesílám...' : 'Odeslat recenzi' }}
-            </button>
+        <p v-else-if="!userReview" class="text-gray-500 italic">Zatím žádné recenze.</p>
+
+        <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
+          <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
+          <form @submit.prevent="submitReview" class="space-y-4">
+            <RatingInput v-model="newReview.rating" />
+            <textarea v-model="newReview.comment" placeholder="Napište svůj názor..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
+            <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
           </form>
         </div>
       </div>
 
       <!-- Mohlo by se vám líbit -->
       <div v-if="relatedMovies.length > 0" class="p-8 border-t border-gray-200 dark:border-gray-700">
-        <h2 class="text-2xl font-bold mt-8 mb-4 dark:text-gray-100">Mohlo by se vám líbit</h2>
+        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Mohlo by se vám líbit</h2>
         <Carousel>
           <div 
             v-for="relatedMovie in relatedMovies" 
@@ -277,13 +200,12 @@
         </Carousel>
       </div>
     </div>
-    <div v-else class="text-center text-gray-500 py-12">Film nenalezen.</div>
 
     <!-- Confirm Modal -->
     <ConfirmModal 
       :is-open="isConfirmModalOpen"
       :title="'Smazat recenzi'"
-      :message="'Opravdu chcete smazat svou recenzi? Tuto akci nelze vrátit zpět.'"
+      :message="'Opravdu chcete smazat svou recenzi?'"
       @confirm="confirmDeleteReview" 
       @close="isConfirmModalOpen = false" 
     />
@@ -420,7 +342,6 @@ const fetchMovie = async (id) => {
     const response = await getMovieById(id);
     movie.value = response.data;
     
-    // Přesměrování na /series/ pokud je to seriál
     if (movie.value.type === 'series') {
         router.replace(`/series/${id}`);
         return;
@@ -444,29 +365,12 @@ const handleAddToCollection = async (collectionId) => {
   try {
     await addMovieToCollection(collectionId, movieId.value);
     showCollectionDropdown.value = false;
+    toast.success('Přidáno do kolekce.');
   } catch (err) {
     console.error('Failed to add to collection:', err);
     toast.error('Film už v této kolekci je.');
   }
 };
-
-const handleToggleLike = async (review) => {
-  if (!authStore.isLoggedIn) return;
-  try {
-    if (review.user_has_liked) {
-      review.likes_count--;
-      review.user_has_liked = false;
-    } else {
-      review.likes_count++;
-      review.user_has_liked = true;
-    }
-    await toggleLikeReview(review.id);
-  } catch (err) {
-    console.error('Failed to toggle like:', err);
-  }
-};
-
-watch(reviewSortOrder, fetchReviews);
 
 const toggleWatchlist = async () => {
   if (!authStore.isLoggedIn) return;
@@ -488,7 +392,6 @@ const toggleWatchlist = async () => {
 
 const submitReview = async () => {
   submittingReview.value = true;
-  submitError.value = null;
   try {
     await addReview({
       movie_id: movieId.value,
@@ -498,9 +401,10 @@ const submitReview = async () => {
     newReview.rating = 5;
     newReview.comment = '';
     await fetchReviews();
+    toast.success('Recenze odeslána.');
   } catch (err) {
     console.error('Error submitting review:', err);
-    submitError.value = 'Nepodařilo se odeslat recenzi.';
+    toast.error('Nepodařilo se odeslat recenzi.');
   } finally {
     submittingReview.value = false;
   }
@@ -514,8 +418,6 @@ const handleEditReview = (review) => {
 
 const handleCancelEdit = () => {
   editingReviewId.value = null;
-  editedReviewRating.value = 1;
-  editedReviewComment.value = '';
 };
 
 const handleSaveEdit = async (reviewId) => {
@@ -526,6 +428,7 @@ const handleSaveEdit = async (reviewId) => {
     });
     await fetchReviews();
     handleCancelEdit();
+    toast.success('Recenze aktualizována.');
   } catch (err) {
     console.error('Error saving review:', err);
     toast.error('Nepodařilo se aktualizovat recenzi.');
@@ -542,6 +445,7 @@ const confirmDeleteReview = async () => {
   try {
     await deleteReview(pendingDeleteReviewId.value);
     await fetchReviews();
+    toast.success('Recenze smazána.');
   } catch (err) {
     console.error('Error deleting review:', err);
     toast.error('Nepodařilo se smazat recenzi.');
