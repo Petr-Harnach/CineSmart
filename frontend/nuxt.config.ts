@@ -2,7 +2,12 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode'],
+  modules: [
+    '@nuxtjs/tailwindcss', 
+    '@pinia/nuxt', 
+    '@nuxtjs/color-mode',
+    '@vercel/speed-insights/nuxt'
+  ],
   colorMode: {
     classSuffix: '',
     preference: 'dark', // Default to dark mode
