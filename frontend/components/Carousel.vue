@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative group/carousel">
     <div
       ref="carousel"
       class="flex overflow-x-auto space-x-4 pb-4 scroll-smooth hide-scrollbar"
@@ -10,16 +10,16 @@
     <button
       v-if="showPrev"
       @click="scrollLeft"
-      class="absolute top-1/2 -left-4 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-md text-gray-800 dark:text-white p-2 rounded-full hover:scale-110 transition-transform z-10"
+      class="absolute top-1/2 -left-2 md:-left-5 -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-xl text-gray-800 dark:text-white p-3 rounded-full hover:bg-white dark:hover:bg-gray-700 hover:scale-110 transition-all z-10"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
     </button>
     <button
       v-if="showNext"
       @click="scrollRight"
-      class="absolute top-1/2 -right-4 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-md text-gray-800 dark:text-white p-2 rounded-full hover:scale-110 transition-transform z-10"
+      class="absolute top-1/2 -right-2 md:-right-5 -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-xl text-gray-800 dark:text-white p-3 rounded-full hover:bg-white dark:hover:bg-gray-700 hover:scale-110 transition-all z-10"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
     </button>
   </div>
 </template>
