@@ -1,82 +1,86 @@
 <template>
-  <!-- Main Background: Dark gradient for better glassmorphism contrast -->
-  <div class="bg-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-950 min-h-screen pb-12 transition-colors duration-500">
+  <!-- Main Background: Dark gradient for high-end feel -->
+  <div class="bg-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-950 dark:to-black min-h-screen pb-12 transition-colors duration-500">
     <!-- Loading State -->
     <div v-if="isLoadingProfile" class="flex justify-center items-center h-64">
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
     <div v-else-if="authStore.user">
-      <!-- HERO SECTION -->
-      <div class="relative w-full h-64 md:h-96 bg-gray-800 overflow-hidden group">
-        <img 
-          v-if="authStore.user.cover_picture" 
-          :src="authStore.user.cover_picture" 
-          class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-          alt="Cover"
-        >
-        <div v-else class="w-full h-full bg-gradient-to-r from-slate-900 via-gray-800 to-slate-900 flex items-center justify-center">
-          <span class="text-white/20 text-xl font-bold tracking-widest uppercase">CineSmart Profile</span>
+      <!-- HERO SECTION (STEAM STYLE) -->
+      <div class="relative w-full h-64 md:h-[450px] bg-gray-950 overflow-hidden group">
+        <!-- Cover Image with Smooth Fade -->
+        <div class="absolute inset-0">
+          <img 
+            v-if="authStore.user.cover_picture" 
+            :src="authStore.user.cover_picture" 
+            class="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
+            alt="Cover"
+          >
+          <!-- The "Steam Fade" Gradient: Fades to background color at the bottom -->
+          <div class="absolute inset-0 bg-gradient-to-t from-[#141419] via-transparent to-transparent opacity-100"></div>
+          <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent"></div>
         </div>
-        
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
 
         <button 
           @click="openEditModal"
-          class="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-white/10 group/btn shadow-lg"
+          class="absolute top-6 right-6 bg-black/40 hover:bg-blue-600/60 backdrop-blur-xl text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 border border-white/10 shadow-2xl z-30 group/btn"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover/btn:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-          Upravit
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover/btn:rotate-90 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          Upravit profil
         </button>
       </div>
 
       <!-- PROFILE INFO BAR -->
-      <div class="container mx-auto px-4 relative -mt-24 mb-12 flex flex-col md:flex-row items-center md:items-end gap-8">
-        <!-- Avatar with Frame -->
+      <div class="container mx-auto px-4 relative -mt-28 md:-mt-36 mb-12 flex flex-col md:flex-row items-center md:items-end gap-8 z-20">
+        <!-- Avatar with Glowing Frame -->
         <div class="relative flex-shrink-0 group">
-          <div class="w-36 h-36 md:w-48 md:h-48 rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-2xl relative z-10">
-            <div class="w-full h-full rounded-full overflow-hidden bg-gray-800 border-4 border-gray-900">
+          <div class="w-40 h-40 md:w-56 md:h-56 rounded-3xl p-1.5 bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-600 shadow-[0_0_50px_rgba(59,130,246,0.3)] transform -rotate-3 group-hover:rotate-0 transition-transform duration-500">
+            <div class="w-full h-full rounded-2xl overflow-hidden bg-[#141419] border-4 border-[#141419]">
               <img 
                 v-if="authStore.user.profile_picture" 
                 :src="authStore.user.profile_picture" 
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 alt="Avatar"
               >
-              <div v-else class="w-full h-full flex items-center justify-center text-white text-5xl font-bold bg-gray-700">
+              <div v-else class="w-full h-full flex items-center justify-center text-white text-6xl font-black bg-slate-800">
                 {{ authStore.user.username.charAt(0).toUpperCase() }}
               </div>
             </div>
           </div>
           <!-- Level Badge -->
-          <div class="absolute bottom-2 right-2 md:bottom-4 md:right-4 z-20 bg-gradient-to-br from-yellow-400 to-yellow-600 text-gray-900 font-black w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center border-4 border-gray-900 shadow-xl text-sm md:text-lg cursor-help transform hover:scale-110 transition-transform" :title="'Level ' + userLevel">
+          <div class="absolute -bottom-4 -right-4 z-30 bg-gradient-to-br from-yellow-400 to-orange-600 text-gray-900 font-black w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center border-4 border-[#141419] shadow-2xl text-lg md:text-2xl transform rotate-12 group-hover:rotate-0 transition-all">
             {{ userLevel }}
           </div>
         </div>
 
         <!-- Name, Bio & Stats -->
-        <div class="flex-grow text-center md:text-left pb-2 w-full md:w-auto">
-          <h1 class="text-4xl md:text-6xl font-black text-white drop-shadow-lg tracking-tight mb-2">{{ authStore.user.username }}</h1>
-          <p class="text-gray-300/90 text-sm md:text-lg max-w-2xl mx-auto md:mx-0 font-medium leading-relaxed mb-4">{{ authStore.user.bio || 'Filmový nadšenec' }}</p>
+        <div class="flex-grow text-center md:text-left pb-4">
+          <h1 class="text-4xl md:text-7xl font-black text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)] tracking-tighter mb-3 italic">
+            {{ authStore.user.username }}
+          </h1>
+          <p class="text-gray-300 text-sm md:text-xl max-w-2xl mx-auto md:mx-0 font-medium leading-relaxed mb-6 drop-shadow-md">
+            {{ authStore.user.bio || 'Tento uživatel zatím nemá žádný příběh...' }}
+          </p>
           
-          <!-- Stats Chips -->
-          <div class="flex flex-wrap justify-center md:justify-start gap-3">
-            <div class="bg-gray-900/60 backdrop-blur-md border border-gray-700/50 px-4 py-2 rounded-xl flex items-center gap-3 shadow-lg">
-              <div class="p-1.5 bg-blue-500/20 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+          <!-- Modern Stats Chips -->
+          <div class="flex flex-wrap justify-center md:justify-start gap-4">
+            <div class="bg-white/5 backdrop-blur-2xl border border-white/10 px-5 py-2.5 rounded-2xl flex items-center gap-4 shadow-2xl">
+              <div class="p-2 bg-blue-500/20 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /></svg>
               </div>
-              <div class="flex flex-col items-start">
-                <span class="text-white font-bold text-lg leading-none">{{ stats.totalCount }}</span>
-                <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Filmů</span>
+              <div class="flex flex-col">
+                <span class="text-white font-black text-xl leading-none">{{ stats.totalCount }}</span>
+                <span class="text-[10px] text-gray-400 uppercase font-black tracking-tighter mt-1">Filmotéka</span>
               </div>
             </div>
-            <div class="bg-gray-900/60 backdrop-blur-md border border-gray-700/50 px-4 py-2 rounded-xl flex items-center gap-3 shadow-lg">
-              <div class="p-1.5 bg-green-500/20 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+            <div class="bg-white/5 backdrop-blur-2xl border border-white/10 px-5 py-2.5 rounded-2xl flex items-center gap-4 shadow-2xl">
+              <div class="p-2 bg-emerald-500/20 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              <div class="flex flex-col items-start">
-                <span class="text-white font-bold text-lg leading-none">{{ stats.formattedTime }}</span>
-                <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Čas</span>
+              <div class="flex flex-col">
+                <span class="text-white font-black text-xl leading-none">{{ stats.formattedTime }}</span>
+                <span class="text-[10px] text-gray-400 uppercase font-black tracking-tighter mt-1">U obrazovky</span>
               </div>
             </div>
           </div>
@@ -86,131 +90,127 @@
       <!-- MAIN CONTENT LAYOUT -->
       <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <!-- LEFT COLUMN (Main - 3/4) -->
-        <div class="lg:col-span-3 space-y-8">
+        <!-- LEFT COLUMN (Showcases) -->
+        <div class="lg:col-span-3 space-y-10">
           
-          <!-- SHOWCASE: TOP OBLÍBENÉ (Glassmorphism) -->
-          <div class="bg-white/80 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
-              <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                Výstavka: Oblíbené
+          <!-- SHOWCASE: TOP OBLÍBENÉ -->
+          <div class="bg-white/[0.03] backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-500">
+            <div class="px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+              <h2 class="text-xl font-black text-white flex items-center gap-3 tracking-tight uppercase italic">
+                <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                Top Výstavka
               </h2>
             </div>
-            <div class="p-6">
-              <div v-if="topFavorites.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <div class="p-8">
+              <div v-if="topFavorites.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
                 <NuxtLink 
                   v-for="item in topFavorites" 
                   :key="item.id" 
                   :to="`/movies/${item.movie.id}`"
-                  class="group relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:ring-2 hover:ring-blue-500 z-0 hover:z-10"
+                  class="group relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-110 hover:ring-4 hover:ring-blue-500/50 z-0 hover:z-10"
                 >
                   <img :src="item.movie.poster" class="w-full h-full object-cover">
-                  <!-- Overlay gradient on hover -->
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                    <span class="text-white text-xs font-bold leading-tight">{{ item.movie.title }}</span>
-                    <div class="w-full bg-gray-700 h-1 mt-2 rounded-full overflow-hidden">
-                      <div class="bg-green-500 h-full w-full"></div>
-                    </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
+                    <span class="text-white text-sm font-black leading-tight drop-shadow-md">{{ item.movie.title }}</span>
                   </div>
                 </NuxtLink>
               </div>
-              <div v-else class="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                <p class="text-sm font-medium">Zatím žádné oblíbené filmy</p>
+              <div v-else class="flex flex-col items-center justify-center py-16 text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p class="text-lg font-bold opacity-30">Zatím žádné oblíbené kousky</p>
               </div>
             </div>
           </div>
 
-          <!-- SHOWCASE: KOLEKCE (Glassmorphism) -->
-          <div class="bg-white/80 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
-              <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+          <!-- SHOWCASE: KOLEKCE -->
+          <div class="bg-white/[0.03] backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
+            <div class="px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+              <h2 class="text-xl font-black text-white flex items-center gap-3 tracking-tight uppercase italic">
+                <span class="w-2 h-8 bg-purple-600 rounded-full"></span>
                 Moje Kolekce
               </h2>
-              <NuxtLink to="/collections" class="text-xs font-bold text-blue-600 hover:text-blue-400 uppercase tracking-wide transition-colors">Všechny kolekce</NuxtLink>
+              <NuxtLink to="/collections" class="text-[10px] font-black text-blue-400 hover:text-white uppercase tracking-[0.2em] transition-all">Zobrazit vše &rarr;</NuxtLink>
             </div>
-            <div class="p-6">
-              <div v-if="collections.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-8">
+              <div v-if="collections.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div 
                   v-for="collection in collections.slice(0, 4)" 
                   :key="collection.id" 
-                  class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-all cursor-pointer border border-transparent hover:border-gray-300 dark:hover:border-gray-600 group"
+                  class="flex items-center gap-5 p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] transition-all cursor-pointer border border-white/5 hover:border-white/20 group"
                   @click="navigateTo(`/collections/${collection.id}`)"
                 >
-                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex-shrink-0 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl flex-shrink-0 flex items-center justify-center text-white shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                   </div>
                   <div class="overflow-hidden">
-                    <h4 class="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-400 transition-colors">{{ collection.name }}</h4>
-                    <p class="text-xs text-gray-500">{{ collection.items.length }} položek</p>
+                    <h4 class="font-black text-white text-lg truncate group-hover:text-blue-400 transition-colors">{{ collection.name }}</h4>
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">{{ collection.items.length }} filmů</p>
                   </div>
                 </div>
               </div>
-              <div v-else class="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                <p class="text-sm">Žádné kolekce</p>
+              <div v-else class="flex flex-col items-center justify-center py-10 opacity-30">
+                <p class="text-sm font-black uppercase tracking-widest text-white">Žádné kolekce</p>
               </div>
             </div>
           </div>
 
         </div>
 
-        <!-- RIGHT COLUMN (SIDEBAR - 1/4) -->
+        <!-- RIGHT COLUMN (Sidebar) -->
         <div class="lg:col-span-1 space-y-8">
           
-          <!-- Odznaky (Glassmorphism) -->
-          <div class="bg-white/80 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 p-6">
-            <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">Odznaky</h3>
-            <div class="flex flex-wrap gap-2">
-              <div class="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-yellow-500/20 cursor-help transition-transform hover:scale-105" title="Získáno za aktivitu">
-                🏆 Lvl {{ userLevel }}
+          <!-- Odznaky -->
+          <div class="bg-white/[0.03] backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/10 p-8">
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-6">Úspěchy</h3>
+            <div class="flex flex-col gap-4">
+              <div class="bg-yellow-500/10 p-4 rounded-2xl border border-yellow-500/20 flex items-center gap-4 transition-transform hover:scale-105">
+                <span class="text-2xl">👑</span>
+                <div>
+                  <p class="text-white font-black text-sm">Úroveň {{ userLevel }}</p>
+                  <p class="text-[10px] text-yellow-500 uppercase font-black">Filmový Mistr</p>
+                </div>
               </div>
-              <div v-if="stats.totalCount >= 50" class="bg-purple-500/10 text-purple-600 dark:text-purple-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-500/20">
-                🎬 Cinephile
+              <div v-if="stats.totalCount >= 50" class="bg-purple-500/10 p-4 rounded-2xl border border-purple-500/20 flex items-center gap-4">
+                <span class="text-2xl">🎬</span>
+                <div>
+                  <p class="text-white font-black text-sm">Cinephile</p>
+                  <p class="text-[10px] text-purple-500 uppercase font-black">50+ zhlédnutí</p>
+                </div>
               </div>
-              <div v-else class="bg-gray-500/10 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-500/20">
-                🐣 Začátečník
-              </div>
-              <div v-if="stats.favoriteGenre !== 'N/A'" class="bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-blue-500/20">
-                💙 {{ stats.favoriteGenre }}
+              <div v-if="stats.favoriteGenre !== 'N/A'" class="bg-blue-500/10 p-4 rounded-2xl border border-blue-500/20 flex items-center gap-4">
+                <span class="text-2xl">💙</span>
+                <div>
+                  <p class="text-white font-black text-sm">{{ stats.favoriteGenre }}</p>
+                  <p class="text-[10px] text-blue-500 uppercase font-black">Nejoblíbenější žánr</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Quick Links (Glassmorphism) -->
-          <div class="bg-white/80 dark:bg-gray-900/60 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="p-2 space-y-1">
-              <NuxtLink to="/watchlist" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition group">
-                <div class="flex items-center gap-3">
-                  <div class="p-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-colors text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                  </div>
-                  <span class="font-medium text-sm">Můj seznam</span>
-                </div>
-                <span class="text-xs font-bold bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-md min-w-[24px] text-center">{{ watchlistItems.length }}</span>
-              </NuxtLink>
-              
-              <NuxtLink to="/collections" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition group">
-                <div class="flex items-center gap-3">
-                  <div class="p-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg group-hover:bg-purple-500 group-hover:text-white transition-colors text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                  </div>
-                  <span class="font-medium text-sm">Kolekce</span>
-                </div>
-                <span class="text-xs font-bold bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-md min-w-[24px] text-center">{{ collections.length }}</span>
-              </NuxtLink>
-              
-              <div class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-200 transition group cursor-not-allowed opacity-70">
-                <div class="flex items-center gap-3">
-                  <div class="p-1.5 bg-gray-200 dark:bg-gray-800 rounded-lg text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                  </div>
-                  <span class="font-medium text-sm">Recenze</span>
-                </div>
-                <span class="text-xs font-bold bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-md min-w-[24px] text-center">{{ reviewCount }}</span>
+          <!-- Quick Links -->
+          <div class="bg-white/[0.03] backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden p-2">
+            <NuxtLink to="/watchlist" class="flex items-center justify-between px-6 py-4 rounded-2xl hover:bg-white/10 text-gray-300 hover:text-white transition-all group">
+              <div class="flex items-center gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                <span class="font-black text-sm uppercase tracking-wider">Můj seznam</span>
               </div>
+              <span class="text-xs font-black bg-white/10 px-3 py-1 rounded-full">{{ watchlistItems.length }}</span>
+            </NuxtLink>
+            
+            <NuxtLink to="/collections" class="flex items-center justify-between px-6 py-4 rounded-2xl hover:bg-white/10 text-gray-300 hover:text-white transition-all group">
+              <div class="flex items-center gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                <span class="font-black text-sm uppercase tracking-wider">Kolekce</span>
+              </div>
+              <span class="text-xs font-black bg-white/10 px-3 py-1 rounded-full">{{ collections.length }}</span>
+            </NuxtLink>
+            
+            <div class="flex items-center justify-between px-6 py-4 rounded-2xl opacity-40 grayscale group">
+              <div class="flex items-center gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                <span class="font-black text-sm uppercase tracking-wider">Recenze</span>
+              </div>
+              <span class="text-xs font-black bg-white/10 px-3 py-1 rounded-full">{{ reviewCount }}</span>
             </div>
           </div>
 
@@ -218,64 +218,77 @@
       </div>
     </div>
 
-    <!-- EDIT PROFILE MODAL -->
+    <!-- EDIT PROFILE MODAL (With Fixed Previews) -->
     <transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
-      <div v-if="isEditModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div v-if="isEditModalOpen" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 text-center">
-          <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" @click="closeEditModal"></div>
+          <div class="fixed inset-0 bg-black/90 backdrop-blur-md transition-opacity" @click="closeEditModal"></div>
 
-          <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
-            <div class="px-6 py-6">
-              <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Upravit profil</h3>
-                <button @click="closeEditModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+          <div class="inline-block align-bottom bg-[#1a1a21] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-white/10">
+            <div class="px-8 py-8">
+              <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-black text-white italic uppercase tracking-tighter">Nastavení Profilu</h3>
+                <button @click="closeEditModal" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-full transition-all">
                   <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
 
-              <form @submit.prevent="saveProfile" class="space-y-4">
-                <!-- Avatar Upload -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Avatar</label>
-                  <div class="flex items-center gap-4">
-                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-16 w-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">
-                    <input type="file" @change="handleFileChange" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
+              <form @submit.prevent="saveProfile" class="space-y-6">
+                <!-- Cover Preview & Upload -->
+                <div class="relative group/cover">
+                  <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Pozadí profilu</label>
+                  <div class="relative h-32 w-full rounded-2xl overflow-hidden bg-gray-800 border-2 border-dashed border-white/10 group-hover/cover:border-blue-500/50 transition-colors">
+                    <img v-if="coverPreviewUrl || authStore.user.cover_picture" :src="coverPreviewUrl || authStore.user.cover_picture" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity">
+                      <input type="file" @change="handleCoverChange" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                      <span class="text-white text-xs font-bold bg-blue-600 px-4 py-2 rounded-full shadow-xl">Změnit pozadí</span>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Cover Upload -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pozadí profilu (Cover)</label>
-                  <input type="file" @change="handleCoverChange" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
-                  <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
-                  <textarea v-model="editForm.bio" rows="3" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors"></textarea>
-                </div>
-
-                <!-- Password Change Toggle -->
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline font-medium">Změnit heslo</button>
-                </div>
-
-                <transition enter-active-class="duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0" leave-active-class="duration-150 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-2">
-                  <div v-if="showPasswordSection" class="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <input type="password" v-model="passwordForm.old_password" placeholder="Staré heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                    <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                    <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                    <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-2 bg-red-500/10 text-red-600 border border-red-500/20 rounded text-sm hover:bg-red-500 hover:text-white transition-colors font-bold">Aktualizovat heslo</button>
+                <!-- Avatar Preview & Upload -->
+                <div class="flex items-end gap-6">
+                  <div class="relative group/avatar flex-shrink-0">
+                    <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border-4 border-[#1a1a21] shadow-2xl relative">
+                      <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/100'" class="w-full h-full object-cover">
+                      <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                        <input type="file" @change="handleFileChange" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      </div>
+                    </div>
                   </div>
-                </transition>
+                  <div class="flex-grow">
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Uživatelské jméno</label>
+                    <input type="text" v-model="editForm.username" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                  </div>
+                </div>
 
-                <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-                  <button type="submit" :disabled="isSaving" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500 shadow-lg shadow-blue-500/30 disabled:opacity-50 transition-all transform hover:scale-105 active:scale-95">
-                    {{ isSaving ? 'Ukládám...' : 'Uložit změny' }}
+                <div>
+                  <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Příběh (Bio)</label>
+                  <textarea v-model="editForm.bio" rows="3" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all placeholder-gray-600" placeholder="Napište něco o sobě..."></textarea>
+                </div>
+
+                <!-- Password Section -->
+                <div class="pt-2">
+                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-blue-400 transition-colors">
+                    {{ showPasswordSection ? 'Skrýt nastavení hesla' : 'Zabezpečení a heslo' }}
+                  </button>
+                  
+                  <div v-if="showPasswordSection" class="mt-4 p-6 bg-black/20 rounded-2xl border border-white/5 space-y-4">
+                    <input type="password" v-model="passwordForm.old_password" placeholder="Současné heslo" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all">
+                    <div class="grid grid-cols-2 gap-4">
+                      <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all">
+                      <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:ring-2 focus:ring-red-500/50 focus:outline-none transition-all">
+                    </div>
+                    <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white font-black uppercase tracking-widest rounded-xl transition-all border border-red-600/20 text-xs">
+                      Aktualizovat heslo
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex justify-end pt-6">
+                  <button type="submit" :disabled="isSaving" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-2xl shadow-blue-600/20 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50">
+                    {{ isSaving ? 'Ukládám...' : 'Uložit Profil' }}
                   </button>
                 </div>
               </form>
@@ -311,6 +324,7 @@ const editForm = reactive({
 const profilePictureFile = ref(null);
 const coverPictureFile = ref(null);
 const previewImageUrl = ref('');
+const coverPreviewUrl = ref('');
 
 const passwordForm = reactive({
   old_password: '',
@@ -325,6 +339,8 @@ const reviewCount = ref(0);
 const openEditModal = () => {
   editForm.username = authStore.user.username;
   editForm.bio = authStore.user.bio;
+  previewImageUrl.value = '';
+  coverPreviewUrl.value = '';
   isEditModalOpen.value = true;
 };
 
@@ -352,6 +368,11 @@ const handleCoverChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     coverPictureFile.value = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      coverPreviewUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 };
 
@@ -424,7 +445,6 @@ const fetchData = async () => {
   }
 };
 
-// Computed Stats
 const watchedMovies = computed(() => watchlistItems.value.filter(item => item.watched));
 
 const stats = computed(() => {
@@ -462,10 +482,17 @@ const userLevel = computed(() => {
 });
 
 const topFavorites = computed(() => {
-  return [...watchlistItems.value].reverse().slice(0, 5);
+  return [...watchedMovies.value].reverse().slice(0, 5);
 });
 
 onMounted(() => {
   fetchData();
 });
 </script>
+
+<style scoped>
+/* Custom blur for extra smoothness */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
+</style>
