@@ -1,336 +1,300 @@
 <template>
-  <div class="max-w-2xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Můj profil</h1>
-    
-    <div v-if="!authStore.user" class="text-center text-gray-500">
-      Načítám data uživatele...
+  <div class="bg-gray-100 dark:bg-gray-900 min-h-screen pb-12">
+    <!-- Loading State -->
+    <div v-if="isLoadingProfile" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
-    <form v-else @submit.prevent="saveProfile">
-      <div class="flex flex-col items-center space-y-4 mb-8">
+    <div v-else-if="authStore.user">
+      <!-- HERO SECTION (STEAM STYLE) -->
+      <div class="relative w-full h-64 md:h-80 bg-gray-800 overflow-hidden group">
+        <!-- Cover Image -->
         <img 
-          v-if="previewImageUrl || authStore.user.profile_picture"
-          :src="previewImageUrl || authStore.user.profile_picture" 
-          alt="Profile Picture"
-          class="h-32 w-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600"
+          v-if="authStore.user.cover_picture" 
+          :src="authStore.user.cover_picture" 
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          alt="Cover"
         >
-        <div v-else class="h-32 w-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 flex items-center justify-center bg-gray-300 dark:bg-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+        <div v-else class="w-full h-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+          <span class="text-gray-600 dark:text-gray-500 text-lg font-medium">Zatím bez pozadí</span>
         </div>
-        <div class="relative">
-          <input 
-            type="file" 
-            @change="handleFileChange" 
-            accept="image/*"
-            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            id="file-upload"
-          >
-          <label for="file-upload" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 cursor-pointer">
-            Změnit obrázek
-          </label>
-        </div>
-      </div>
+        
+        <!-- Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
 
-      <div class="mb-6">
-        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
-        <input 
-          type="text" 
-          id="username"
-          v-model="username"
-          class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
-        >
-      </div>
-
-      <div class="mb-6">
-        <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">O mně</label>
-        <textarea 
-          id="bio" 
-          v-model="bio"
-          rows="4"
-          class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200"
-          placeholder="Řekněte nám něco o sobě..."
-        ></textarea>
-      </div>
-
-      <div v-if="successMessage" class="mb-4 text-green-600 dark:text-green-400">
-        {{ successMessage }}
-      </div>
-      <div v-if="errorMessage" class="mb-4 text-red-600 dark:text-red-400">
-        {{ errorMessage }}
-      </div>
-
-      <div class="flex justify-end">
+        <!-- Edit Profile Button (Top Right) -->
         <button 
-          type="submit" 
-          :disabled="isSaving"
-          class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+          @click="openEditModal"
+          class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-white/10"
         >
-          {{ isSaving ? 'Ukládám...' : 'Uložit profil' }}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+          Upravit profil
         </button>
       </div>
-    </form>
 
-    <hr class="my-8 border-gray-200 dark:border-gray-700">
-    <section class="mt-8">
-      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Zabezpečení</h2>
-      <form @submit.prevent="handleChangePassword" class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-        <div v-if="passwordSuccess" class="mb-4 text-green-600 dark:text-green-400">{{ passwordSuccess }}</div>
-        <div v-if="passwordError" class="mb-4 text-red-600 dark:text-red-400">{{ passwordError }}</div>
-
-        <div class="mb-4">
-          <label for="old_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staré heslo</label>
-          <input 
-            type="password" 
-            id="old_password" 
-            v-model="passwordForm.old_password" 
-            required
-            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-          >
-        </div>
-        <div class="mb-4">
-          <label for="new_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nové heslo</label>
-          <input 
-            type="password" 
-            id="new_password" 
-            v-model="passwordForm.new_password" 
-            required
-            minlength="8"
-            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-          >
-        </div>
-        <div class="mb-4">
-          <label for="confirm_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Potvrzení nového hesla</label>
-          <input 
-            type="password" 
-            id="confirm_password" 
-            v-model="passwordForm.confirm_password" 
-            required
-            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-          >
-        </div>
-        <div class="flex justify-end">
-          <button 
-            type="submit" 
-            :disabled="isChangingPassword"
-            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-red-400"
-          >
-            {{ isChangingPassword ? 'Měním...' : 'Změnit heslo' }}
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <hr class="my-8 border-gray-200 dark:border-gray-700">
-    <section class="mt-8">
-      <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">Vaše statistiky</h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Statistiky se počítají z filmů ve vašem seznamu, které jste označili jako "shlédnuto".
-      </p>
-      <div v-if="isLoadingStats" class="text-center text-gray-500">
-        Načítám statistiky...
-      </div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-        <!-- Stat Card: Movies Watched -->
-        <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Shlédnuté filmy</p>
-          <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.totalCount }}</p>
-        </div>
-        <!-- Stat Card: Time on Screen -->
-        <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Čas u obrazovky</p>
-          <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.formattedTime }}</p>
-        </div>
-        <!-- Stat Card: Favorite Genre -->
-        <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Oblíbený žánr</p>
-          <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.favoriteGenre }}</p>
-        </div>
-      </div>
-    </section>
-
-    <hr class="my-8 border-gray-200 dark:border-gray-700">
-    <section class="mt-8">
-      <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Moje kolekce</h2>
-      
-      <form @submit.prevent="handleCreateCollection" class="mb-8 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-        <h3 class="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Vytvořit novou kolekci</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input 
-            type="text" 
-            v-model="newCollection.name" 
-            placeholder="Název kolekce" 
-            class="p-2 border rounded bg-white dark:bg-gray-600 dark:text-white dark:border-gray-500" 
-            required
-          >
-          <input 
-            type="text" 
-            v-model="newCollection.description" 
-            placeholder="Popis (volitelné)" 
-            class="p-2 border rounded bg-white dark:bg-gray-600 dark:text-white dark:border-gray-500"
-          >
-        </div>
-        <div class="flex items-center justify-between mt-3">
-          <label class="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-            <input type="checkbox" v-model="newCollection.is_public" class="form-checkbox">
-            <span>Veřejná</span>
-          </label>
-          <button 
-            type="submit" 
-            :disabled="isCreatingCollection"
-            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-green-400"
-          >
-            {{ isCreatingCollection ? 'Vytvářím...' : 'Vytvořit' }}
-          </button>
-        </div>
-      </form>
-
-      <div v-if="collections.length > 0" class="space-y-4">
-        <div 
-          v-for="collection in collections" 
-          :key="collection.id" 
-          class="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
-        >
-          <div>
-            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ collection.name }}</h3>
-            <p class="text-gray-600 dark:text-gray-400 text-sm">{{ collection.description }}</p>
-            <div class="flex gap-2 mt-1 text-xs">
-              <span :class="collection.is_public ? 'text-green-600' : 'text-yellow-600'">
-                {{ collection.is_public ? 'Veřejná' : 'Soukromá' }}
-              </span>
-              <span class="text-gray-400">• {{ collection.items.length }} položek</span>
+      <!-- PROFILE INFO BAR -->
+      <div class="container mx-auto px-4 relative -mt-16 mb-8 flex flex-col md:flex-row items-end md:items-center gap-6">
+        <!-- Avatar -->
+        <div class="relative">
+          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-gray-900 overflow-hidden bg-gray-800 shadow-2xl">
+            <img 
+              v-if="authStore.user.profile_picture" 
+              :src="authStore.user.profile_picture" 
+              class="w-full h-full object-cover"
+              alt="Avatar"
+            >
+            <div v-else class="w-full h-full flex items-center justify-center text-white text-4xl font-bold bg-blue-600">
+              {{ authStore.user.username.charAt(0).toUpperCase() }}
             </div>
           </div>
-          <button @click="handleDeleteCollection(collection.id)" class="text-red-500 hover:text-red-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          <!-- Level Badge (Absolute) -->
+          <div class="absolute -bottom-2 -right-2 bg-yellow-500 text-gray-900 font-bold w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-900 shadow-lg" title="Úroveň">
+            {{ userLevel }}
+          </div>
+        </div>
+
+        <!-- Name & Bio -->
+        <div class="flex-grow text-center md:text-left pb-2">
+          <h1 class="text-3xl md:text-4xl font-black text-white drop-shadow-md">{{ authStore.user.username }}</h1>
+          <p class="text-gray-300 mt-1 max-w-2xl text-sm md:text-base line-clamp-2 md:line-clamp-1">{{ authStore.user.bio || 'Filmový nadšenec' }}</p>
+        </div>
+
+        <!-- Main Stats (Right) -->
+        <div class="flex gap-6 pb-2">
+          <div class="text-center">
+            <span class="block text-2xl font-bold text-white">{{ stats.totalCount }}</span>
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Filmů</span>
+          </div>
+          <div class="text-center">
+            <span class="block text-2xl font-bold text-white">{{ stats.formattedTime }}</span>
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Čas</span>
+          </div>
         </div>
       </div>
-      <p v-else class="text-center text-gray-500 italic">Zatím žádné kolekce.</p>
-    </section>
 
-    <!-- Confirm Modal -->
-    <ConfirmModal 
-      :is-open="isConfirmModalOpen"
-      :title="'Smazat kolekci'"
-      :message="'Opravdu chcete smazat tuto kolekci? Tuto akci nelze vrátit zpět.'"
-      @confirm="confirmDeleteCollection"
-      @close="isConfirmModalOpen = false"
-    />
+      <!-- MAIN CONTENT LAYOUT (2 COLUMNS) -->
+      <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <!-- LEFT COLUMN (MAIN - 3/4) -->
+        <div class="lg:col-span-3 space-y-8">
+          
+          <!-- SHOWCASE: TOP OBLÍBENÉ (Simulated from Watchlist for now) -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+              <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                Výstavka: Oblíbené
+              </h2>
+            </div>
+            <div class="p-6">
+              <div v-if="topFavorites.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <NuxtLink 
+                  v-for="item in topFavorites" 
+                  :key="item.id" 
+                  :to="`/movies/${item.movie.id}`"
+                  class="group relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all hover:-translate-y-1"
+                >
+                  <img :src="item.movie.poster" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
+                    <span class="text-white text-xs font-bold">{{ item.movie.title }}</span>
+                  </div>
+                </NuxtLink>
+              </div>
+              <p v-else class="text-gray-500 italic text-center py-8">Přidejte si filmy do seznamu a označte je jako shlédnuté.</p>
+            </div>
+          </div>
+
+          <!-- SHOWCASE: KOLEKCE -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+              <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                Moje Kolekce
+              </h2>
+              <NuxtLink to="/collections" class="text-sm text-blue-600 hover:underline">Všechny kolekce</NuxtLink>
+            </div>
+            <div class="p-6">
+              <div v-if="collections.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div 
+                  v-for="collection in collections.slice(0, 4)" 
+                  :key="collection.id" 
+                  class="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
+                  @click="navigateTo(`/collections/${collection.id}`)"
+                >
+                  <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded flex-shrink-0 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  </div>
+                  <div class="overflow-hidden">
+                    <h4 class="font-bold text-gray-900 dark:text-white truncate">{{ collection.name }}</h4>
+                    <p class="text-xs text-gray-500">{{ collection.items.length }} položek</p>
+                  </div>
+                </div>
+              </div>
+              <p v-else class="text-gray-500 italic text-center py-4">Zatím žádné kolekce.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN (SIDEBAR - 1/4) -->
+        <div class="lg:col-span-1 space-y-8">
+          
+          <!-- Odznaky (Badges) -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Odznaky</h3>
+            <div class="flex flex-wrap gap-2">
+              <!-- Level Badge -->
+              <div class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200 dark:border-yellow-800" title="Level">
+                Lvl {{ userLevel }}
+              </div>
+              <!-- Cinephile Badge -->
+              <div v-if="stats.totalCount >= 50" class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-800">
+                Cinephile
+              </div>
+              <!-- Newbie Badge -->
+              <div v-else class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-xs font-bold border border-gray-200 dark:border-gray-600">
+                Začátečník
+              </div>
+              <!-- Genre Badge -->
+              <div v-if="stats.favoriteGenre !== 'N/A'" class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 dark:border-blue-800">
+                Fanoušek {{ stats.favoriteGenre }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="p-4 space-y-1">
+              <NuxtLink to="/watchlist" class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
+                Můj seznam
+              </NuxtLink>
+              <NuxtLink to="/collections" class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
+                Moje kolekce
+              </NuxtLink>
+              <!-- Placeholder for Reviews page if it exists separately -->
+              <div class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition cursor-pointer">
+                Recenze
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT PROFILE MODAL -->
+    <transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+      <div v-if="isEditModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 text-center">
+          <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" @click="closeEditModal"></div>
+
+          <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-6">
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Upravit profil</h3>
+                <button @click="closeEditModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <form @submit.prevent="saveProfile" class="space-y-4">
+                <!-- Avatar Upload -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Avatar</label>
+                  <div class="flex items-center gap-4">
+                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-12 w-12 rounded-full object-cover border border-gray-300 dark:border-gray-600">
+                    <input type="file" @change="handleFileChange" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
+                  </div>
+                </div>
+
+                <!-- Cover Upload -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pozadí profilu (Cover)</label>
+                  <input type="file" @change="handleCoverChange" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
+                  <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+                  <textarea v-model="editForm.bio" rows="3" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <!-- Password Change Toggle -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline">Změnit heslo</button>
+                </div>
+
+                <div v-if="showPasswordSection" class="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <input type="password" v-model="passwordForm.old_password" placeholder="Staré heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">Aktualizovat heslo</button>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                  <button type="submit" :disabled="isSaving" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                    {{ isSaving ? 'Ukládám...' : 'Uložit změny' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive, nextTick } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
 import { useToast } from '../composables/useToast';
-import ConfirmModal from '../components/ConfirmModal.vue'; // Correct path
+import { navigateTo } from '#app';
 
 const authStore = useAuthStore();
-const { updateProfile, getWatchlist, getCollections, createCollection, deleteCollection, changePassword } = useApi();
+const { updateProfile, getWatchlist, getCollections, changePassword } = useApi();
 const toast = useToast();
 
-const username = ref('');
-const bio = ref('');
-const profilePictureFile = ref(null);
-const previewImageUrl = ref('');
-
+const isLoadingProfile = ref(true);
+const isEditModalOpen = ref(false);
 const isSaving = ref(false);
-const successMessage = ref('');
-const errorMessage = ref('');
+const showPasswordSection = ref(false);
+const isChangingPassword = ref(false);
+
+const editForm = reactive({
+  username: '',
+  bio: '',
+});
+const profilePictureFile = ref(null);
+const coverPictureFile = ref(null);
+const previewImageUrl = ref('');
 
 const passwordForm = reactive({
   old_password: '',
   new_password: '',
   confirm_password: ''
 });
-const isChangingPassword = ref(false);
-const passwordSuccess = ref('');
-const passwordError = ref('');
 
 const watchlistItems = ref([]);
-const isLoadingStats = ref(true);
-
 const collections = ref([]);
-const newCollection = reactive({
-  name: '',
-  description: '',
-  is_public: true
-});
-const isCreatingCollection = ref(false);
 
-const isConfirmModalOpen = ref(false);
-const pendingDeleteCollectionId = ref(null);
-
-onMounted(() => {
-  if (authStore.user) {
-    username.value = authStore.user.username || '';
-    bio.value = authStore.user.bio || '';
-  }
-  fetchWatchlistData();
-  fetchCollections();
-});
-
-const fetchWatchlistData = async () => {
-  isLoadingStats.value = true;
-  try {
-    const response = await getWatchlist();
-    watchlistItems.value = response.data?.results || [];
-  } catch (err) {
-    console.error('Error fetching watchlist for stats:', err);
-    watchlistItems.value = [];
-  } finally {
-    isLoadingStats.value = false;
-  }
+const openEditModal = () => {
+  editForm.username = authStore.user.username;
+  editForm.bio = authStore.user.bio;
+  isEditModalOpen.value = true;
 };
 
-const fetchCollections = async () => {
-  try {
-    const response = await getCollections();
-    collections.value = (response.data?.results || []).filter(c => c.user.id === authStore.user?.id);
-  } catch (err) {
-    console.error('Error fetching collections:', err);
-    collections.value = [];
-  }
-};
-
-const handleCreateCollection = async () => {
-  isCreatingCollection.value = true;
-  try {
-    await createCollection(newCollection);
-    newCollection.name = '';
-    newCollection.description = '';
-    newCollection.is_public = true;
-    await fetchCollections();
-  } catch (err) {
-    console.error('Error creating collection:', err);
-    toast.error('Nepodařilo se vytvořit kolekci.');
-  } finally {
-    isCreatingCollection.value = false;
-  }
-};
-
-const handleDeleteCollection = (id) => {
-  pendingDeleteCollectionId.value = id;
-  isConfirmModalOpen.value = true;
-};
-
-const confirmDeleteCollection = async () => {
-  if (!pendingDeleteCollectionId.value) return;
-  
-  try {
-    await deleteCollection(pendingDeleteCollectionId.value);
-    await fetchCollections();
-    toast.success('Kolekce smazána.');
-  } catch (err) {
-    console.error('Error deleting collection:', err);
-    toast.error('Nepodařilo se smazat kolekci.');
-  } finally {
-    isConfirmModalOpen.value = false;
-    pendingDeleteCollectionId.value = null;
-  }
+const closeEditModal = () => {
+  isEditModalOpen.value = false;
+  showPasswordSection.value = false;
+  passwordForm.old_password = '';
+  passwordForm.new_password = '';
+  passwordForm.confirm_password = '';
 };
 
 const handleFileChange = (event) => {
@@ -345,25 +309,33 @@ const handleFileChange = (event) => {
   }
 };
 
+const handleCoverChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    coverPictureFile.value = file;
+  }
+};
+
 const saveProfile = async () => {
   isSaving.value = true;
-  successMessage.value = '';
-  errorMessage.value = '';
-
   const formData = new FormData();
-  formData.append('username', username.value);
-  formData.append('bio', bio.value);
+  formData.append('username', editForm.username);
+  formData.append('bio', editForm.bio);
   if (profilePictureFile.value) {
     formData.append('profile_picture', profilePictureFile.value);
+  }
+  if (coverPictureFile.value) {
+    formData.append('cover_picture', coverPictureFile.value);
   }
 
   try {
     await updateProfile(formData);
     await authStore.fetchProfile();
-    toast.success('Profil úspěšně aktualizován!');
+    toast.success('Profil uložen!');
+    closeEditModal();
   } catch (err) {
-    console.error('Error updating profile:', err);
-    toast.error('Nepodařilo se aktualizovat profil. Uživatelské jméno je možná obsazené.');
+    console.error('Error:', err);
+    toast.error('Chyba při ukládání profilu.');
   } finally {
     isSaving.value = false;
   }
@@ -371,76 +343,90 @@ const saveProfile = async () => {
 
 const handleChangePassword = async () => {
   if (passwordForm.new_password !== passwordForm.confirm_password) {
-    passwordError.value = "Nová hesla se neshodují.";
-    toast.error("Nová hesla se neshodují.");
+    toast.error("Hesla se neshodují.");
     return;
   }
-  
   isChangingPassword.value = true;
-  passwordError.value = '';
-  passwordSuccess.value = '';
-
   try {
     await changePassword({
       old_password: passwordForm.old_password,
       new_password: passwordForm.new_password
     });
-    toast.success("Heslo úspěšně změněno.");
+    toast.success("Heslo změněno.");
     passwordForm.old_password = '';
     passwordForm.new_password = '';
     passwordForm.confirm_password = '';
+    showPasswordSection.value = false;
   } catch (err) {
-    console.error('Password change failed:', err);
-    const msg = err.response?.data?.detail || "Nepodařilo se změnit heslo.";
-    passwordError.value = msg;
-    toast.error(msg);
+    toast.error(err.response?.data?.detail || "Chyba při změně hesla.");
   } finally {
     isChangingPassword.value = false;
   }
 };
 
-const watchedMovies = computed(() => {
-    if (!Array.isArray(watchlistItems.value)) return [];
-    return watchlistItems.value.filter(item => item.watched);
-});
+const fetchData = async () => {
+  isLoadingProfile.value = true;
+  try {
+    if (!authStore.user) {
+        await authStore.initialize();
+    }
+    const [wRes, cRes] = await Promise.all([
+      getWatchlist(),
+      getCollections()
+    ]);
+    watchlistItems.value = wRes.data.results;
+    collections.value = cRes.data.results.filter(c => c.user.id === authStore.user?.id);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isLoadingProfile.value = false;
+  }
+};
+
+// Computed Stats
+const watchedMovies = computed(() => watchlistItems.value.filter(item => item.watched));
 
 const stats = computed(() => {
-  if (isLoadingStats.value || watchedMovies.value.length === 0) {
-    return {
-      totalCount: 0,
-      totalMinutes: 0,
-      favoriteGenre: 'N/A',
-      formattedTime: '0h 0m',
-    };
-  }
-
   const totalCount = watchedMovies.value.length;
-  const totalMinutes = watchedMovies.value.reduce((total, item) => total + (item.movie?.duration_minutes || 0), 0);
+  const totalMinutes = watchedMovies.value.reduce((acc, item) => acc + (item.movie?.duration_minutes || 0), 0);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  const formattedTime = `${hours}h ${minutes}m`;
-
-  const genreCounts = watchedMovies.value
-    .flatMap(item => item.movie?.genres || [])
-    .reduce((counts, genre) => {
-      counts[genre.name] = (counts[genre.name] || 0) + 1;
-      return counts;
-    }, {});
+  
+  const genreCounts = {};
+  watchedMovies.value.forEach(item => {
+    item.movie?.genres?.forEach(g => {
+      genreCounts[g.name] = (genreCounts[g.name] || 0) + 1;
+    });
+  });
   
   let favoriteGenre = 'N/A';
-  let maxCount = 0;
-  for (const genre in genreCounts) {
-    if (genreCounts[genre] > maxCount) {
-      maxCount = genreCounts[genre];
+  let max = 0;
+  for (const [genre, count] of Object.entries(genreCounts)) {
+    if (count > max) {
+      max = count;
       favoriteGenre = genre;
     }
   }
 
   return {
     totalCount,
-    totalMinutes,
-    favoriteGenre,
-    formattedTime,
+    formattedTime: `${hours}h ${minutes}m`,
+    favoriteGenre
   };
+});
+
+const userLevel = computed(() => {
+  const count = stats.value.totalCount;
+  return Math.floor(count / 5) + 1; // Level up every 5 movies
+});
+
+const topFavorites = computed(() => {
+  // Prozatím bereme posledních 5 zhlédnutých jako "Top". 
+  // V budoucnu můžeme brát podle hodnocení (5 hvězd).
+  return [...watchedMovies.value].reverse().slice(0, 5);
+});
+
+onMounted(() => {
+  fetchData();
 });
 </script>

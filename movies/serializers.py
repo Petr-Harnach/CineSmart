@@ -55,9 +55,10 @@ class ActorSerializer(serializers.ModelSerializer):
 # PŘESUNUTO SEM, ABY BYLO DOSTUPNÉ PRO REVIEW A COLLECTION SERIALIZERY
 class MyProfileSerializer(serializers.ModelSerializer):
     profile_picture = AbsoluteImageField(read_only=True)
+    cover_picture = AbsoluteImageField(read_only=True) # New field
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
-        fields = ['id', 'username', 'email', 'bio', 'profile_picture']
+        fields = ['id', 'username', 'email', 'bio', 'profile_picture', 'cover_picture']
 
 
 class CollectionItemSerializer(serializers.ModelSerializer):
@@ -115,11 +116,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 class PublicUserSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     profile_picture = AbsoluteImageField(read_only=True)
+    cover_picture = AbsoluteImageField(read_only=True) # New field
     collections = serializers.SerializerMethodField()
 
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
-        fields = ['id', 'username', 'bio', 'profile_picture', 'reviews', 'collections']
+        fields = ['id', 'username', 'bio', 'profile_picture', 'cover_picture', 'reviews', 'collections']
 
     def get_collections(self, obj):
         # Vrátit jen veřejné kolekce
@@ -142,7 +144,7 @@ class EpisodeSerializer(serializers.ModelSerializer):
 
 
 class SeasonSerializer(serializers.ModelSerializer):
-    poster = AbsoluteImageField(read_only=True) # New field
+    poster = AbsoluteImageField(read_only=True) 
     episodes = EpisodeSerializer(many=True, read_only=True)
     directors = DirectorSerializer(many=True, read_only=True)
     screenwriters = ScreenwriterSerializer(many=True, read_only=True)

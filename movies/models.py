@@ -13,9 +13,11 @@ class CustomUser(AbstractUser):
     
     # LOCAL (Aktivní):
     # profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    # cover_picture = models.ImageField(upload_to='cover_pics/', null=True, blank=True) # New field
     
     # PRODUCTION (Zakomentované):
     profile_picture = CloudinaryField('image', null=True, blank=True)
+    cover_picture = CloudinaryField('image', null=True, blank=True)
 
     groups = models.ManyToManyField(
         Group,
