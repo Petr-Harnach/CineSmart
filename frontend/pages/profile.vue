@@ -436,7 +436,7 @@ const cropImage = () => {
       canvas.toBlob((blob) => {
         cropperCallback.value(blob);
         closeCropperModal();
-      });
+      }, 'image/png');
     }
   }
 };
@@ -469,7 +469,7 @@ const handleCoverChange = (event) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      openCropper(e.target.result, handleCroppedCoverPicture, 16 / 9); // 16:9 aspect ratio for cover picture
+      openCropper(e.target.result, handleCroppedCoverPicture, 1920 / 500); // aspect ratio for cover picture
     };
     reader.readAsDataURL(file);
     event.target.value = ''; // Clear the input so the same file can be selected again
@@ -482,10 +482,10 @@ const saveProfile = async () => {
   formData.append('username', editForm.username);
   formData.append('bio', editForm.bio);
   if (profilePictureFile.value) {
-    formData.append('profile_picture', profilePictureFile.value);
+    formData.append('profile_picture', profilePictureFile.value, 'profile.png');
   }
   if (coverPictureFile.value) {
-    formData.append('cover_picture', coverPictureFile.value);
+    formData.append('cover_picture', coverPictureFile.value, 'cover.png');
   }
 
   try {
