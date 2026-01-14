@@ -197,46 +197,60 @@
                 </button>
               </div>
 
-              <form @submit.prevent="saveProfile" class="space-y-4">
+              <form @submit.prevent="saveProfile" class="space-y-6">
                 <!-- Avatar Upload -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Avatar</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Avatar</label>
                   <div class="flex items-center gap-4">
-                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-12 w-12 rounded-full object-cover border border-gray-300 dark:border-gray-600">
-                    <input type="file" @change="handleFileChange" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
+                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-16 w-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">
+                    <label class="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-md text-sm transition">
+                      Vybrat soubor
+                      <input type="file" @change="handleFileChange" accept="image/*" class="hidden">
+                    </label>
                   </div>
+                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 500x500px, max 2MB.</p>
                 </div>
 
                 <!-- Cover Upload -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pozadí profilu (Cover)</label>
-                  <input type="file" @change="handleCoverChange" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pozadí profilu (Cover)</label>
+                  <div class="relative w-full h-32 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-dashed border-gray-300 dark:border-gray-600 group">
+                    <img v-if="previewCoverUrl || authStore.user.cover_picture" :src="previewCoverUrl || authStore.user.cover_picture" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition">
+                      <label class="cursor-pointer text-white font-medium text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        Změnit pozadí
+                        <input type="file" @change="handleCoverChange" accept="image/*" class="hidden">
+                      </label>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 1920x600px, max 5MB.</p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
-                  <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uživatelské jméno</label>
+                  <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
-                  <textarea v-model="editForm.bio" rows="3" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"></textarea>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label>
+                  <textarea v-model="editForm.bio" rows="3" class="mt-1 block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"></textarea>
                 </div>
 
                 <!-- Password Change Toggle -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline">Změnit heslo</button>
+                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline font-medium">Změnit heslo</button>
                 </div>
 
-                <div v-if="showPasswordSection" class="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <input type="password" v-model="passwordForm.old_password" placeholder="Staré heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                  <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                  <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                  <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">Aktualizovat heslo</button>
+                <div v-if="showPasswordSection" class="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600 animate-fade-in">
+                  <input type="password" v-model="passwordForm.old_password" placeholder="Staré heslo" class="block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové heslo" class="block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 font-bold transition shadow">Aktualizovat heslo</button>
                 </div>
 
                 <div class="flex justify-end pt-4">
-                  <button type="submit" :disabled="isSaving" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                  <button type="submit" :disabled="isSaving" class="px-8 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition shadow-lg transform active:scale-95">
                     {{ isSaving ? 'Ukládám...' : 'Uložit změny' }}
                   </button>
                 </div>
@@ -273,6 +287,7 @@ const editForm = reactive({
 const profilePictureFile = ref(null);
 const coverPictureFile = ref(null);
 const previewImageUrl = ref('');
+const previewCoverUrl = ref(''); // New for cover preview
 
 const passwordForm = reactive({
   old_password: '',
@@ -295,6 +310,8 @@ const closeEditModal = () => {
   passwordForm.old_password = '';
   passwordForm.new_password = '';
   passwordForm.confirm_password = '';
+  previewImageUrl.value = '';
+  previewCoverUrl.value = '';
 };
 
 const handleFileChange = (event) => {
@@ -313,6 +330,11 @@ const handleCoverChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     coverPictureFile.value = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewCoverUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 };
 
@@ -329,8 +351,14 @@ const saveProfile = async () => {
   }
 
   try {
-    await updateProfile(formData);
-    await authStore.fetchProfile();
+    const response = await updateProfile(formData);
+    // Explicitly update store user data
+    if (response.data) {
+        authStore.user = response.data;
+    } else {
+        await authStore.fetchProfile();
+    }
+    
     toast.success('Profil uložen!');
     closeEditModal();
   } catch (err) {
@@ -421,8 +449,6 @@ const userLevel = computed(() => {
 });
 
 const topFavorites = computed(() => {
-  // Prozatím bereme posledních 5 zhlédnutých jako "Top". 
-  // V budoucnu můžeme brát podle hodnocení (5 hvězd).
   return [...watchedMovies.value].reverse().slice(0, 5);
 });
 
