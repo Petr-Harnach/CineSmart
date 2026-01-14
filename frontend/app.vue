@@ -13,6 +13,7 @@
       />
     </main>
     <TheFooter />
+    <SpeedInsights />
   </div>
 </template>
 
@@ -23,6 +24,7 @@ import { useAuthStore } from './stores/auth'; // Import store
 import TheNavbar from './components/TheNavbar.vue';
 import TheFooter from './components/TheFooter.vue';
 import AuthModal from './components/AuthModal.vue';
+import { SpeedInsights } from "@vercel/speed-insights/nuxt";
 
 const router = useRouter();
 const authStore = useAuthStore(); // Use store
