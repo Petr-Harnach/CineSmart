@@ -69,7 +69,7 @@
     <div class="mb-12 reveal">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nejlépe hodnocené</h2>
       <div v-if="loadingTopRated" class="text-center text-gray-500">
-        <p>Načítám filmy...</p>
+        <p>Načítám filmy a seriály...</p>
       </div>
       <Carousel v-else>
         <div 
@@ -99,7 +99,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
         </svg>
         <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Váš seznam je na dosah kliknutí</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Přihlaste se, abyste si mohli ukládat filmy, které chcete vidět.</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Přihlaste se, abyste si mohli ukládat filmy a seriály, které chcete vidět.</p>
         <div class="mt-6">
           <button @click="openAuthModal('login')" type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             Přihlásit se
@@ -107,7 +107,7 @@
         </div>
       </div>
       <div v-else-if="userWatchlist.length === 0" class="text-center text-gray-600 dark:text-gray-400">
-        <p>Váš seznam je prázdný. Přidejte nějaké filmy!</p>
+        <p>Váš seznam je prázdný. Přidejte nějaké filmy a seriály!</p>
       </div>
       <Carousel v-else>
         <div 

@@ -123,6 +123,13 @@ class Season(models.Model):
     overview = models.TextField(blank=True)
     release_date = models.DateField(null=True, blank=True)
     
+    # Season poster
+    # LOCAL (Aktivní):
+    # poster = models.ImageField(upload_to='season_posters/', null=True, blank=True)
+    
+    # PRODUCTION (Zakomentované):
+    poster = CloudinaryField('image', null=True, blank=True)
+
     # Season specific crew/cast (useful for anthologies)
     directors = models.ManyToManyField(Director, related_name='seasons', blank=True)
     screenwriters = models.ManyToManyField(Screenwriter, related_name='seasons', blank=True)

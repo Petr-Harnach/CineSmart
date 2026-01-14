@@ -8,10 +8,25 @@
     <div v-else-if="series" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <!-- Hlavička seriálu -->
       <div class="md:flex">
-        <div class="md:flex-shrink-0">
+        <div class="md:flex-shrink-0 relative group">
           <img v-if="series.poster" :src="series.poster" :alt="series.title" class="h-96 w-full object-cover md:w-80">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-96 w-full md:w-80 flex items-center justify-center text-gray-500">Žádný plakát</div>
+          
+          <!-- Tlačítko Watchlist (Overlay) -->
+          <button 
+            @click.stop="toggleWatchlist"
+            class="absolute top-2 right-2 bg-gray-900/60 text-white p-2 rounded-full hover:bg-gray-900/80 transition-all opacity-0 group-hover:opacity-100"
+            :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
+          >
+            <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
         </div>
+        
         <div class="p-8 w-full">
           <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ series.title }}</h1>
           <div class="flex flex-wrap items-center mb-6 text-gray-600 dark:text-gray-300 text-lg gap-4">
@@ -29,23 +44,6 @@
             </span>
 
             <AvgRating :rating="series.avg_rating" />
-          </div>
-          
-          <div class="flex gap-2 mb-6">
-            <button 
-              @click="toggleWatchlist" 
-              :disabled="isProcessingWatchlist && authStore.isLoggedIn"
-              class="px-6 py-2 rounded font-semibold transition"
-              :class="[
-                authStore.isLoggedIn 
-                  ? (watchlistItem 
-                      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700')
-                  : 'bg-gray-400 text-white cursor-pointer'
-              ]"
-            >
-              {{ isProcessingWatchlist ? '...' : (authStore.isLoggedIn ? (watchlistItem ? '✓ Ve vašem seznamu' : '+ Přidat do seznamu') : 'Přihlašte se pro přidání') }}
-            </button>
           </div>
           
           <div v-if="series.description" class="mb-6">
@@ -115,7 +113,13 @@
               >
                 <!-- Obrázek epizody -->
                 <div class="sm:w-48 flex-shrink-0 relative">
-                  <img v-if="episode.still_path" :src="episode.still_path" :alt="episode.title" class="w-full h-32 object-cover">
+                  <!-- LOGIKA OBRÁZKU: Still -> Season Poster -> Series Poster -> Placeholder -->
+                  <img 
+                    v-if="getEpisodeImage(episode)" 
+                    :src="getEpisodeImage(episode)" 
+                    :alt="episode.title" 
+                    class="w-full h-32 object-cover"
+                  >
                   <div v-else class="w-full h-32 bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 text-xs">
                     Bez náhledu
                   </div>
@@ -229,9 +233,6 @@ const fetchSeries = async () => {
   try {
     const response = await getMovieById(seriesId);
     series.value = response.data;
-    // Pokud to není seriál, přesměrujeme na detail filmu? 
-    // Ne, API vrací stejná data, jen 'type' se liší. 
-    // Pokud uživatel přijde na /series/ID a je to film, měli bychom ho přesměrovat na /movies/ID?
     if (series.value.type !== 'series') {
         router.replace(`/movies/${seriesId}`);
     }
@@ -258,7 +259,6 @@ const fetchWatchlistData = async () => {
 
 const toggleWatchlist = async () => {
   if (!authStore.isLoggedIn) {
-    // Open login modal logic here or redirect
     alert("Pro přidání do seznamu se prosím přihlašte.");
     return;
   }
@@ -275,6 +275,13 @@ const toggleWatchlist = async () => {
   } finally {
     isProcessingWatchlist.value = false;
   }
+};
+
+const getEpisodeImage = (episode) => {
+  if (episode.still_path) return episode.still_path;
+  if (currentSeason.value && currentSeason.value.poster) return currentSeason.value.poster;
+  if (series.value && series.value.poster) return series.value.poster;
+  return null;
 };
 
 const scrollToReviews = () => {

@@ -142,6 +142,7 @@ class EpisodeSerializer(serializers.ModelSerializer):
 
 
 class SeasonSerializer(serializers.ModelSerializer):
+    poster = AbsoluteImageField(read_only=True) # New field
     episodes = EpisodeSerializer(many=True, read_only=True)
     directors = DirectorSerializer(many=True, read_only=True)
     screenwriters = ScreenwriterSerializer(many=True, read_only=True)
@@ -150,7 +151,7 @@ class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Season
         fields = [
-            'id', 'season_number', 'title', 'overview', 'release_date',
+            'id', 'season_number', 'title', 'overview', 'release_date', 'poster',
             'directors', 'screenwriters', 'actors', 'episodes'
         ]
 

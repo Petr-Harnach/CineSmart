@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-6xl mx-auto mt-10 p-4">
     <div class="flex justify-between items-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Filmové kolekce</h1>
+      <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Veřejné kolekce</h1>
       <button 
         v-if="authStore.isLoggedIn"
         @click="showCreateForm = !showCreateForm"
