@@ -8,10 +8,29 @@
 
     <div v-else-if="movie" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div class="md:flex">
-        <div class="md:flex-shrink-0">
+        <!-- PLAKÁT S TLAČÍTKEM -->
+        <div class="md:flex-shrink-0 relative group">
           <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="h-96 w-full object-cover md:w-64">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-96 w-full md:w-64 flex items-center justify-center text-gray-500">Žádný plakát</div>
+          
+          <!-- Tlačítko Watchlist (Overlay) - Stejný styl jako na HP banneru -->
+          <button 
+            v-if="authStore.isLoggedIn"
+            @click.stop="toggleWatchlist"
+            class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 hover:scale-110 transition-all shadow-lg border border-white/20"
+            :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
+          >
+            <!-- Plus Icon -->
+            <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <!-- Check Icon -->
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
         </div>
+
         <div class="p-8 w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
           <div class="flex items-center mb-4 text-gray-600 dark:text-gray-300 text-lg">
@@ -22,22 +41,7 @@
           </div>
           
           <div class="flex gap-2 mb-4">
-            <button 
-              @click="toggleWatchlist" 
-              :disabled="isProcessingWatchlist && authStore.isLoggedIn"
-              class="flex-1 p-2 rounded font-semibold transition"
-              :class="[
-                authStore.isLoggedIn 
-                  ? (watchlistItem 
-                      ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500' 
-                      : 'bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600')
-                  : 'bg-gray-400 text-white cursor-pointer hover:bg-gray-500 dark:bg-gray-500 dark:hover:bg-gray-400'
-              ]"
-            >
-              {{ isProcessingWatchlist ? '...' : (authStore.isLoggedIn ? (watchlistItem ? '✓ Ve vašem seznamu' : '+ Přidat do seznamu') : 'Přihlašte se pro přidání') }}
-            </button>
-
-            <!-- Collection Dropdown -->
+            <!-- Původní tlačítko odstraněno, ponecháno pouze pro kolekce -->
             <div v-if="authStore.isLoggedIn" class="relative">
               <button 
                 @click="showCollectionDropdown = !showCollectionDropdown"
@@ -50,7 +54,7 @@
               </button>
               
               <div v-if="showCollectionDropdown" 
-                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                   class="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
                 <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
                   Nemáte žádné kolekce. Nejprve si nějakou vytvořte!
                 </div>
@@ -67,6 +71,10 @@
                 </div>
               </div>
             </div>
+            
+            <p v-else class="text-sm text-gray-500 italic self-center">
+              Přihlašte se pro přidání do seznamu nebo kolekcí.
+            </p>
           </div>
           
           <div v-if="movie.description" class="mb-4">
@@ -83,7 +91,7 @@
           </div>
           <p v-else class="text-gray-500 italic mb-4">Popis není k dispozici.</p>
           
-          <div class="mb-4 dark:text-gray-100">
+          <div class="mb-4 dark:text-gray-100 text-sm">
             <span class="font-semibold">Režie:</span> 
             <span v-if="movie.directors && movie.directors.length" class="ml-2">
               <template v-for="(director, index) in movie.directors" :key="director.id">
@@ -96,7 +104,7 @@
             <span v-else class="ml-2">N/A</span>
           </div>
           
-          <div class="mb-4 dark:text-gray-100">
+          <div class="mb-4 dark:text-gray-100 text-sm">
             <span class="font-semibold">Žánry:</span> 
             <span v-if="movie.genres && movie.genres.length" class="ml-2">
               {{ movie.genres.map(g => g.name).join(', ') }}
@@ -104,7 +112,7 @@
             <span v-else class="ml-2">N/A</span>
           </div>
 
-          <div v-if="movie.screenwriters && movie.screenwriters.length" class="mb-4 dark:text-gray-100">
+          <div v-if="movie.screenwriters && movie.screenwriters.length" class="mb-4 dark:text-gray-100 text-sm">
             <span class="font-semibold">Scénář:</span> 
             <span class="ml-2">
               <span v-for="(writer, index) in movie.screenwriters" :key="writer.id">
@@ -113,7 +121,7 @@
             </span>
           </div>
 
-          <div v-if="movie.actors && movie.actors.length" class="mb-4 dark:text-gray-100">
+          <div v-if="movie.actors && movie.actors.length" class="mb-4 dark:text-gray-100 text-sm">
             <span class="font-semibold">Hrají:</span> 
             <span class="ml-2">
               <template v-for="(actor, index) in movie.actors" :key="actor.id">
@@ -127,7 +135,7 @@
         </div>
       </div>
       <div class="p-8 border-t border-gray-200 dark:border-gray-700">
-        <!-- Your Review Section -->
+        <!-- Sekce recenzí zůstává stejná -->
         <div v-if="userReview" class="mb-8">
           <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Vaše recenze</h3>
           <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
@@ -182,7 +190,6 @@
           </div>
         </div>
 
-        <!-- Other Reviews section -->
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-2xl font-bold dark:text-gray-100">Recenze</h2>
           <div v-if="reviews.length > 0">
@@ -221,9 +228,7 @@
           </div>
         </div>
         <p v-else-if="!userReview" class="text-gray-500 dark:text-gray-400">Zatím žádné recenze.</p>
-        <p v-else class="text-gray-500 dark:text-gray-400">Žádné další recenze.</p>
-
-        <!-- New Review Form -->
+        
         <div v-if="authStore.isLoggedIn && !userReview" class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
           <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
           <form @submit.prevent="submitReview" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -250,10 +255,9 @@
             </button>
           </form>
         </div>
-        <p v-else-if="!authStore.isLoggedIn" class="mt-8 text-gray-600 dark:text-gray-400">Pro přidání recenze se prosím <a @click.prevent="$emit('navigate', 'login')" class="text-blue-500 hover:underline cursor-pointer">přihlašte</a>.</p>
       </div>
 
-      <!-- Related Movies Section -->
+      <!-- Mohlo by se vám líbit -->
       <div v-if="relatedMovies.length > 0" class="p-8 border-t border-gray-200 dark:border-gray-700">
         <h2 class="text-2xl font-bold mt-8 mb-4 dark:text-gray-100">Mohlo by se vám líbit</h2>
         <Carousel>
@@ -261,7 +265,7 @@
             v-for="relatedMovie in relatedMovies" 
             :key="relatedMovie.id" 
             class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
-            @click="goToMovie(relatedMovie.id)"
+            @click="goToDetail(relatedMovie)"
           >
             <img v-if="relatedMovie.poster" :src="relatedMovie.poster" :alt="relatedMovie.title" class="h-64 w-full object-cover">
             <div v-else class="bg-gray-300 dark:bg-gray-700 h-64 w-full"></div>
@@ -273,15 +277,15 @@
         </Carousel>
       </div>
     </div>
-    <div v-else class="text-center text-gray-500">Film nenalezen.</div>
+    <div v-else class="text-center text-gray-500 py-12">Film nenalezen.</div>
 
     <!-- Confirm Modal -->
     <ConfirmModal 
       :is-open="isConfirmModalOpen"
       :title="'Smazat recenzi'"
       :message="'Opravdu chcete smazat svou recenzi? Tuto akci nelze vrátit zpět.'"
-      @confirm="confirmDeleteReview"
-      @close="isConfirmModalOpen = false"
+      @confirm="confirmDeleteReview" 
+      @close="isConfirmModalOpen = false" 
     />
   </div>
 </template>
@@ -358,11 +362,13 @@ const otherReviews = computed(() => {
   return reviews.value.filter(review => review.id !== userReview.value.id);
 });
 
-const goToMovie = (id) => {
-  router.push(`/movies/${id}`);
+const goToDetail = (item) => {
+  if (item.type === 'series') {
+    router.push(`/series/${item.id}`);
+  } else {
+    router.push(`/movies/${item.id}`);
+  }
 };
-
-// ... (fetch functions same as before) ...
 
 const fetchUserCollections = async () => {
   try {
@@ -413,6 +419,13 @@ const fetchMovie = async (id) => {
   try {
     const response = await getMovieById(id);
     movie.value = response.data;
+    
+    // Přesměrování na /series/ pokud je to seriál
+    if (movie.value.type === 'series') {
+        router.replace(`/series/${id}`);
+        return;
+    }
+
     if (authStore.isLoggedIn) {
       await fetchWatchlist();
       await fetchUserCollections();
@@ -431,7 +444,6 @@ const handleAddToCollection = async (collectionId) => {
   try {
     await addMovieToCollection(collectionId, movieId.value);
     showCollectionDropdown.value = false;
-    // toast.success('Added to collection!'); // Removed per user request
   } catch (err) {
     console.error('Failed to add to collection:', err);
     toast.error('Film už v této kolekci je.');
@@ -439,10 +451,7 @@ const handleAddToCollection = async (collectionId) => {
 };
 
 const handleToggleLike = async (review) => {
-  if (!authStore.isLoggedIn) {
-    // openAuthModal('login'); // TODO: Handle modal globally
-    return;
-  }
+  if (!authStore.isLoggedIn) return;
   try {
     if (review.user_has_liked) {
       review.likes_count--;
@@ -454,31 +463,19 @@ const handleToggleLike = async (review) => {
     await toggleLikeReview(review.id);
   } catch (err) {
     console.error('Failed to toggle like:', err);
-    if (review.user_has_liked) {
-      review.likes_count--;
-      review.user_has_liked = false;
-    } else {
-      review.likes_count++;
-      review.user_has_liked = true;
-    }
   }
 };
 
 watch(reviewSortOrder, fetchReviews);
 
 const toggleWatchlist = async () => {
-  if (!authStore.isLoggedIn) {
-    // openAuthModal('login'); // TODO
-    return;
-  }
+  if (!authStore.isLoggedIn) return;
   isProcessingWatchlist.value = true;
   try {
     if (watchlistItem.value) {
       await removeFromWatchlist(watchlistItem.value.id);
-      // toast.success('Removed from watchlist'); // Removed
     } else {
       await addToWatchlist(movieId.value);
-      // toast.success('Added to watchlist'); // Removed
     }
     await fetchWatchlist();
   } catch (err) {
@@ -501,20 +498,9 @@ const submitReview = async () => {
     newReview.rating = 5;
     newReview.comment = '';
     await fetchReviews();
-    // toast.success('Review submitted!'); // Removed
   } catch (err) {
     console.error('Error submitting review:', err);
-    if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (data.detail) {
-            submitError.value = data.detail;
-        } else {
-            submitError.value = 'Vyskytla se neznámá chyba.';
-        }
-    } else {
-        submitError.value = 'Nepodařilo se odeslat recenzi. Zkontrolujte připojení.';
-    }
-    toast.error('Nepodařilo se odeslat recenzi.');
+    submitError.value = 'Nepodařilo se odeslat recenzi.';
   } finally {
     submittingReview.value = false;
   }
@@ -540,7 +526,6 @@ const handleSaveEdit = async (reviewId) => {
     });
     await fetchReviews();
     handleCancelEdit();
-    // toast.success('Review updated!'); // Removed
   } catch (err) {
     console.error('Error saving review:', err);
     toast.error('Nepodařilo se aktualizovat recenzi.');
@@ -554,11 +539,9 @@ const handleDeleteReview = (reviewId) => {
 
 const confirmDeleteReview = async () => {
   if (!pendingDeleteReviewId.value) return;
-  
   try {
     await deleteReview(pendingDeleteReviewId.value);
     await fetchReviews();
-    // toast.success('Review deleted.'); // Removed
   } catch (err) {
     console.error('Error deleting review:', err);
     toast.error('Nepodařilo se smazat recenzi.');

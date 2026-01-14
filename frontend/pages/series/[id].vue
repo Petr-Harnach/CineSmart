@@ -8,20 +8,22 @@
     <div v-else-if="series" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <!-- Hlavička seriálu -->
       <div class="md:flex">
+        <!-- PLAKÁT S TLAČÍTKEM -->
         <div class="md:flex-shrink-0 relative group">
           <img v-if="series.poster" :src="series.poster" :alt="series.title" class="h-96 w-full object-cover md:w-80">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-96 w-full md:w-80 flex items-center justify-center text-gray-500">Žádný plakát</div>
           
-          <!-- Tlačítko Watchlist (Overlay) -->
+          <!-- Tlačítko Watchlist (Overlay) - Styl z trailer banneru -->
           <button 
+            v-if="authStore.isLoggedIn"
             @click.stop="toggleWatchlist"
-            class="absolute top-2 right-2 bg-gray-900/60 text-white p-2 rounded-full hover:bg-gray-900/80 transition-all opacity-0 group-hover:opacity-100"
+            class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 hover:scale-110 transition-all shadow-lg border border-white/20"
             :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
           >
-            <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </button>
@@ -30,7 +32,6 @@
         <div class="p-8 w-full">
           <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ series.title }}</h1>
           <div class="flex flex-wrap items-center mb-6 text-gray-600 dark:text-gray-300 text-lg gap-4">
-            <!-- Roky vysílání -->
             <span v-if="series.release_date">
               {{ series.release_date.substring(0, 4) }}
               <span v-if="series.end_date"> – {{ series.end_date.substring(0, 4) }}</span>
@@ -38,7 +39,6 @@
             </span>
             <span v-else>TBA</span>
             
-            <!-- Počet sérií -->
             <span v-if="series.seasons && series.seasons.length" class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-200">
               {{ series.seasons.length }} {{ series.seasons.length === 1 ? 'Série' : (series.seasons.length < 5 ? 'Série' : 'Sérií') }}
             </span>
@@ -51,7 +51,6 @@
             <p class="text-gray-700 dark:text-gray-200 leading-relaxed">{{ series.description }}</p>
           </div>
 
-          <!-- Štáb (Showrunners/Main Cast) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div v-if="series.directors && series.directors.length">
               <span class="font-bold text-gray-900 dark:text-gray-100">Tvůrci/Režie:</span>
@@ -71,12 +70,10 @@
 
       <hr class="border-gray-200 dark:border-gray-700">
 
-      <!-- SEKCIE SÉRIE A EPIZODY -->
       <div class="p-8 bg-gray-50 dark:bg-gray-900/50">
         <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Epizody</h2>
         
         <div v-if="series.seasons && series.seasons.length > 0">
-          <!-- Taby pro výběr série -->
           <div class="flex overflow-x-auto space-x-2 mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
             <button 
               v-for="(season, index) in series.seasons" 
@@ -91,7 +88,6 @@
             </button>
           </div>
 
-          <!-- Seznam epizod pro vybranou sérii -->
           <div v-if="currentSeason" class="space-y-4">
             <div class="mb-4">
               <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
@@ -111,9 +107,7 @@
                 :key="episode.id" 
                 class="flex flex-col sm:flex-row bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
-                <!-- Obrázek epizody -->
                 <div class="sm:w-48 flex-shrink-0 relative">
-                  <!-- LOGIKA OBRÁZKU: Still -> Season Poster -> Series Poster -> Placeholder -->
                   <img 
                     v-if="getEpisodeImage(episode)" 
                     :src="getEpisodeImage(episode)" 
@@ -128,7 +122,6 @@
                   </div>
                 </div>
                 
-                <!-- Info o epizodě -->
                 <div class="p-4 flex-grow">
                   <div class="flex justify-between items-start">
                     <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">
@@ -145,7 +138,6 @@
                     {{ episode.overview || 'Popis epizody není k dispozici.' }}
                   </p>
                   
-                  <!-- Štáb epizody (rozbalovací?) -->
                   <div v-if="episode.directors?.length || episode.guest_stars?.length" class="mt-3 text-xs text-gray-500 dark:text-gray-400">
                     <span v-if="episode.directors?.length">
                       <strong>Režie:</strong> {{ episode.directors.map(d => d.name).join(', ') }}
@@ -162,17 +154,13 @@
             </div>
           </div>
         </div>
-        <div v-else class="text-center py-12 text-gray-500 italic">
-          Informace o sériích nejsou k dispozici.
-        </div>
       </div>
 
       <hr class="border-gray-200 dark:border-gray-700">
 
-      <!-- Sekce Recenze (Stejná jako u filmů) -->
+      <!-- Recenze -->
       <div class="p-8">
         <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Recenze</h2>
-        <!-- (Zde by byl kód pro recenze, pro stručnost zkopíruji jen základní zobrazení, nebo můžeme použít komponentu) -->
         <div v-if="series.reviews && series.reviews.length > 0" class="space-y-4">
           <div v-for="review in series.reviews" :key="review.id" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div class="flex justify-between">
@@ -183,12 +171,6 @@
           </div>
         </div>
         <p v-else class="text-gray-500 italic">Zatím žádné recenze.</p>
-        
-        <!-- Odkaz na přidání recenze (zjednodušeně) -->
-        <div v-if="authStore.isLoggedIn" class="mt-4">
-           <!-- Formular na recenzi by zde byl stejny jako u filmu -->
-           <p class="text-sm text-blue-600 cursor-pointer hover:underline" @click="scrollToReviews">Napsat recenzi (viz sekce filmu)</p>
-        </div>
       </div>
 
     </div>
@@ -258,10 +240,7 @@ const fetchWatchlistData = async () => {
 };
 
 const toggleWatchlist = async () => {
-  if (!authStore.isLoggedIn) {
-    alert("Pro přidání do seznamu se prosím přihlašte.");
-    return;
-  }
+  if (!authStore.isLoggedIn) return;
   isProcessingWatchlist.value = true;
   try {
     if (watchlistItem.value) {
@@ -282,10 +261,6 @@ const getEpisodeImage = (episode) => {
   if (currentSeason.value && currentSeason.value.poster) return currentSeason.value.poster;
   if (series.value && series.value.poster) return series.value.poster;
   return null;
-};
-
-const scrollToReviews = () => {
-    // Implement scroll
 };
 
 onMounted(fetchSeries);
