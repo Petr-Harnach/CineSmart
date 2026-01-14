@@ -10,8 +10,8 @@
       <div class="relative w-full h-64 md:h-80 bg-gray-800 overflow-hidden group">
         <!-- Cover Image -->
         <img 
-          v-if="authStore.user.cover_picture" 
-          :src="authStore.user.cover_picture" 
+          v-if="userCoverUrl" 
+          :src="userCoverUrl" 
           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           alt="Cover"
         >
@@ -38,8 +38,8 @@
         <div class="relative">
           <div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-gray-900 overflow-hidden bg-gray-800 shadow-2xl">
             <img 
-              v-if="authStore.user.profile_picture" 
-              :src="authStore.user.profile_picture" 
+              v-if="userProfileUrl" 
+              :src="userProfileUrl" 
               class="w-full h-full object-cover"
               alt="Avatar"
             >
@@ -143,19 +143,15 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Odznaky</h3>
             <div class="flex flex-wrap gap-2">
-              <!-- Level Badge -->
               <div class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200 dark:border-yellow-800" title="Level">
                 Lvl {{ userLevel }}
               </div>
-              <!-- Cinephile Badge -->
               <div v-if="stats.totalCount >= 50" class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-800">
                 Cinephile
               </div>
-              <!-- Newbie Badge -->
               <div v-else class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-xs font-bold border border-gray-200 dark:border-gray-600">
                 Začátečník
               </div>
-              <!-- Genre Badge -->
               <div v-if="stats.favoriteGenre !== 'N/A'" class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 dark:border-blue-800">
                 Fanoušek {{ stats.favoriteGenre }}
               </div>
@@ -171,13 +167,36 @@
               <NuxtLink to="/collections" class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
                 Moje kolekce
               </NuxtLink>
-              <!-- Placeholder for Reviews page if it exists separately -->
-              <div class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition cursor-pointer">
-                Recenze
-              </div>
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- CROPPER MODAL -->
+    <div v-if="isCropperOpen" class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="fixed inset-0 bg-black/90 transition-opacity backdrop-blur-sm" @click="closeCropper"></div>
+        
+        <div class="inline-block align-bottom bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-700">
+          <div class="p-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-white">Upravit obrázek</h3>
+            <button @click="closeCropper" class="text-gray-400 hover:text-white"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+          </div>
+          <div class="p-4">
+            <cropper
+              class="cropper"
+              :src="croppingImage"
+              :stencil-props="{ aspectRatio: cropAspectRatio }"
+              @change="onCropChange"
+              ref="cropperRef"
+            />
+          </div>
+          <div class="p-4 bg-gray-900 border-t border-gray-700 flex justify-end gap-3">
+            <button @click="closeCropper" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">Zrušit</button>
+            <button @click="applyCrop" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500">Použít</button>
+          </div>
         </div>
       </div>
     </div>
@@ -205,10 +224,10 @@
                     <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-16 w-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">
                     <label class="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-md text-sm transition">
                       Vybrat soubor
-                      <input type="file" @change="handleFileChange" accept="image/*" class="hidden">
+                      <input type="file" @change="(e) => prepareCrop(e, 1)" accept="image/*" class="hidden">
                     </label>
                   </div>
-                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 500x500px, max 2MB.</p>
+                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 500x500px (Čtverec)</p>
                 </div>
 
                 <!-- Cover Upload -->
@@ -220,11 +239,11 @@
                       <label class="cursor-pointer text-white font-medium text-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         Změnit pozadí
-                        <input type="file" @change="handleCoverChange" accept="image/*" class="hidden">
+                        <input type="file" @change="(e) => prepareCrop(e, 3)" accept="image/*" class="hidden">
                       </label>
                     </div>
                   </div>
-                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 1920x600px, max 5MB.</p>
+                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 1920x600px (Širokoúhlé)</p>
                 </div>
 
                 <div>
@@ -269,6 +288,8 @@ import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
 import { useToast } from '../composables/useToast';
 import { navigateTo } from '#app';
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 
 const authStore = useAuthStore();
 const { updateProfile, getWatchlist, getCollections, changePassword } = useApi();
@@ -280,6 +301,13 @@ const isSaving = ref(false);
 const showPasswordSection = ref(false);
 const isChangingPassword = ref(false);
 
+// State for Cropper
+const isCropperOpen = ref(false);
+const croppingImage = ref(null);
+const cropAspectRatio = ref(1); // 1 for avatar, 3 for cover
+const cropperRef = ref(null);
+const cropType = ref('avatar'); // 'avatar' or 'cover'
+
 const editForm = reactive({
   username: '',
   bio: '',
@@ -287,7 +315,7 @@ const editForm = reactive({
 const profilePictureFile = ref(null);
 const coverPictureFile = ref(null);
 const previewImageUrl = ref('');
-const previewCoverUrl = ref(''); // New for cover preview
+const previewCoverUrl = ref('');
 
 const passwordForm = reactive({
   old_password: '',
@@ -297,6 +325,26 @@ const passwordForm = reactive({
 
 const watchlistItems = ref([]);
 const collections = ref([]);
+
+// Computed URL with timestamp to force refresh
+const userProfileUrl = computed(() => {
+    if (authStore.user?.profile_picture) {
+        // Check if URL already has query params
+        return authStore.user.profile_picture.includes('?') 
+            ? `${authStore.user.profile_picture}&t=${Date.now()}` 
+            : `${authStore.user.profile_picture}?t=${Date.now()}`;
+    }
+    return null;
+});
+
+const userCoverUrl = computed(() => {
+    if (authStore.user?.cover_picture) {
+        return authStore.user.cover_picture.includes('?')
+            ? `${authStore.user.cover_picture}&t=${Date.now()}`
+            : `${authStore.user.cover_picture}?t=${Date.now()}`;
+    }
+    return null;
+});
 
 const openEditModal = () => {
   editForm.username = authStore.user.username;
@@ -312,30 +360,64 @@ const closeEditModal = () => {
   passwordForm.confirm_password = '';
   previewImageUrl.value = '';
   previewCoverUrl.value = '';
+  profilePictureFile.value = null;
+  coverPictureFile.value = null;
 };
 
-const handleFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    profilePictureFile.value = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewImageUrl.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
+// CROPPER LOGIC
+const prepareCrop = (event, aspectRatio) => {
+    const file = event.target.files[0];
+    if (file) {
+        // Store the file type for later
+        cropType.value = aspectRatio === 1 ? 'avatar' : 'cover';
+        cropAspectRatio.value = aspectRatio;
+        
+        // Read file to data URL for cropper
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            croppingImage.value = e.target.result;
+            isCropperOpen.value = true;
+        };
+        reader.readAsDataURL(file);
+        
+        // Reset input value so same file can be selected again if needed
+        event.target.value = '';
+    }
 };
 
-const handleCoverChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    coverPictureFile.value = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewCoverUrl.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
+const onCropChange = ({ coordinates, canvas }) => {
+    // Optional: Real-time preview could go here
+};
+
+const applyCrop = () => {
+    if (cropperRef.value) {
+        const { canvas } = cropperRef.value.getResult();
+        if (canvas) {
+            canvas.toBlob((blob) => {
+                // Create a new File from the blob
+                const fileName = cropType.value === 'avatar' ? 'avatar_crop.png' : 'cover_crop.png';
+                const newFile = new File([blob], fileName, { type: 'image/png' });
+                
+                // Set file and preview
+                const previewUrl = URL.createObjectURL(blob);
+                
+                if (cropType.value === 'avatar') {
+                    profilePictureFile.value = newFile;
+                    previewImageUrl.value = previewUrl;
+                } else {
+                    coverPictureFile.value = newFile;
+                    previewCoverUrl.value = previewUrl;
+                }
+                
+                closeCropper();
+            }, 'image/png');
+        }
+    }
+};
+
+const closeCropper = () => {
+    isCropperOpen.value = false;
+    croppingImage.value = null;
 };
 
 const saveProfile = async () => {
@@ -343,6 +425,7 @@ const saveProfile = async () => {
   const formData = new FormData();
   formData.append('username', editForm.username);
   formData.append('bio', editForm.bio);
+  
   if (profilePictureFile.value) {
     formData.append('profile_picture', profilePictureFile.value);
   }
@@ -352,9 +435,9 @@ const saveProfile = async () => {
 
   try {
     const response = await updateProfile(formData);
-    // Explicitly update store user data
+    // Force update local user state
     if (response.data) {
-        authStore.user = response.data;
+        authStore.user = response.data; 
     } else {
         await authStore.fetchProfile();
     }
@@ -362,7 +445,7 @@ const saveProfile = async () => {
     toast.success('Profil uložen!');
     closeEditModal();
   } catch (err) {
-    console.error('Error:', err);
+    console.error('Error saving profile:', err);
     toast.error('Chyba při ukládání profilu.');
   } finally {
     isSaving.value = false;
@@ -445,7 +528,7 @@ const stats = computed(() => {
 
 const userLevel = computed(() => {
   const count = stats.value.totalCount;
-  return Math.floor(count / 5) + 1; // Level up every 5 movies
+  return Math.floor(count / 5) + 1;
 });
 
 const topFavorites = computed(() => {
@@ -456,3 +539,10 @@ onMounted(() => {
   fetchData();
 });
 </script>
+
+<style scoped>
+.cropper {
+    height: 400px;
+    background: #000;
+}
+</style>
