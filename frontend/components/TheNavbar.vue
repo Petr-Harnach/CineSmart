@@ -4,7 +4,7 @@
 
       <!-- 1. LOGO & BRANDING -->
       <NuxtLink to="/" class="flex-shrink-0 group">
-        <span class="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors">
+        <span class="text-3xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-all duration-300">
           Cine<span class="text-blue-600">Smart</span>
         </span>
       </NuxtLink>
