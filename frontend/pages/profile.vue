@@ -8,66 +8,65 @@
     <div v-else-if="authStore.user">
       <!-- HERO SECTION (STEAM STYLE) -->
       <div class="relative w-full h-64 md:h-80 bg-gray-800 overflow-hidden group">
-        <!-- Cover Image -->
         <img 
-          v-if="userCoverUrl" 
-          :src="userCoverUrl" 
+          v-if="authStore.user.cover_picture" 
+          :src="authStore.user.cover_picture" 
           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           alt="Cover"
         >
         <div v-else class="w-full h-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-          <span class="text-gray-600 dark:text-gray-500 text-lg font-medium">Zatím bez pozadí</span>
+          <span class="text-gray-600 dark:text-gray-500 text-lg font-medium opacity-50">Zatím bez pozadí</span>
         </div>
         
-        <!-- Gradient Overlay -->
         <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
 
-        <!-- Edit Profile Button (Top Right) -->
         <button 
           @click="openEditModal"
-          class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-white/10"
+          class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-white/10 group/btn"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover/btn:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
           Upravit profil
         </button>
       </div>
 
       <!-- PROFILE INFO BAR -->
-      <div class="container mx-auto px-4 relative -mt-16 mb-8 flex flex-col md:flex-row items-end md:items-center gap-6">
+      <div class="container mx-auto px-4 relative -mt-20 mb-12 flex flex-col md:flex-row items-center md:items-end gap-6">
         <!-- Avatar -->
-        <div class="relative">
-          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-gray-900 overflow-hidden bg-gray-800 shadow-2xl">
+        <div class="relative flex-shrink-0">
+          <div class="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-gray-900 overflow-hidden bg-gray-800 shadow-2xl relative z-10">
             <img 
-              v-if="userProfileUrl" 
-              :src="userProfileUrl" 
+              v-if="authStore.user.profile_picture" 
+              :src="authStore.user.profile_picture" 
               class="w-full h-full object-cover"
               alt="Avatar"
             >
-            <div v-else class="w-full h-full flex items-center justify-center text-white text-4xl font-bold bg-blue-600">
+            <div v-else class="w-full h-full flex items-center justify-center text-white text-5xl font-bold bg-blue-600">
               {{ authStore.user.username.charAt(0).toUpperCase() }}
             </div>
           </div>
-          <!-- Level Badge (Absolute) -->
-          <div class="absolute -bottom-2 -right-2 bg-yellow-500 text-gray-900 font-bold w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-900 shadow-lg" title="Úroveň">
+          <!-- Level Badge -->
+          <div class="absolute bottom-1 right-1 md:bottom-2 md:right-2 z-20 bg-yellow-500 text-gray-900 font-black w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border-4 border-gray-900 shadow-lg text-sm md:text-base cursor-help" :title="'Level ' + userLevel">
             {{ userLevel }}
           </div>
         </div>
 
-        <!-- Name & Bio -->
-        <div class="flex-grow text-center md:text-left pb-2">
-          <h1 class="text-3xl md:text-4xl font-black text-white drop-shadow-md">{{ authStore.user.username }}</h1>
-          <p class="text-gray-300 mt-1 max-w-2xl text-sm md:text-base line-clamp-2 md:line-clamp-1">{{ authStore.user.bio || 'Filmový nadšenec' }}</p>
-        </div>
-
-        <!-- Main Stats (Right) -->
-        <div class="flex gap-6 pb-2">
-          <div class="text-center">
-            <span class="block text-2xl font-bold text-white">{{ stats.totalCount }}</span>
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Filmů</span>
-          </div>
-          <div class="text-center">
-            <span class="block text-2xl font-bold text-white">{{ stats.formattedTime }}</span>
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Čas</span>
+        <!-- Name, Bio & Stats (Centered on mobile, Left on desktop) -->
+        <div class="flex-grow text-center md:text-left pb-1">
+          <h1 class="text-3xl md:text-5xl font-black text-white drop-shadow-md tracking-tight">{{ authStore.user.username }}</h1>
+          <p class="text-gray-300 mt-2 max-w-2xl text-sm md:text-base mx-auto md:mx-0 font-medium">{{ authStore.user.bio || 'Filmový nadšenec' }}</p>
+          
+          <!-- STATS (Moved here under bio) -->
+          <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+            <div class="bg-gray-800/80 backdrop-blur border border-gray-700 px-3 py-1.5 rounded-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+              <span class="text-white font-bold">{{ stats.totalCount }}</span>
+              <span class="text-xs text-gray-400 uppercase font-bold">Filmů</span>
+            </div>
+            <div class="bg-gray-800/80 backdrop-blur border border-gray-700 px-3 py-1.5 rounded-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+              <span class="text-white font-bold">{{ stats.formattedTime }}</span>
+              <span class="text-xs text-gray-400 uppercase font-bold">Čas</span>
+            </div>
           </div>
         </div>
       </div>
@@ -78,7 +77,7 @@
         <!-- LEFT COLUMN (MAIN - 3/4) -->
         <div class="lg:col-span-3 space-y-8">
           
-          <!-- SHOWCASE: TOP OBLÍBENÉ (Simulated from Watchlist for now) -->
+          <!-- SHOWCASE: TOP OBLÍBENÉ -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
               <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -92,7 +91,7 @@
                   v-for="item in topFavorites" 
                   :key="item.id" 
                   :to="`/movies/${item.movie.id}`"
-                  class="group relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all hover:-translate-y-1"
+                  class="group relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all hover:-translate-y-1 block"
                 >
                   <img :src="item.movie.poster" class="w-full h-full object-cover">
                   <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
@@ -118,7 +117,7 @@
                 <div 
                   v-for="collection in collections.slice(0, 4)" 
                   :key="collection.id" 
-                  class="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
+                  class="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
                   @click="navigateTo(`/collections/${collection.id}`)"
                 >
                   <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded flex-shrink-0 flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -143,15 +142,19 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Odznaky</h3>
             <div class="flex flex-wrap gap-2">
-              <div class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200 dark:border-yellow-800" title="Level">
+              <!-- Level Badge -->
+              <div class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-full text-xs font-bold border border-yellow-200 dark:border-yellow-800 cursor-help" title="Získáno za aktivitu">
                 Lvl {{ userLevel }}
               </div>
+              <!-- Cinephile Badge -->
               <div v-if="stats.totalCount >= 50" class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-800">
                 Cinephile
               </div>
+              <!-- Newbie Badge -->
               <div v-else class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-xs font-bold border border-gray-200 dark:border-gray-600">
                 Začátečník
               </div>
+              <!-- Genre Badge -->
               <div v-if="stats.favoriteGenre !== 'N/A'" class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 dark:border-blue-800">
                 Fanoušek {{ stats.favoriteGenre }}
               </div>
@@ -160,13 +163,30 @@
 
           <!-- Quick Links -->
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 space-y-1">
-              <NuxtLink to="/watchlist" class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
-                Můj seznam
+            <div class="p-2 space-y-1">
+              <NuxtLink to="/watchlist" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition group">
+                <div class="flex items-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                  <span class="font-medium">Můj seznam</span>
+                </div>
+                <span class="text-xs font-bold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{{ watchlistItems.length }}</span>
               </NuxtLink>
-              <NuxtLink to="/collections" class="block px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
-                Moje kolekce
+              
+              <NuxtLink to="/collections" class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition group">
+                <div class="flex items-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  <span class="font-medium">Kolekce</span>
+                </div>
+                <span class="text-xs font-bold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{{ collections.length }}</span>
               </NuxtLink>
+              
+              <div class="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition group cursor-pointer" title="Zatím nedostupné">
+                <div class="flex items-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                  <span class="font-medium">Recenze</span>
+                </div>
+                <span class="text-xs font-bold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{{ reviewCount }}</span>
+              </div>
             </div>
           </div>
 
@@ -174,34 +194,7 @@
       </div>
     </div>
 
-    <!-- CROPPER MODAL -->
-    <div v-if="isCropperOpen" class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div class="flex items-center justify-center min-h-screen px-4 text-center">
-        <div class="fixed inset-0 bg-black/90 transition-opacity backdrop-blur-sm" @click="closeCropper"></div>
-        
-        <div class="inline-block align-bottom bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-700">
-          <div class="p-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-white">Upravit obrázek</h3>
-            <button @click="closeCropper" class="text-gray-400 hover:text-white"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
-          </div>
-          <div class="p-4">
-            <cropper
-              class="cropper"
-              :src="croppingImage"
-              :stencil-props="{ aspectRatio: cropAspectRatio }"
-              @change="onCropChange"
-              ref="cropperRef"
-            />
-          </div>
-          <div class="p-4 bg-gray-900 border-t border-gray-700 flex justify-end gap-3">
-            <button @click="closeCropper" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">Zrušit</button>
-            <button @click="applyCrop" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500">Použít</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- EDIT PROFILE MODAL -->
+    <!-- EDIT PROFILE MODAL (Same as before) -->
     <transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
       <div v-if="isEditModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 text-center">
@@ -216,60 +209,46 @@
                 </button>
               </div>
 
-              <form @submit.prevent="saveProfile" class="space-y-6">
+              <form @submit.prevent="saveProfile" class="space-y-4">
                 <!-- Avatar Upload -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Avatar</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Avatar</label>
                   <div class="flex items-center gap-4">
-                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-16 w-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">
-                    <label class="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-md text-sm transition">
-                      Vybrat soubor
-                      <input type="file" @change="(e) => prepareCrop(e, 1)" accept="image/*" class="hidden">
-                    </label>
+                    <img :src="previewImageUrl || authStore.user.profile_picture || 'https://via.placeholder.com/50'" class="h-12 w-12 rounded-full object-cover border border-gray-300 dark:border-gray-600">
+                    <input type="file" @change="handleFileChange" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
                   </div>
-                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 500x500px (Čtverec)</p>
                 </div>
 
                 <!-- Cover Upload -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pozadí profilu (Cover)</label>
-                  <div class="relative w-full h-32 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-dashed border-gray-300 dark:border-gray-600 group">
-                    <img v-if="previewCoverUrl || authStore.user.cover_picture" :src="previewCoverUrl || authStore.user.cover_picture" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition">
-                      <label class="cursor-pointer text-white font-medium text-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        Změnit pozadí
-                        <input type="file" @change="(e) => prepareCrop(e, 3)" accept="image/*" class="hidden">
-                      </label>
-                    </div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1">Doporučeno: 1920x600px (Širokoúhlé)</p>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pozadí profilu (Cover)</label>
+                  <input type="file" @change="handleCoverChange" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uživatelské jméno</label>
-                  <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
+                  <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label>
-                  <textarea v-model="editForm.bio" rows="3" class="mt-1 block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"></textarea>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+                  <textarea v-model="editForm.bio" rows="3" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
 
                 <!-- Password Change Toggle -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline font-medium">Změnit heslo</button>
+                  <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline">Změnit heslo</button>
                 </div>
 
-                <div v-if="showPasswordSection" class="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600 animate-fade-in">
-                  <input type="password" v-model="passwordForm.old_password" placeholder="Staré heslo" class="block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                  <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                  <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové heslo" class="block w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
-                  <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 font-bold transition shadow">Aktualizovat heslo</button>
+                <div v-if="showPasswordSection" class="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <input type="password" v-model="passwordForm.old_password" placeholder="Staré heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <input type="password" v-model="passwordForm.new_password" placeholder="Nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <input type="password" v-model="passwordForm.confirm_password" placeholder="Potvrdit nové heslo" class="block w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white text-sm">
+                  <button type="button" @click="handleChangePassword" :disabled="isChangingPassword" class="w-full py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">Aktualizovat heslo</button>
                 </div>
 
                 <div class="flex justify-end pt-4">
-                  <button type="submit" :disabled="isSaving" class="px-8 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition shadow-lg transform active:scale-95">
+                  <button type="submit" :disabled="isSaving" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50">
                     {{ isSaving ? 'Ukládám...' : 'Uložit změny' }}
                   </button>
                 </div>
@@ -288,11 +267,9 @@ import { useAuthStore } from '../stores/auth';
 import { useApi } from '../composables/useApi';
 import { useToast } from '../composables/useToast';
 import { navigateTo } from '#app';
-import { Cropper } from 'vue-advanced-cropper';
-import 'vue-advanced-cropper/dist/style.css';
 
 const authStore = useAuthStore();
-const { updateProfile, getWatchlist, getCollections, changePassword } = useApi();
+const { updateProfile, getWatchlist, getCollections, changePassword, getReviews } = useApi();
 const toast = useToast();
 
 const isLoadingProfile = ref(true);
@@ -301,13 +278,6 @@ const isSaving = ref(false);
 const showPasswordSection = ref(false);
 const isChangingPassword = ref(false);
 
-// State for Cropper
-const isCropperOpen = ref(false);
-const croppingImage = ref(null);
-const cropAspectRatio = ref(1); // 1 for avatar, 3 for cover
-const cropperRef = ref(null);
-const cropType = ref('avatar'); // 'avatar' or 'cover'
-
 const editForm = reactive({
   username: '',
   bio: '',
@@ -315,7 +285,6 @@ const editForm = reactive({
 const profilePictureFile = ref(null);
 const coverPictureFile = ref(null);
 const previewImageUrl = ref('');
-const previewCoverUrl = ref('');
 
 const passwordForm = reactive({
   old_password: '',
@@ -325,26 +294,7 @@ const passwordForm = reactive({
 
 const watchlistItems = ref([]);
 const collections = ref([]);
-
-// Computed URL with timestamp to force refresh
-const userProfileUrl = computed(() => {
-    if (authStore.user?.profile_picture) {
-        // Check if URL already has query params
-        return authStore.user.profile_picture.includes('?') 
-            ? `${authStore.user.profile_picture}&t=${Date.now()}` 
-            : `${authStore.user.profile_picture}?t=${Date.now()}`;
-    }
-    return null;
-});
-
-const userCoverUrl = computed(() => {
-    if (authStore.user?.cover_picture) {
-        return authStore.user.cover_picture.includes('?')
-            ? `${authStore.user.cover_picture}&t=${Date.now()}`
-            : `${authStore.user.cover_picture}?t=${Date.now()}`;
-    }
-    return null;
-});
+const reviewCount = ref(0);
 
 const openEditModal = () => {
   editForm.username = authStore.user.username;
@@ -358,66 +308,25 @@ const closeEditModal = () => {
   passwordForm.old_password = '';
   passwordForm.new_password = '';
   passwordForm.confirm_password = '';
-  previewImageUrl.value = '';
-  previewCoverUrl.value = '';
-  profilePictureFile.value = null;
-  coverPictureFile.value = null;
 };
 
-// CROPPER LOGIC
-const prepareCrop = (event, aspectRatio) => {
-    const file = event.target.files[0];
-    if (file) {
-        // Store the file type for later
-        cropType.value = aspectRatio === 1 ? 'avatar' : 'cover';
-        cropAspectRatio.value = aspectRatio;
-        
-        // Read file to data URL for cropper
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            croppingImage.value = e.target.result;
-            isCropperOpen.value = true;
-        };
-        reader.readAsDataURL(file);
-        
-        // Reset input value so same file can be selected again if needed
-        event.target.value = '';
-    }
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    profilePictureFile.value = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImageUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 };
 
-const onCropChange = ({ coordinates, canvas }) => {
-    // Optional: Real-time preview could go here
-};
-
-const applyCrop = () => {
-    if (cropperRef.value) {
-        const { canvas } = cropperRef.value.getResult();
-        if (canvas) {
-            canvas.toBlob((blob) => {
-                // Create a new File from the blob
-                const fileName = cropType.value === 'avatar' ? 'avatar_crop.png' : 'cover_crop.png';
-                const newFile = new File([blob], fileName, { type: 'image/png' });
-                
-                // Set file and preview
-                const previewUrl = URL.createObjectURL(blob);
-                
-                if (cropType.value === 'avatar') {
-                    profilePictureFile.value = newFile;
-                    previewImageUrl.value = previewUrl;
-                } else {
-                    coverPictureFile.value = newFile;
-                    previewCoverUrl.value = previewUrl;
-                }
-                
-                closeCropper();
-            }, 'image/png');
-        }
-    }
-};
-
-const closeCropper = () => {
-    isCropperOpen.value = false;
-    croppingImage.value = null;
+const handleCoverChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    coverPictureFile.value = file;
+  }
 };
 
 const saveProfile = async () => {
@@ -425,7 +334,6 @@ const saveProfile = async () => {
   const formData = new FormData();
   formData.append('username', editForm.username);
   formData.append('bio', editForm.bio);
-  
   if (profilePictureFile.value) {
     formData.append('profile_picture', profilePictureFile.value);
   }
@@ -434,18 +342,12 @@ const saveProfile = async () => {
   }
 
   try {
-    const response = await updateProfile(formData);
-    // Force update local user state
-    if (response.data) {
-        authStore.user = response.data; 
-    } else {
-        await authStore.fetchProfile();
-    }
-    
+    await updateProfile(formData);
+    await authStore.fetchProfile();
     toast.success('Profil uložen!');
     closeEditModal();
   } catch (err) {
-    console.error('Error saving profile:', err);
+    console.error('Error:', err);
     toast.error('Chyba při ukládání profilu.');
   } finally {
     isSaving.value = false;
@@ -481,12 +383,14 @@ const fetchData = async () => {
     if (!authStore.user) {
         await authStore.initialize();
     }
-    const [wRes, cRes] = await Promise.all([
+    const [wRes, cRes, rRes] = await Promise.all([
       getWatchlist(),
-      getCollections()
+      getCollections(),
+      getReviews({ user: authStore.user?.id }) // Fetch review count
     ]);
     watchlistItems.value = wRes.data.results;
     collections.value = cRes.data.results.filter(c => c.user.id === authStore.user?.id);
+    reviewCount.value = rRes.data.count || 0; // Use count from paginated response
   } catch (err) {
     console.error(err);
   } finally {
@@ -528,21 +432,14 @@ const stats = computed(() => {
 
 const userLevel = computed(() => {
   const count = stats.value.totalCount;
-  return Math.floor(count / 5) + 1;
+  return Math.floor(count / 5) + 1; // Level up every 5 movies
 });
 
 const topFavorites = computed(() => {
-  return [...watchedMovies.value].reverse().slice(0, 5);
+  return [...watchlistItems.value].reverse().slice(0, 5);
 });
 
 onMounted(() => {
   fetchData();
 });
 </script>
-
-<style scoped>
-.cropper {
-    height: 400px;
-    background: #000;
-}
-</style>
