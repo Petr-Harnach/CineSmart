@@ -6,10 +6,10 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss', 
     '@pinia/nuxt', 
     '@nuxtjs/color-mode',
-    '@nuxtjs/google-analytics'
+    'nuxt-gtag'
   ],
-  googleAnalytics: {
-    id: 'G-5Y1TBMD8WR' // Google Analytics Measurement ID
+  gtag: {
+    id: 'G-5Y1TBMD8WR' // Vaše ID
   },
   colorMode: {
     classSuffix: '',
