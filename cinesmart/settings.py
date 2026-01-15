@@ -70,7 +70,7 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # CORS: Allow production frontend
 CORS_ALLOWED_ORIGINS = [
-    "https://cine-smart.vercel.app",
+    "https://cinesmart.vercel.app",
 ]
 # ---------------------------------------------------------
 
