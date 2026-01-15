@@ -5,8 +5,12 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss', 
     '@pinia/nuxt', 
-    '@nuxtjs/color-mode'
+    '@nuxtjs/color-mode',
+    '@nuxtjs/google-analytics'
   ],
+  googleAnalytics: {
+    id: 'G-5Y1TBMD8WR' // Google Analytics Measurement ID
+  },
   colorMode: {
     classSuffix: '',
     preference: 'dark', // Default to dark mode
