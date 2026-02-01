@@ -32,7 +32,7 @@ class DirectorSerializer(serializers.ModelSerializer):
     photo = AbsoluteImageField(read_only=True)
     class Meta:
         model = Director
-        fields = ['id', 'name', 'bio', 'photo', 'movies']
+        fields = ['id', 'name', 'photo', 'movies', 'birth_date', 'birth_place'] # Removed 'bio'
 
 
 class ScreenwriterSerializer(serializers.ModelSerializer):
@@ -40,7 +40,7 @@ class ScreenwriterSerializer(serializers.ModelSerializer):
     photo = AbsoluteImageField(read_only=True)
     class Meta:
         model = Screenwriter
-        fields = ['id', 'name', 'bio', 'photo', 'movies']
+        fields = ['id', 'name', 'photo', 'movies'] # Removed 'bio'
 
 
 class ActorSerializer(serializers.ModelSerializer):
@@ -48,17 +48,16 @@ class ActorSerializer(serializers.ModelSerializer):
     photo = AbsoluteImageField(read_only=True)
     class Meta:
         model = Actor
-        fields = ['id', 'name', 'bio', 'photo', 'movies']
+        fields = ['id', 'name', 'photo', 'movies', 'birth_date', 'birth_place'] # Removed 'bio'
 
 
 # Serializer pro přihlášeného uživatele (vlastní profil)
-# PŘESUNUTO SEM, ABY BYLO DOSTUPNÉ PRO REVIEW A COLLECTION SERIALIZERY
 class MyProfileSerializer(serializers.ModelSerializer):
     profile_picture = AbsoluteImageField(required=False)
-    cover_picture = AbsoluteImageField(required=False)
+    cover_picture = AbsoluteImageField(required=False) 
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
-        fields = ['id', 'username', 'email', 'bio', 'profile_picture', 'cover_picture']
+        fields = ['id', 'username', 'email', 'profile_picture', 'cover_picture'] # Removed 'bio'
 
 
 class CollectionItemSerializer(serializers.ModelSerializer):
@@ -116,12 +115,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 class PublicUserSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     profile_picture = AbsoluteImageField(read_only=True)
-    cover_picture = AbsoluteImageField(read_only=True) # New field
+    cover_picture = AbsoluteImageField(read_only=True) 
     collections = serializers.SerializerMethodField()
 
     class Meta:
         model = __import__('django').contrib.auth.get_user_model()
-        fields = ['id', 'username', 'bio', 'profile_picture', 'cover_picture', 'reviews', 'collections']
+        fields = ['id', 'username', 'profile_picture', 'cover_picture', 'reviews', 'collections'] # Removed 'bio'
 
     def get_collections(self, obj):
         # Vrátit jen veřejné kolekce

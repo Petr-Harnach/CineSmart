@@ -7,13 +7,13 @@ from django.conf import settings
 from cloudinary.models import CloudinaryField
 
 class CustomUser(AbstractUser):
-    bio = models.TextField(blank=True)
+    # bio = models.TextField(blank=True) # REMOVED
     
     # --- IMAGE FIELDS (Přepínat mezi lokálem a produkcí) ---
     
     # LOCAL (Aktivní):
     # profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
-    # cover_picture = models.ImageField(upload_to='cover_pics/', null=True, blank=True) # New field
+    # cover_picture = models.ImageField(upload_to='cover_pics/', null=True, blank=True)
     
     # PRODUCTION (Zakomentované):
     profile_picture = CloudinaryField('image', null=True, blank=True)
@@ -46,7 +46,9 @@ class Genre(models.Model):
 
 class Director(models.Model):
     name = models.CharField(max_length=150, unique=True)
-    bio = models.TextField(blank=True)
+    # bio = models.TextField(blank=True) # REMOVED
+    birth_date = models.DateField(null=True, blank=True)
+    birth_place = models.CharField(max_length=100, blank=True)
     
     # LOCAL (Aktivní):
     # photo = models.ImageField(upload_to='director_photos/', null=True, blank=True)
@@ -60,7 +62,7 @@ class Director(models.Model):
 
 class Screenwriter(models.Model):
     name = models.CharField(max_length=150, unique=True)
-    bio = models.TextField(blank=True)
+    # bio = models.TextField(blank=True) # REMOVED
     
     # LOCAL (Aktivní):
     # photo = models.ImageField(upload_to='screenwriter_photos/', null=True, blank=True)
@@ -74,7 +76,9 @@ class Screenwriter(models.Model):
 
 class Actor(models.Model):
     name = models.CharField(max_length=150, unique=True)
-    bio = models.TextField(blank=True)
+    # bio = models.TextField(blank=True) # REMOVED
+    birth_date = models.DateField(null=True, blank=True)
+    birth_place = models.CharField(max_length=100, blank=True)
     
     # LOCAL (Aktivní):
     # photo = models.ImageField(upload_to='actor_photos/', null=True, blank=True)
