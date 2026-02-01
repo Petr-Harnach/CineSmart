@@ -162,7 +162,7 @@
       <!-- Sekce Obsazení -->
       <div v-if="movie.actors && movie.actors.length" class="mt-12">
         <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Obsazení</h2>
-        <div class="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4">
+        <Carousel>
           <NuxtLink v-for="actor in movie.actors" :key="actor.id" :to="`/actors/${actor.id}`" class="flex-shrink-0 w-32 text-center group">
             <div class="aspect-[2/3] w-full bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform group-hover:-translate-y-1 transition-transform">
               <img v-if="actor.photo" :src="actor.photo" :alt="actor.name" class="w-full h-full object-cover">
@@ -172,7 +172,7 @@
             </div>
             <p class="mt-2 text-sm font-semibold text-gray-800 dark:text-gray-200 truncate group-hover:underline">{{ actor.name }}</p>
           </NuxtLink>
-        </div>
+        </Carousel>
       </div>
 
       <!-- Mohlo by se vám líbit -->
