@@ -25,7 +25,7 @@
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
             <div>
-              <span class="font-semibold text-gray-500 dark:text-gray-400 block mb-1">Role</span>
+              <span class="font-semibold text-gray-500 dark:text-gray-400 block mb-1">Známý jako</span>
               <span class="text-gray-900 dark:text-white font-medium">Herec</span>
             </div>
             <div v-if="actor.birth_date">
