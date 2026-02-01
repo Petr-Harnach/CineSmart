@@ -62,9 +62,6 @@
           <h1 class="text-4xl md:text-5xl font-bold text-white drop-shadow-md mb-2">
             {{ authStore.user.username }}
           </h1>
-          <p class="text-gray-300 text-sm md:text-base max-w-2xl mx-auto md:mx-0 leading-relaxed mb-4 font-medium">
-            Tento uživatel zatím nemá žádný příběh...
-          </p>
           
           <!-- Stats Chips -->
           <div class="flex flex-wrap justify-center md:justify-start gap-3">
