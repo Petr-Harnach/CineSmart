@@ -5,57 +5,67 @@
   <div v-else-if="error" class="text-center text-red-500 py-12">
     <p>Nepodařilo se načíst detaily režiséra: {{ error.message }}</p>
   </div>
-  <div v-else-if="director" class="max-w-6xl mx-auto mt-10 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-    <!-- Director Header Card -->
-    <div class="flex flex-col md:flex-row gap-6 p-6">
-      <div class="flex-shrink-0 w-36 md:w-48">
-        <img v-if="director.photo" :src="director.photo" :alt="director.name" class="w-full h-auto rounded-lg shadow-md">
-        <div v-else class="w-full h-48 md:h-64 bg-gray-300 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-500">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+  <div v-else-if="director" class="max-w-6xl mx-auto mt-10 p-4">
+    <!-- Hlavní karta s informacemi o režisérovi -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="flex flex-col md:flex-row gap-6 md:gap-8 p-6">
+        <!-- Fotka režiséra -->
+        <div class="flex-shrink-0 w-48 mx-auto md:mx-0">
+          <div class="aspect-[2/3] rounded-lg overflow-hidden shadow-md bg-gray-200 dark:bg-gray-700">
+            <img v-if="director.photo" :src="director.photo" :alt="director.name" class="w-full h-full object-cover">
+            <div v-else class="w-full h-full flex items-center justify-center text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="flex-grow">
-        <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">{{ director.name }}</h1>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-600 dark:text-gray-300">
-          <div>
-            <span class="font-semibold text-gray-900 dark:text-gray-200">Role:</span> Režisér
-          </div>
-          <div v-if="director.birth_date">
-            <span class="font-semibold text-gray-900 dark:text-gray-200">Narozen:</span> {{ new Date(director.birth_date).toLocaleDateString() }}
-          </div>
-          <div v-if="director.birth_place">
-            <span class="font-semibold text-gray-900 dark:text-gray-200">Místo narození:</span> {{ director.birth_place }}
+        <!-- Detaily režiséra -->
+        <div class="flex-grow text-center md:text-left">
+          <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">{{ director.name }}</h1>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div>
+              <span class="font-semibold text-gray-500 dark:text-gray-400 block mb-1">Role</span>
+              <span class="text-gray-900 dark:text-white font-medium">Režisér</span>
+            </div>
+            <div v-if="director.birth_date">
+              <span class="font-semibold text-gray-500 dark:text-gray-400 block mb-1">Narozen</span>
+              <span class="text-gray-900 dark:text-white font-medium">{{ new Date(director.birth_date).toLocaleDateString() }}</span>
+            </div>
+            <div v-if="director.birth_place">
+              <span class="font-semibold text-gray-500 dark:text-gray-400 block mb-1">Místo narození</span>
+              <span class="text-gray-900 dark:text-white font-medium">{{ director.birth_place }}</span>
+            </div>
+            <div>
+              <span class="font-semibold text-gray-500 dark:text-gray-400 block mb-1">Počet děl</span>
+              <span class="text-gray-900 dark:text-white font-medium">{{ director.movies.length }}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <hr class="my-8 border-gray-200 dark:border-gray-700">
+    <hr class="my-8 border-transparent">
 
-    <!-- Filmography Tabs -->
-    <div class="flex gap-2 mb-6">
+    <!-- Přepínač filmografie -->
+    <div class="flex justify-center gap-2 mb-8">
       <button 
         @click="selectedFilmographyType = 'movie'" 
-        class="px-4 py-2 rounded-lg font-medium transition-colors"
-        :class="selectedFilmographyType === 'movie' 
-          ? 'bg-blue-600 text-white' 
-          : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+        class="px-5 py-2 rounded-full font-medium transition-colors"
+        :class="selectedFilmographyType === 'movie' ? 'bg-blue-600 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
       >
-        Filmy
+        Filmy ({{ moviesCount }})
       </button>
       <button 
         @click="selectedFilmographyType = 'series'" 
-        class="px-4 py-2 rounded-lg font-medium transition-colors"
-        :class="selectedFilmographyType === 'series' 
-          ? 'bg-blue-600 text-white' 
-          : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+        class="px-5 py-2 rounded-full font-medium transition-colors"
+        :class="selectedFilmographyType === 'series' ? 'bg-blue-600 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
       >
-        Seriály
+        Seriály ({{ seriesCount }})
       </button>
     </div>
 
-    <!-- Filmography Grid -->
+    <!-- Mřížka filmografie -->
     <div>
       <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Filmografie</h2>
       <div v-if="filteredFilmography.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -67,16 +77,22 @@
         >
           <div class="relative aspect-[2/3] overflow-hidden">
             <img v-if="movie.poster" :src="movie.poster" :alt="movie.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            <div v-else class="w-full h-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500">Žádný plakát</div>
-            <div class="absolute top-2 right-2 text-white bg-blue-600 px-2 py-0.5 rounded-full text-xs font-bold">{{ movie.avg_rating?.toFixed(1) || 'N/A' }} ⭐</div>
-            <div class="absolute top-2 left-2 text-white bg-black/60 px-2 py-0.5 rounded-full text-xs font-bold">{{ movie.release_date.substring(0, 4) }}</div>
+            <div v-else class="w-full h-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </div>
+            
+            <div v-if="movie.release_date" class="absolute top-2 left-2 text-white bg-black/70 px-2 py-0.5 rounded-full text-xs font-bold">{{ movie.release_date.substring(0, 4) }}</div>
+            <div v-if="movie.avg_rating" class="absolute top-2 right-2 text-white bg-yellow-600 px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+              {{ movie.avg_rating.toFixed(1) }}
+            </div>
           </div>
-          <div class="p-4">
-            <h3 class="text-md font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h3>
+          <div class="p-3">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ movie.title }}</h3>
           </div>
         </div>
       </div>
-      <p v-else class="text-center text-gray-500 italic py-8">V naší databázi nebyly nalezeny žádné {{ selectedFilmographyType === 'movie' ? 'filmy' : 'seriály' }} pro tohoto režiséra.</p>
+      <p v-else class="text-center text-gray-500 italic py-8">Pro tento výběr nebyly nalezeny žádné tituly.</p>
     </div>
   </div>
 </template>
@@ -119,6 +135,9 @@ const goToDetail = (item) => {
     router.push(`/movies/${item.id}`);
   }
 };
+
+const moviesCount = computed(() => director.value?.movies.filter(m => m.type === 'movie').length || 0);
+const seriesCount = computed(() => director.value?.movies.filter(m => m.type === 'series').length || 0);
 
 const filteredFilmography = computed(() => {
   if (!director.value || !director.value.movies) return [];

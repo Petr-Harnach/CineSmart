@@ -56,7 +56,6 @@
         <!-- Name -->
         <div class="flex-grow text-center md:text-left pb-2">
           <h1 class="text-3xl md:text-4xl font-black text-white drop-shadow-md">{{ authStore.user.username }}</h1>
-          <!-- <p class="text-gray-300 mt-1 max-w-2xl text-sm md:text-base line-clamp-2 md:line-clamp-1">{{ authStore.user.bio || 'Filmový nadšenec' }}</p> -->
         </div>
 
         <!-- Main Stats (Right) -->
@@ -82,7 +81,7 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
               <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 g 00.951-.69l1.07-3.292z" /></svg>
                 Výstavka: Oblíbené
               </h2>
             </div>
@@ -108,7 +107,7 @@
           <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
               <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 g 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
                 Moje Kolekce
               </h2>
               <NuxtLink to="/collections" class="text-sm text-blue-600 hover:underline">Všechny kolekce</NuxtLink>
@@ -217,7 +216,7 @@
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Uživatelské jméno</label>
                   <input type="text" v-model="editForm.username" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                 </div>
-
+                
                 <!-- Password Change Toggle -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <button type="button" @click="showPasswordSection = !showPasswordSection" class="text-blue-600 text-sm hover:underline">Změnit heslo</button>
@@ -263,7 +262,6 @@ const isChangingPassword = ref(false);
 
 const editForm = reactive({
   username: '',
-  // bio: '', // REMOVED
 });
 const profilePictureFile = ref(null);
 const coverPictureFile = ref(null);
@@ -280,7 +278,6 @@ const collections = ref([]);
 
 const openEditModal = () => {
   editForm.username = authStore.user.username;
-  // editForm.bio = authStore.user.bio; // REMOVED
   isEditModalOpen.value = true;
 };
 
@@ -315,7 +312,6 @@ const saveProfile = async () => {
   isSaving.value = true;
   const formData = new FormData();
   formData.append('username', editForm.username);
-  // formData.append('bio', editForm.bio); // REMOVED
   if (profilePictureFile.value) {
     formData.append('profile_picture', profilePictureFile.value);
   }
