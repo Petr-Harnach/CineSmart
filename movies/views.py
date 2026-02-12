@@ -16,7 +16,8 @@ from .permissions import IsOwnerOrReadOnly
 from .filters import MovieFilter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-from datetime import timedelta, date # Import date
+from datetime import timedelta
+from django.utils import timezone # Import timezone instead of date
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser 
 
@@ -190,20 +191,23 @@ class ActorViewSet(viewsets.ModelViewSet):
 class WatchlistViewSet(viewsets.ModelViewSet):
     """Watchlist items for authenticated users."""
     permission_classes = [IsAuthenticated]
-    serializer_class = WatchlistItemSerializer # Explicitly define for perform_update access
+    serializer_class = WatchlistItemSerializer
 
     def get_queryset(self):
         WatchlistItem = __import__('django').apps.apps.get_model('movies', 'WatchlistItem')
         return WatchlistItem.objects.filter(user=self.request.user).select_related('movie')
 
     def perform_create(self, serializer):
+        if serializer.validated_data.get('watched') == True:
+            movie = serializer.validated_data['movie']
+            if movie.release_date is None or movie.release_date > timezone.now().date():
+                raise permissions.ValidationError("Nelze označit jako shlédnuté film, který ještě nevyšel.")
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
-        # Prevent marking as watched if movie has not been released yet
         if serializer.validated_data.get('watched') == True:
             movie = serializer.instance.movie
-            if movie.release_date and movie.release_date > date.today():
+            if movie.release_date is None or movie.release_date > timezone.now().date():
                 raise permissions.ValidationError("Nelze označit jako shlédnuté film, který ještě nevyšel.")
         serializer.save()
 
@@ -219,16 +223,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Review.objects.annotate(likes_count=Count('likes'))
 
     def perform_create(self, serializer):
-        # Prevent adding review if movie has not been released yet
         movie = serializer.validated_data['movie']
-        if movie.release_date and movie.release_date > date.today():
+        if movie.release_date is None or movie.release_date > timezone.now().date():
             raise permissions.ValidationError("Nelze recenzovat film, který ještě nevyšel.")
         serializer.save(user=self.request.user)
     
     def perform_update(self, serializer):
-        # Prevent updating review if movie has not been released yet
         movie = serializer.instance.movie
-        if movie.release_date and movie.release_date > date.today():
+        if movie.release_date is None or movie.release_date > timezone.now().date():
             raise permissions.ValidationError("Nelze aktualizovat recenzi filmu, který ještě nevyšel.")
         serializer.save()
 
