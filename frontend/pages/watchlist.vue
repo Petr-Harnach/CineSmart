@@ -37,6 +37,8 @@
             <div class="p-4">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
               <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date ? item.movie.release_date.substring(0, 4) : 'TBA' }}</p>
+              
+              <!-- Tlačítko Označit jako shlédnuté -->
               <button 
                 @click.stop="toggleWatched(item)" 
                 :disabled="!isMovieReleased(item.movie)"
@@ -48,6 +50,10 @@
               >
                 Označit jako shlédnuté
               </button>
+              <!-- Info o nevydaném filmu -->
+              <p v-if="!isMovieReleased(item.movie)" class="text-xs text-red-500 dark:text-red-400 mt-2 text-center">
+                Film ještě nevyšel.
+              </p>
             </div>
           </div>
         </div>
@@ -115,12 +121,12 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
-import { useToast } from '../composables/useToast'; // Import useToast
+import { useToast } from '../composables/useToast';
 
 const { getWatchlist, updateWatchlistItem } = useApi();
 const authStore = useAuthStore();
 const router = useRouter();
-const toast = useToast(); // Initialize useToast
+const toast = useToast();
 
 const watchlist = ref([]);
 const loading = ref(true);
@@ -164,6 +170,7 @@ const fetchWatchlistData = async (url = 'watchlist/') => {
 };
 
 const toggleWatched = async (item) => {
+  // Pokud je film nevydaný A NENÍ už označený jako shlédnutý, nedovolíme to
   if (!isMovieReleased(item.movie) && !item.watched) {
     toast.error(`Film "${item.movie.title}" ještě nevyšel. Nelze jej označit jako shlédnutý.`);
     return;
@@ -178,6 +185,7 @@ const toggleWatched = async (item) => {
     }
   } catch (err) {
     console.error('Failed to update watched status:', err);
+    // Zobrazíme konkrétní chybovou zprávu z backendu, pokud existuje
     toast.error(err.response?.data?.detail || 'Nepodařilo se aktualizovat status shlédnutí.');
   }
 };
