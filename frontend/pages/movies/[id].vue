@@ -17,8 +17,13 @@
           <!-- Tlačítko Watchlist (Overlay) -->
           <button 
             @click.stop="toggleWatchlist"
-            class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 hover:scale-110 transition-all shadow-lg border border-white/20"
-            :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
+            class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 transition-all shadow-lg border border-white/20"
+            :class="{
+              'hover:scale-110': !(!isMovieReleased && watchlistItem?.watched),
+              'opacity-50 cursor-not-allowed': (!isMovieReleased && watchlistItem?.watched)
+            }"
+            :title="getWatchlistButtonTitle"
+            :disabled="!authStore.isLoggedIn && !isMovieReleased && watchlistItem?.watched"
           >
             <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -44,6 +49,7 @@
           <p v-if="movie.description" class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
             {{ movie.description }}
           </p>
+          <p v-else class="text-gray-500 italic mb-6">Popis není k dispozici.</p>
         </div>
       </div>
 
@@ -101,61 +107,74 @@
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
           <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Recenze</h2>
           
-          <!-- Vaše recenze (pokud existuje) -->
-          <div v-if="userReview" class="mb-8">
-            <h3 class="text-lg font-bold mb-2 dark:text-gray-200">Vaše recenze</h3>
-            <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
-              <template v-if="editingReviewId === userReview.id">
-                <form @submit.prevent="handleSaveEdit(userReview.id)">
-                  <div class="mb-2">
-                    <label class="block text-gray-700 dark:text-gray-300 text-sm mb-1">Hodnocení</label>
-                    <RatingInput v-model="editedReviewRating" />
-                  </div>
-                  <div class="mb-2">
-                    <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Komentář</label>
-                    <textarea v-model="editedReviewComment" id="edit-comment" rows="2" maxlength="1000" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
-                  </div>
-                  <div class="flex justify-end space-x-2">
-                    <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
-                    <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
-                  </div>
-                </form>
-              </template>
-              <template v-else>
-                <div class="flex justify-between items-start mb-2">
-                  <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
-                  <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
-                </div>
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
-                <div class="flex justify-end gap-2 mt-3">
-                  <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
-                  <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
-                </div>
-              </template>
+          <template v-if="!isMovieReleased">
+            <div class="bg-gray-100 dark:bg-gray-700/50 p-6 rounded-lg text-center border border-gray-200 dark:border-gray-700">
+              <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                Film ještě nevyšel.
+              </p>
+              <p class="text-gray-500 dark:text-gray-400 mt-2">
+                Recenze a hodnocení budou dostupné po datu vydání: 
+                <span class="font-medium">{{ movie.release_date ? new Date(movie.release_date).toLocaleDateString() : 'Neznámo' }}</span>
+              </p>
             </div>
-          </div>
-
-          <!-- Ostatní recenze -->
-          <div v-if="otherReviews.length > 0" class="space-y-4">
-            <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
-              <div class="flex justify-between items-start mb-2">
-                <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
-                <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+          </template>
+          <template v-else>
+            <!-- Vaše recenze (pokud existuje) -->
+            <div v-if="userReview" class="mb-8">
+              <h3 class="text-lg font-bold mb-2 dark:text-gray-200">Vaše recenze</h3>
+              <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
+                <template v-if="editingReviewId === userReview.id">
+                  <form @submit.prevent="handleSaveEdit(userReview.id)">
+                    <div class="mb-2">
+                      <label class="block text-gray-700 dark:text-gray-300 text-sm mb-1">Hodnocení</label>
+                      <RatingInput v-model="editedReviewRating" />
+                    </div>
+                    <div class="mb-2">
+                      <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Komentář</label>
+                      <textarea v-model="editedReviewComment" id="edit-comment" rows="2" maxlength="1000" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                      <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
+                      <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
+                    </div>
+                  </form>
+                </template>
+                <template v-else>
+                  <div class="flex justify-between items-start mb-2">
+                    <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
+                    <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
+                  </div>
+                  <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
+                  <div class="flex justify-end gap-2 mt-3">
+                    <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
+                    <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
+                  </div>
+                </template>
               </div>
-              <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
             </div>
-          </div>
-          <p v-else-if="!userReview" class="text-gray-500 italic text-center py-4">Zatím žádné recenze.</p>
 
-          <!-- Formulář pro přidání recenze -->
-          <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
-            <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
-            <form @submit.prevent="submitReview" class="space-y-4">
-              <RatingInput v-model="newReview.rating" />
-              <textarea v-model="newReview.comment" placeholder="Napište svůj názor..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
-              <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
-            </form>
-          </div>
+            <!-- Ostatní recenze -->
+            <div v-if="otherReviews.length > 0" class="space-y-4">
+              <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                <div class="flex justify-between items-start mb-2">
+                  <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
+                  <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+                </div>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
+              </div>
+            </div>
+            <p v-else-if="!userReview" class="text-gray-500 italic text-center py-4">Zatím žádné recenze.</p>
+
+            <!-- Formulář pro přidání recenze -->
+            <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
+              <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
+              <form @submit.prevent="submitReview" class="space-y-4">
+                <RatingInput v-model="newReview.rating" />
+                <textarea v-model="newReview.comment" placeholder="Napište svůj názor..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
+                <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
+              </form>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -252,7 +271,32 @@ const isProcessingWatchlist = ref(false);
 const isConfirmModalOpen = ref(false);
 const pendingDeleteReviewId = ref(null);
 
+const today = new Date();
+today.setHours(0, 0, 0, 0); // Reset time for comparison
+
+const isMovieReleased = computed(() => {
+  if (!movie.value || !movie.value.release_date) return false;
+  const releaseDate = new Date(movie.value.release_date);
+  releaseDate.setHours(0, 0, 0, 0); // Reset time for comparison
+  return releaseDate <= today;
+});
+
 const watchlistItem = computed(() => watchlist.value.find(item => item.movie.id === movieId.value));
+
+const getWatchlistButtonTitle = computed(() => {
+  if (watchlistItem.value) {
+    if (watchlistItem.value.watched) {
+      return 'Odebrat ze shlédnutých';
+    } else {
+      return 'Odebrat ze seznamu';
+    }
+  } else {
+    if (!isMovieReleased.value) {
+      return 'Film ještě nevyšel'; // Can't mark as watched
+    }
+    return 'Přidat do seznamu';
+  }
+});
 
 const userReview = computed(() => {
   if (!authStore.user || !reviews.value) return null;
@@ -337,17 +381,39 @@ const toggleWatchlist = async () => {
     return;
   }
   
+  // Pokud je film nevydaný a už je označen jako shlédnutý, nedovolíme to změnit
+  if (!isMovieReleased.value && watchlistItem.value?.watched) {
+    toast.error('Nelze změnit status shlédnutí u filmu, který ještě nevyšel.');
+    return;
+  }
+
   isProcessingWatchlist.value = true;
   try {
     if (watchlistItem.value) {
-      await removeFromWatchlist(watchlistItem.value.id);
+      // Pokud je již v seznamu, odebereme nebo změníme status watched (jen pokud film vyšel)
+      if (watchlistItem.value.watched && !isMovieReleased.value) { // Edge case: already watched and then changed to not released
+        // Nemělo by nastat, backend by to nepustil.
+      } else if (!watchlistItem.value.watched && !isMovieReleased.value) {
+        // přidání k vidění (ale ne shlédnutí) nevydaného filmu
+        await updateWatchlist(watchlistItem.value.id, { watched: false });
+      } else if (watchlistItem.value.watched && isMovieReleased.value) {
+        // odebrání shlédnutí u vydaného filmu
+        await removeFromWatchlist(watchlistItem.value.id); // Odebereme celý item, aby se vynuloval
+      } else if (!watchlistItem.value.watched && isMovieReleased.value) {
+        // označit jako shlédnuté u vydaného filmu
+        await updateWatchlist(watchlistItem.value.id, { watched: true });
+      } else {
+        // Fallback: odebereme ze seznamu
+        await removeFromWatchlist(watchlistItem.value.id);
+      }
     } else {
-      await addToWatchlist(movieId.value);
+      // Přidání do seznamu. Pokud film nevyšel, watched=false. Jinak watched=true
+      await addToWatchlist(movieId.value, isMovieReleased.value); // Pass watched status to backend
     }
     await fetchWatchlist();
   } catch (err) {
     console.error("Failed to toggle watchlist:", err);
-    toast.error('Nepodařilo se aktualizovat seznam.');
+    toast.error(err.response?.data?.detail || 'Nepodařilo se aktualizovat seznam.');
   } finally {
     isProcessingWatchlist.value = false;
   }
@@ -367,7 +433,7 @@ const submitReview = async () => {
     toast.success('Recenze odeslána.');
   } catch (err) {
     console.error('Error submitting review:', err);
-    toast.error('Nepodařilo se odeslat recenzi.');
+    toast.error(err.response?.data?.detail || 'Nepodařilo se odeslat recenzi.');
   } finally {
     submittingReview.value = false;
   }
@@ -394,7 +460,7 @@ const handleSaveEdit = async (reviewId) => {
     toast.success('Recenze aktualizována.');
   } catch (err) {
     console.error('Error saving review:', err);
-    toast.error('Nepodařilo se aktualizovat recenzi.');
+    toast.error(err.response?.data?.detail || 'Nepodařilo se aktualizovat recenzi.');
   }
 };
 
@@ -411,7 +477,7 @@ const confirmDeleteReview = async () => {
     toast.success('Recenze smazána.');
   } catch (err) {
     console.error('Error deleting review:', err);
-    toast.error('Nepodařilo se smazat recenzi.');
+    toast.error(err.response?.data?.detail || 'Nepodařilo se smazat recenzi.');
   } finally {
     isConfirmModalOpen.value = false;
     pendingDeleteReviewId.value = null;
