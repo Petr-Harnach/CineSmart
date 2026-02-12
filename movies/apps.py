@@ -6,4 +6,5 @@ class MoviesConfig(AppConfig):
     name = 'movies'
 
     def ready(self):
-        import movies.signals
+        # Removed: import movies.signals
+        pass # Add a pass statement since ready() needs some content if not importing signals

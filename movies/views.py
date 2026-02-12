@@ -198,16 +198,20 @@ class WatchlistViewSet(viewsets.ModelViewSet):
         return WatchlistItem.objects.filter(user=self.request.user).select_related('movie')
 
     def perform_create(self, serializer):
+        movie = serializer.validated_data['movie']
         if serializer.validated_data.get('watched') == True:
-            movie = serializer.validated_data['movie']
+            print(f"DEBUG Watchlist Create: Movie '{movie.title}', Release Date: {movie.release_date}, Today: {timezone.now().date()}")
             if movie.release_date is None or movie.release_date > timezone.now().date():
+                print(f"DEBUG Watchlist Create: Validation failed for movie '{movie.title}'")
                 raise permissions.ValidationError("Nelze označit jako shlédnuté film, který ještě nevyšel.")
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
+        movie = serializer.instance.movie
         if serializer.validated_data.get('watched') == True:
-            movie = serializer.instance.movie
+            print(f"DEBUG Watchlist Update: Movie '{movie.title}', Release Date: {movie.release_date}, Today: {timezone.now().date()}")
             if movie.release_date is None or movie.release_date > timezone.now().date():
+                print(f"DEBUG Watchlist Update: Validation failed for movie '{movie.title}'")
                 raise permissions.ValidationError("Nelze označit jako shlédnuté film, který ještě nevyšel.")
         serializer.save()
 
@@ -224,13 +228,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         movie = serializer.validated_data['movie']
+        print(f"DEBUG Review Create: Movie '{movie.title}', Release Date: {movie.release_date}, Today: {timezone.now().date()}")
         if movie.release_date is None or movie.release_date > timezone.now().date():
+            print(f"DEBUG Review Create: Validation failed for movie '{movie.title}'")
             raise permissions.ValidationError("Nelze recenzovat film, který ještě nevyšel.")
         serializer.save(user=self.request.user)
     
     def perform_update(self, serializer):
         movie = serializer.instance.movie
+        print(f"DEBUG Review Update: Movie '{movie.title}', Release Date: {movie.release_date}, Today: {timezone.now().date()}")
         if movie.release_date is None or movie.release_date > timezone.now().date():
+            print(f"DEBUG Review Update: Validation failed for movie '{movie.title}'")
             raise permissions.ValidationError("Nelze aktualizovat recenzi filmu, který ještě nevyšel.")
         serializer.save()
 
