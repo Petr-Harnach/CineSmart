@@ -92,15 +92,15 @@
             <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400">
                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </div>
-            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-               <AvgRating :rating="movie.avg_rating" size="sm" class="shadow-2xl" />
-            </div>
+            <!-- Odstraněn rating z horního rohu plakátu -->
           </div>
           <div class="p-4">
             <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-2 h-10 leading-tight mb-1">{{ movie.title }}</h3>
-            <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ movie.type === 'series' ? 'Seriál' : 'Film' }}</span>
+            <div class="flex items-center gap-2">
               <span class="text-xs font-medium text-gray-400">{{ movie.release_date ? movie.release_date.substring(0, 4) : 'TBA' }}</span>
+              <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ movie.type === 'series' ? 'Seriál' : 'Film' }}</span>
+              <!-- Přidán rating pod obrázek -->
+              <AvgRating :rating="movie.avg_rating" size="sm" class="ml-auto" />
             </div>
           </div>
         </div>

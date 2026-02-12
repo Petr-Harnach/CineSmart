@@ -90,7 +90,7 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     'rest_framework_simplejwt',
-    'django_rest_passwordreset',
+    # Removed: 'django_rest_passwordreset',
     'corsheaders',
     'cloudinary',           # Keep installed, harmless locally
     'cloudinary_storage',   # Keep installed, harmless locally

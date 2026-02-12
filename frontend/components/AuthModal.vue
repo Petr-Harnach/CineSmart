@@ -67,7 +67,7 @@
                 <div>
                   <div class="flex justify-between items-center mb-1">
                     <label for="login-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Heslo</label>
-                    <a href="#" @click.prevent="$emit('forgot-password')" class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">Zapomenuté heslo?</a>
+                    <!-- Removed "Zapomenuté heslo?" link -->
                   </div>
                   <input type="password" v-model="loginForm.password" id="login-password" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors" required />
                 </div>
@@ -141,7 +141,8 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close', 'login-success', 'forgot-password']);
+// Removed 'forgot-password' from emit
+const emit = defineEmits(['close', 'login-success']); 
 const authStore = useAuthStore();
 
 const currentView = ref(props.initialView);

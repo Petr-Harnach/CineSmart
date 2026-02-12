@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Movie, Genre, Director, Review, Actor, CustomUser, Collection, CollectionItem, Season, Episode
 from .serializers import (
     MovieSerializer, MovieDetailSerializer, GenreSerializer, DirectorSerializer, ReviewSerializer, ActorSerializer,
-    MyProfileSerializer, PublicUserSerializer, CollectionSerializer, CollectionItemSerializer
+    MyProfileSerializer, PublicUserSerializer, CollectionSerializer, CollectionItemSerializer, WatchlistItemSerializer
 )
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from rest_framework import permissions, status
@@ -16,19 +16,17 @@ from .permissions import IsOwnerOrReadOnly
 from .filters import MovieFilter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-from datetime import timedelta
+from datetime import timedelta, date # Import date
 from django.conf import settings
-from rest_framework.parsers import MultiPartParser, FormParser # Added imports
+from rest_framework.parsers import MultiPartParser, FormParser 
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     """Extends TokenObtainPairView to set refresh token in an HttpOnly cookie."""
     def post(self, request, *args, **kwargs):
         resp = super().post(request, *args, **kwargs)
-        # If refresh token provided, set it as HttpOnly cookie
         refresh = resp.data.get('refresh')
         if refresh:
-            # cookie lifetime from settings SIMPLE_JWT REFRESH_TOKEN_LIFETIME
             lifetime = getattr(settings, 'SIMPLE_JWT', {}).get('REFRESH_TOKEN_LIFETIME', timedelta(days=1))
             max_age = int(lifetime.total_seconds())
             resp.set_cookie(
@@ -45,14 +43,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 class CookieTokenRefreshView(TokenRefreshView):
     """Extends TokenRefreshView to update refresh cookie when rotating tokens."""
     def post(self, request, *args, **kwargs):
-        # If client did not send refresh in body, attempt to read it from HttpOnly cookie
         data = request.data if request.data else {}
         if 'refresh' not in data:
             cookie_refresh = request.COOKIES.get('refresh_token')
             if cookie_refresh:
                 serializer = TokenRefreshSerializer(data={'refresh': cookie_refresh})
             else:
-                # fallback to default behaviour (will raise error)
                 return super().post(request, *args, **kwargs)
         else:
             serializer = TokenRefreshSerializer(data=data)
@@ -60,10 +56,8 @@ class CookieTokenRefreshView(TokenRefreshView):
         serializer.is_valid(raise_exception=True)
         validated = serializer.validated_data
 
-        # Build response similar to TokenRefreshView
         resp = Response(validated, status=status.HTTP_200_OK)
 
-        # If serializer returned a new refresh token (rotation), update cookie
         refresh = validated.get('refresh')
         if refresh:
             lifetime = getattr(settings, 'SIMPLE_JWT', {}).get('REFRESH_TOKEN_LIFETIME', timedelta(days=1))
@@ -87,16 +81,10 @@ def change_password_view(request):
     old = request.data.get('old_password')
     new = request.data.get('new_password')
     
-    print(f"DEBUG: Change password for user: {user.username}")
-    print(f"DEBUG: Old password provided: {old}")
-    
     if not old or not new:
         return Response({'detail': 'old_password and new_password required'}, status=status.HTTP_400_BAD_REQUEST)
     
-    is_valid = user.check_password(old)
-    print(f"DEBUG: Password check result: {is_valid}")
-
-    if not is_valid:
+    if not user.check_password(old):
         return Response({'detail': 'old password incorrect'}, status=status.HTTP_400_BAD_REQUEST)
     
     user.set_password(new)
@@ -108,7 +96,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     """Retrieve or update the authenticated user's profile."""
     serializer_class = MyProfileSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser) # Allow file uploads
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_object(self):
         return self.request.user
@@ -120,7 +108,6 @@ from django.db.models.functions import Lower
 class MovieViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Movie.objects.all()
-    # serializer_class is handled by get_serializer_class
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = MovieFilter
     search_fields = ['title'] 
@@ -136,7 +123,6 @@ class MovieViewSet(viewsets.ModelViewSet):
         ordering = self.request.query_params.get('ordering')
 
         if ordering in ['title', '-title']:
-            # Apply case-insensitive ordering for the 'title' field
             if ordering.startswith('-'):
                 return queryset.annotate(title_lower=Lower('title')).order_by('-title_lower')
             return queryset.annotate(title_lower=Lower('title')).order_by('title_lower')
@@ -204,21 +190,22 @@ class ActorViewSet(viewsets.ModelViewSet):
 class WatchlistViewSet(viewsets.ModelViewSet):
     """Watchlist items for authenticated users."""
     permission_classes = [IsAuthenticated]
+    serializer_class = WatchlistItemSerializer # Explicitly define for perform_update access
 
     def get_queryset(self):
         WatchlistItem = __import__('django').apps.apps.get_model('movies', 'WatchlistItem')
         return WatchlistItem.objects.filter(user=self.request.user).select_related('movie')
 
-    def list(self, request, *args, **kwargs):
-        """Return only the requesting user's watchlist items."""
-        return super().list(request, *args, **kwargs)
-
-    def get_serializer_class(self):
-        from .serializers import WatchlistItemSerializer
-        return WatchlistItemSerializer
-
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        # Prevent marking as watched if movie has not been released yet
+        if serializer.validated_data.get('watched') == True:
+            movie = serializer.instance.movie
+            if movie.release_date and movie.release_date > date.today():
+                raise permissions.ValidationError("Nelze označit jako shlédnuté film, který ještě nevyšel.")
+        serializer.save()
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -232,7 +219,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Review.objects.annotate(likes_count=Count('likes'))
 
     def perform_create(self, serializer):
+        # Prevent adding review if movie has not been released yet
+        movie = serializer.validated_data['movie']
+        if movie.release_date and movie.release_date > date.today():
+            raise permissions.ValidationError("Nelze recenzovat film, který ještě nevyšel.")
         serializer.save(user=self.request.user)
+    
+    def perform_update(self, serializer):
+        # Prevent updating review if movie has not been released yet
+        movie = serializer.instance.movie
+        if movie.release_date and movie.release_date > date.today():
+            raise permissions.ValidationError("Nelze aktualizovat recenzi filmu, který ještě nevyšel.")
+        serializer.save()
+
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def like(self, request, pk=None):
@@ -264,7 +263,6 @@ class CollectionViewSet(viewsets.ModelViewSet):
         from django.db.models import Q
         user = self.request.user
         if user.is_authenticated:
-            # Veřejné kolekce + vlastní kolekce uživatele
             return Collection.objects.filter(Q(is_public=True) | Q(user=user)).distinct().order_by('-created_at')
         return Collection.objects.filter(is_public=True).order_by('-created_at')
 

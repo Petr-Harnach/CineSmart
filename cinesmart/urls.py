@@ -28,5 +28,5 @@ urlpatterns = [
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/', include('movies.urls')),
-    path('api/auth/password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    # Removed password reset URL: path('api/auth/password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 ]

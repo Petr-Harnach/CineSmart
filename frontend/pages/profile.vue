@@ -370,7 +370,6 @@ const cropperRef = ref(null); // Ref to the cropper component
 
 const editForm = reactive({
   username: '',
-  // bio: '', // REMOVED
 });
 const profilePictureFile = ref(null);
 const coverPictureFile = ref(null);
@@ -389,7 +388,6 @@ const reviewCount = ref(0);
 
 const openEditModal = () => {
   editForm.username = authStore.user.username;
-  // editForm.bio = authStore.user.bio; // REMOVED
   previewImageUrl.value = '';
   coverPreviewUrl.value = '';
   isEditModalOpen.value = true;
@@ -469,7 +467,6 @@ const saveProfile = async () => {
   isSaving.value = true;
   const formData = new FormData();
   formData.append('username', editForm.username);
-  // formData.append('bio', editForm.bio); // REMOVED
   if (profilePictureFile.value) {
     formData.append('profile_picture', profilePictureFile.value, 'profile.png');
   }
@@ -536,7 +533,15 @@ const fetchData = async () => {
 };
 
 // Computed Stats
-const watchedMovies = computed(() => watchlistItems.value.filter(item => item.watched));
+const watchedMovies = computed(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time for comparison
+  
+  return watchlistItems.value.filter(item => {
+    const releaseDate = item.movie?.release_date ? new Date(item.movie.release_date) : null;
+    return item.watched && releaseDate && releaseDate <= today;
+  });
+});
 
 const stats = computed(() => {
   const totalCount = watchedMovies.value.length;
@@ -580,7 +585,8 @@ const levelTitle = computed(() => {
 });
 
 const topFavorites = computed(() => {
-  return [...watchlistItems.value].reverse().slice(0, 5);
+  // Filtrujeme pouze shlédnuté filmy, které již vyšly
+  return watchedMovies.value.filter(item => item.movie && item.movie.poster && item.movie.title).slice(0, 5);
 });
 
 onMounted(() => {
