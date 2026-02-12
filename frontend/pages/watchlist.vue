@@ -28,7 +28,7 @@
           <div 
             v-for="item in moviesToWatch" 
             :key="item.id" 
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative group"
             @click.self="goToDetail(item.movie)"
           >
             <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="goToDetail(item.movie)">
@@ -37,7 +37,15 @@
             <div class="p-4">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
               <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date ? item.movie.release_date.substring(0, 4) : 'TBA' }}</p>
-              <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition">
+              <button 
+                @click.stop="toggleWatched(item)" 
+                :disabled="!isMovieReleased(item.movie)"
+                :title="!isMovieReleased(item.movie) ? `Nelze označit jako shlédnuté. Film ${item.movie.release_date ? new Date(item.movie.release_date).toLocaleDateString() : ''} ještě nevyšel.` : 'Označit jako shlédnuté'"
+                class="w-full mt-2 text-sm py-2 rounded-md transition"
+                :class="isMovieReleased(item.movie) 
+                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                  : 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-70 dark:bg-gray-700 dark:text-gray-400'"
+              >
                 Označit jako shlédnuté
               </button>
             </div>
@@ -59,7 +67,7 @@
           <div 
             v-for="item in moviesWatched" 
             :key="item.id" 
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer relative group"
             @click.self="goToDetail(item.movie)"
           >
             <img v-if="item.movie.poster" :src="item.movie.poster" :alt="item.movie.title" class="h-64 w-full object-cover" @click="goToDetail(item.movie)">
@@ -68,7 +76,11 @@
             <div class="p-4">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ item.movie.title }}</h2>
               <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ item.movie.release_date ? item.movie.release_date.substring(0, 4) : 'TBA' }}</p>
-              <button @click.stop="toggleWatched(item)" class="w-full mt-2 text-sm py-2 rounded-md bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition">
+              <button 
+                @click.stop="toggleWatched(item)" 
+                class="w-full mt-2 text-sm py-2 rounded-md bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition"
+                title="Označit jako neshlédnuté"
+              >
                 Označit jako neshlédnuté
               </button>
             </div>
@@ -103,16 +115,28 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useApi } from '../composables/useApi';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast'; // Import useToast
 
 const { getWatchlist, updateWatchlistItem } = useApi();
 const authStore = useAuthStore();
 const router = useRouter();
+const toast = useToast(); // Initialize useToast
 
 const watchlist = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const nextPageUrl = ref(null);
 const prevPageUrl = ref(null);
+
+const today = new Date();
+today.setHours(0, 0, 0, 0); // Reset time for comparison
+
+const isMovieReleased = (movie) => {
+  if (!movie || !movie.release_date) return false;
+  const releaseDate = new Date(movie.release_date);
+  releaseDate.setHours(0, 0, 0, 0);
+  return releaseDate <= today;
+};
 
 const moviesToWatch = computed(() => watchlist.value.filter(item => !item.watched));
 const moviesWatched = computed(() => watchlist.value.filter(item => item.watched));
@@ -121,7 +145,6 @@ const fetchWatchlistData = async (url = 'watchlist/') => {
   if (!authStore.isLoggedIn) {
     loading.value = false;
     watchlist.value = [];
-    // error.value = new Error("You must be logged in to view your watchlist."); // Don't show error immediately, just empty list
     return;
   }
   
@@ -141,14 +164,21 @@ const fetchWatchlistData = async (url = 'watchlist/') => {
 };
 
 const toggleWatched = async (item) => {
+  if (!isMovieReleased(item.movie) && !item.watched) {
+    toast.error(`Film "${item.movie.title}" ještě nevyšel. Nelze jej označit jako shlédnutý.`);
+    return;
+  }
+
   try {
     const updatedItem = await updateWatchlistItem(item.id, { watched: !item.watched });
     const index = watchlist.value.findIndex(i => i.id === item.id);
     if (index !== -1) {
       watchlist.value[index].watched = updatedItem.data.watched;
+      toast.success(item.watched ? `"${item.movie.title}" označen jako neshlédnutý.` : `"${item.movie.title}" označen jako shlédnutý.`);
     }
   } catch (err) {
     console.error('Failed to update watched status:', err);
+    toast.error(err.response?.data?.detail || 'Nepodařilo se aktualizovat status shlédnutí.');
   }
 };
 
