@@ -15,7 +15,6 @@
           
           <!-- Tlačítko Watchlist (Overlay) -->
           <button 
-            v-if="authStore.isLoggedIn"
             @click.stop="toggleWatchlist"
             class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 hover:scale-110 transition-all shadow-lg border border-white/20"
             :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
@@ -195,44 +194,112 @@
 
       <!-- Recenze -->
       <div class="p-8">
-        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Recenze</h2>
-        <div v-if="series.reviews && series.reviews.length > 0" class="space-y-4">
-          <div v-for="review in series.reviews" :key="review.id" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-            <div class="flex justify-between">
-              <span class="font-bold dark:text-gray-200">{{ review.user.username }}</span>
-              <span class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</span>
-            </div>
-            <p class="text-gray-700 dark:text-gray-300 mt-1">{{ review.comment }}</p>
+        <div v-if="userReview" class="mb-8">
+          <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Vaše recenze</h3>
+          <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
+            <template v-if="editingReviewId === userReview.id">
+              <form @submit.prevent="handleSaveEdit(userReview.id)">
+                <div class="mb-2">
+                  <label class="block text-gray-700 dark:text-gray-300 text-sm mb-1">Hodnocení</label>
+                  <RatingInput v-model="editedReviewRating" />
+                </div>
+                <div class="mb-2">
+                  <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Komentář</label>
+                  <textarea v-model="editedReviewComment" id="edit-comment" rows="2" maxlength="1000" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2">
+                  <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
+                  <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
+                </div>
+              </form>
+            </template>
+            <template v-else>
+              <div class="flex justify-between items-start mb-2">
+                <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
+                <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
+              <div class="flex justify-end gap-2 mt-3">
+                <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
+                <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
+              </div>
+            </template>
           </div>
         </div>
-        <p v-else class="text-gray-500 italic">Zatím žádné recenze.</p>
+
+        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Recenze</h2>
+        <div v-if="otherReviews.length > 0" class="space-y-4">
+          <div v-for="review in otherReviews" :key="review.id" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex justify-between items-start mb-2">
+              <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
+              <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+            </div>
+            <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
+          </div>
+        </div>
+        <p v-else-if="!userReview" class="text-gray-500 italic text-center py-4">Zatím žádné recenze.</p>
+
+        <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
+          <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
+          <form @submit.prevent="submitReview" class="space-y-4">
+            <RatingInput v-model="newReview.rating" />
+            <textarea v-model="newReview.comment" placeholder="Napište svůj názor na seriál..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
+            <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
+          </form>
+        </div>
       </div>
 
     </div>
+
+    <!-- Confirm Modal -->
+    <ConfirmModal 
+      :is-open="isConfirmModalOpen"
+      :title="'Smazat recenzi'"
+      :message="'Opravdu chcete smazat svou recenzi?'"
+      @confirm="confirmDeleteReview" 
+      @close="isConfirmModalOpen = false" 
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, reactive, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '../../composables/useApi';
 import { useAuthStore } from '../../stores/auth';
 import { useToast } from '../../composables/useToast';
 import AvgRating from '../../components/AvgRating.vue';
+import RatingInput from '../../components/RatingInput.vue';
+import ConfirmModal from '../../components/ConfirmModal.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
-const { getMovieById, getWatchlist, addToWatchlist, removeFromWatchlist, getCollections, addMovieToCollection } = useApi();
+const openAuthModal = inject('openAuthModal');
 
-const seriesId = route.params.id;
+const { 
+  getMovieById, getWatchlist, addToWatchlist, removeFromWatchlist, 
+  getCollections, addMovieToCollection, getReviews, addReview, updateReview, deleteReview 
+} = useApi();
+
+const seriesId = computed(() => Number(route.params.id));
 const series = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const selectedSeasonIndex = ref(0);
 const userCollections = ref([]);
 const showCollectionDropdown = ref(false);
+
+const reviews = ref([]);
+const newReview = reactive({ rating: 5, comment: '' });
+const submittingReview = ref(false);
+const editingReviewId = ref(null);
+const editedReviewRating = ref(1);
+const editedReviewComment = ref('');
+
+const isConfirmModalOpen = ref(false);
+const pendingDeleteReviewId = ref(null);
 
 const watchlist = ref([]);
 const isProcessingWatchlist = ref(false);
@@ -244,22 +311,43 @@ const currentSeason = computed(() => {
 
 const watchlistItem = computed(() => {
   if (!watchlist.value) return null;
-  return watchlist.value.find(item => item.movie.id === Number(seriesId));
+  return watchlist.value.find(item => item.movie.id === seriesId.value);
 });
+
+const userReview = computed(() => {
+  if (!authStore.user || !reviews.value) return null;
+  return reviews.value.find(review => review.user.id === authStore.user.id);
+});
+
+const otherReviews = computed(() => {
+  if (!reviews.value) return [];
+  if (!userReview.value) return reviews.value;
+  return reviews.value.filter(review => review.id !== userReview.value.id);
+});
+
+const fetchReviews = async () => {
+  try {
+    const response = await getReviews({ movie: seriesId.value });
+    reviews.value = response.data.results;
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+  }
+};
 
 const fetchSeries = async () => {
   loading.value = true;
   try {
-    const response = await getMovieById(seriesId);
+    const response = await getMovieById(seriesId.value);
     series.value = response.data;
     if (series.value.type !== 'series') {
-        router.replace(`/movies/${seriesId}`);
+        router.replace(`/movies/${seriesId.value}`);
     }
     
     if (authStore.isLoggedIn) {
       await fetchWatchlistData();
       await fetchUserCollections();
     }
+    await fetchReviews();
   } catch (err) {
     console.error(err);
     error.value = err;
@@ -288,7 +376,7 @@ const fetchUserCollections = async () => {
 
 const handleAddToCollection = async (collectionId) => {
   try {
-    await addMovieToCollection(collectionId, seriesId);
+    await addMovieToCollection(collectionId, seriesId.value);
     showCollectionDropdown.value = false;
     toast.success('Přidáno do kolekce.');
   } catch (err) {
@@ -298,19 +386,87 @@ const handleAddToCollection = async (collectionId) => {
 };
 
 const toggleWatchlist = async () => {
-  if (!authStore.isLoggedIn) return;
+  if (!authStore.isLoggedIn) {
+    openAuthModal('login');
+    return;
+  }
   isProcessingWatchlist.value = true;
   try {
     if (watchlistItem.value) {
       await removeFromWatchlist(watchlistItem.value.id);
     } else {
-      await addToWatchlist(seriesId);
+      await addToWatchlist(seriesId.value);
     }
     await fetchWatchlistData();
   } catch (err) {
     toast.error("Chyba při aktualizaci seznamu.");
   } finally {
     isProcessingWatchlist.value = false;
+  }
+};
+
+const submitReview = async () => {
+  submittingReview.value = true;
+  try {
+    await addReview({
+      movie_id: seriesId.value,
+      rating: newReview.rating,
+      comment: newReview.comment,
+    });
+    newReview.rating = 5;
+    newReview.comment = '';
+    await fetchReviews();
+    toast.success('Recenze odeslána.');
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    toast.error('Nepodařilo se odeslat recenzi.');
+  } finally {
+    submittingReview.value = false;
+  }
+};
+
+const handleEditReview = (review) => {
+  editingReviewId.value = review.id;
+  editedReviewRating.value = review.rating;
+  editedReviewComment.value = review.comment;
+};
+
+const handleCancelEdit = () => {
+  editingReviewId.value = null;
+};
+
+const handleSaveEdit = async (reviewId) => {
+  try {
+    await updateReview(reviewId, {
+      rating: editedReviewRating.value,
+      comment: editedReviewComment.value,
+    });
+    await fetchReviews();
+    handleCancelEdit();
+    toast.success('Recenze aktualizována.');
+  } catch (err) {
+    console.error('Error saving review:', err);
+    toast.error('Nepodařilo se aktualizovat recenzi.');
+  }
+};
+
+const handleDeleteReview = (reviewId) => {
+  pendingDeleteReviewId.value = reviewId;
+  isConfirmModalOpen.value = true;
+};
+
+const confirmDeleteReview = async () => {
+  if (!pendingDeleteReviewId.value) return;
+  try {
+    await deleteReview(pendingDeleteReviewId.value);
+    await fetchReviews();
+    toast.success('Recenze smazána.');
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    toast.error('Nepodařilo se smazat recenzi.');
+  } finally {
+    isConfirmModalOpen.value = false;
+    pendingDeleteReviewId.value = null;
   }
 };
 
@@ -322,4 +478,20 @@ const getEpisodeImage = (episode) => {
 };
 
 onMounted(fetchSeries);
+
+watch(() => route.params.id, (newId) => {
+  if (newId && Number(newId) !== seriesId.value) {
+    fetchSeries();
+  }
+});
+
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (isLoggedIn) {
+    fetchWatchlistData();
+    fetchUserCollections();
+  } else {
+    watchlist.value = [];
+    userCollections.value = [];
+  }
+});
 </script>
