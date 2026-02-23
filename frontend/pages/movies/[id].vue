@@ -36,7 +36,42 @@
 
         <!-- Informace o filmu -->
         <div class="flex-grow text-center md:text-left">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
+          <div class="flex justify-between items-start">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
+            
+            <!-- Tlačítko Kolekce -->
+            <div v-if="authStore.isLoggedIn" class="relative">
+              <button 
+                @click="showCollectionDropdown = !showCollectionDropdown"
+                class="flex items-center gap-2 p-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm font-semibold"
+                title="Přidat do kolekce"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span>Kolekce</span>
+              </button>
+              
+              <div v-if="showCollectionDropdown" 
+                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
+                  Nemáte žádné kolekce.
+                </div>
+                <div v-else>
+                  <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Přidat do:</p>
+                  <button 
+                    v-for="col in userCollections" 
+                    :key="col.id"
+                    @click="handleAddToCollection(col.id)"
+                    class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                  >
+                    {{ col.name }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <p class="text-lg text-gray-500 mb-4">{{ movie.release_date ? movie.release_date.substring(0, 4) : '' }}</p>
           
           <!-- Žánry -->
@@ -132,49 +167,49 @@
                     <div class="mb-2">
                       <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Komentář</label>
                       <textarea v-model="editedReviewComment" id="edit-comment" rows="2" maxlength="1000" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
-                    </div>
-                    <div class="flex justify-end space-x-2">
-                      <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
-                      <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
-                    </div>
-                  </form>
-                </template>
-                <template v-else>
-                  <div class="flex justify-between items-start mb-2">
-                    <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
-                    <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
                   </div>
-                  <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
-                  <div class="flex justify-end gap-2 mt-3">
-                    <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
-                    <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
+                  <div class="flex justify-end space-x-2">
+                    <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
+                    <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
                   </div>
-                </template>
-              </div>
-            </div>
-
-            <!-- Ostatní recenze -->
-            <div v-if="otherReviews.length > 0" class="space-y-4">
-              <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                </form>
+              </template>
+              <template v-else>
                 <div class="flex justify-between items-start mb-2">
-                  <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
-                  <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+                  <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
+                  <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
                 </div>
-                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
-              </div>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
+                <div class="flex justify-end gap-2 mt-3">
+                  <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
+                  <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
+                </div>
+              </template>
             </div>
-            <p v-else-if="!userReview" class="text-gray-500 italic text-center py-4">Zatím žádné recenze.</p>
+          </div>
 
-            <!-- Formulář pro přidání recenze -->
-            <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
-              <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
-              <form @submit.prevent="submitReview" class="space-y-4">
-                <RatingInput v-model="newReview.rating" />
-                <textarea v-model="newReview.comment" placeholder="Napište svůj názor..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
-                <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
-              </form>
+          <!-- Ostatní recenze -->
+          <div v-if="otherReviews.length > 0" class="space-y-4">
+            <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+              <div class="flex justify-between items-start mb-2">
+                <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
+                <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
             </div>
-          </template>
+          </div>
+          <p v-else-if="!userReview" class="text-gray-500 italic text-center py-4">Zatím žádné recenze.</p>
+
+          <!-- Formulář pro přidání recenze -->
+          <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
+            <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
+            <form @submit.prevent="submitReview" class="space-y-4">
+              <RatingInput v-model="newReview.rating" />
+              <textarea v-model="newReview.comment" placeholder="Napište svůj názor..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
+              <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
+            </form>
+          </div>
+        </template>
         </div>
       </div>
 
@@ -242,18 +277,21 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
-const openAuthModal = inject('openAuthModal');
+const openAuthModal = inject('openAuthModal'); // Pro otevření přihlašovacího modalu
 
 const movieId = computed(() => Number(route.params.id));
 
 const {
   getMovieById, addReview, updateReview, deleteReview, 
-  getWatchlist, addToWatchlist, removeFromWatchlist, 
-  getMovies, getReviews, toggleLikeReview
+  getWatchlist, addToWatchlist, removeFromWatchlist, updateWatchlist, // Přidáno updateWatchlist
+  getMovies, getReviews, toggleLikeReview,
+  getCollections, addMovieToCollection
 } = useApi();
 
 const movie = ref(null);
 const reviews = ref([]);
+const userCollections = ref([]); // State pro kolekce
+const showCollectionDropdown = ref(false); // State pro dropdown kolekcí
 const relatedMovies = ref([]);
 const loading = ref(true);
 const error = ref(null);
@@ -317,6 +355,19 @@ const goToDetail = (item) => {
   }
 };
 
+const fetchUserCollections = async () => {
+  if (!authStore.isLoggedIn) {
+      userCollections.value = [];
+      return;
+  }
+  try {
+    const response = await getCollections();
+    userCollections.value = response.data.results.filter(c => c.user.id === authStore.user?.id);
+  } catch (err) {
+    console.error('Failed to fetch collections:', err);
+  }
+};
+
 const fetchRelatedMovies = async (currentMovie) => {
   if (!currentMovie || !currentMovie.genres || currentMovie.genres.length === 0) {
     relatedMovies.value = [];
@@ -342,7 +393,10 @@ const fetchReviews = async () => {
 };
 
 const fetchWatchlist = async () => {
-  if (!authStore.isLoggedIn) return;
+  if (!authStore.isLoggedIn) {
+      watchlist.value = [];
+      return;
+  }
   try {
     const response = await getWatchlist();
     watchlist.value = response.data.results;
@@ -364,7 +418,11 @@ const fetchMovie = async (id) => {
         return;
     }
 
-    await fetchWatchlist();
+    // Načítání dat závislých na uživateli
+    if (authStore.isLoggedIn) {
+        await fetchWatchlist();
+        await fetchUserCollections(); // Načtení kolekcí
+    }
     await fetchRelatedMovies(movie.value);
     await fetchReviews();
   } catch (err) {
@@ -372,6 +430,21 @@ const fetchMovie = async (id) => {
     console.error('Error fetching movie:', err);
   } finally {
     loading.value = false;
+  }
+};
+
+const handleAddToCollection = async (collectionId) => {
+  if (!authStore.isLoggedIn) { // Znovu kontrola pro jistotu
+    openAuthModal('login');
+    return;
+  }
+  try {
+    await addMovieToCollection(collectionId, movieId.value);
+    showCollectionDropdown.value = false;
+    toast.success('Přidáno do kolekce.');
+  } catch (err) {
+    console.error('Failed to add to collection:', err);
+    toast.error('Film už v této kolekci je.');
   }
 };
 
@@ -420,6 +493,10 @@ const toggleWatchlist = async () => {
 };
 
 const submitReview = async () => {
+  if (!authStore.isLoggedIn) {
+    openAuthModal('login');
+    return;
+  }
   submittingReview.value = true;
   try {
     await addReview({
@@ -496,12 +573,14 @@ watch(() => route.params.id, (newId) => {
   }
 });
 
-// Sledování přihlášení a načtení watchlistu
+// Sledování přihlášení a načtení dat
 watch(() => authStore.isLoggedIn, (isLoggedIn) => {
   if (isLoggedIn) {
     fetchWatchlist();
+    fetchUserCollections(); // Načtení kolekcí
   } else {
     watchlist.value = [];
+    userCollections.value = [];
   }
 });
 </script>
