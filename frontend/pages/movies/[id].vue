@@ -31,8 +31,42 @@
 
         <!-- Informace o filmu -->
         <div class="flex-grow text-center md:text-left">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ movie.title }}</h1>
-          <p class="text-lg text-gray-500 mb-4">{{ movie.release_date ? movie.release_date.substring(0, 4) : '' }}</p>
+          <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-2">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ movie.title }}</h1>
+            
+            <!-- Tlačítko Kolekce -->
+            <div v-if="authStore.isLoggedIn" class="relative self-center md:self-start">
+              <button 
+                @click="showCollectionDropdown = !showCollectionDropdown"
+                class="flex items-center gap-2 p-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm font-semibold border border-gray-200 dark:border-gray-600"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span>Kolekce</span>
+              </button>
+              
+              <div v-if="showCollectionDropdown" 
+                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
+                  Nemáte žádné kolekce.
+                </div>
+                <div v-else>
+                  <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Přidat do:</p>
+                  <button 
+                    v-for="col in userCollections" 
+                    :key="col.id"
+                    @click="handleAddToCollection(col.id)"
+                    class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                  >
+                    {{ col.name }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-lg text-gray-500 mb-4">{{ movie.release_date ? movie.release_date.substring(0, 4) : 'TBA' }}</p>
           
           <!-- Žánry -->
           <div class="flex flex-wrap gap-2 justify-center md:justify-start mb-6">
@@ -41,9 +75,20 @@
             </span>
           </div>
 
-          <p v-if="movie.description" class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-            {{ movie.description }}
-          </p>
+          <!-- Popis s logikou Číst více -->
+          <div v-if="movie.description" class="mb-6">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              {{ truncatedDescription }}
+            </p>
+            <button 
+              v-if="movie.description.length > 250" 
+              @click="isDescriptionExpanded = !isDescriptionExpanded" 
+              class="text-blue-600 dark:text-blue-400 hover:underline mt-1 text-sm font-semibold"
+            >
+              {{ isDescriptionExpanded ? 'Zobrazit méně' : 'Číst více' }}
+            </button>
+          </div>
+          <p v-else class="text-gray-500 italic mb-6">Popis není k dispozici.</p>
         </div>
       </div>
 
@@ -183,7 +228,7 @@
         <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Obsazení</h2>
         <Carousel>
           <NuxtLink v-for="actor in movie.actors" :key="actor.id" :to="`/actors/${actor.id}`" class="flex-shrink-0 w-32 text-center group">
-            <div class="aspect-[2/3] w-full bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform group-hover:-translate-y-1 transition-transform">
+            <div class="aspect-[2/3] w-full bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform group-hover:-translate-y-1 transition-transform border border-gray-200 dark:border-gray-700">
               <img v-if="actor.photo" :src="actor.photo" :alt="actor.name" class="w-full h-full object-cover">
               <div v-else class="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-700 text-gray-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -201,7 +246,7 @@
           <div 
             v-for="relatedMovie in relatedMovies" 
             :key="relatedMovie.id" 
-            class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
+            class="flex-shrink-0 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer border border-gray-200 dark:border-gray-700"
             @click="goToDetail(relatedMovie)"
           >
             <img v-if="relatedMovie.poster" :src="relatedMovie.poster" :alt="relatedMovie.title" class="h-64 w-full object-cover">
@@ -249,14 +294,18 @@ const movieId = computed(() => Number(route.params.id));
 const {
   getMovieById, addReview, updateReview, deleteReview, 
   getWatchlist, addToWatchlist, removeFromWatchlist, 
-  getMovies, getReviews, toggleLikeReview
+  getMovies, getReviews, getCollections, addMovieToCollection
 } = useApi();
 
 const movie = ref(null);
 const reviews = ref([]);
+const userCollections = ref([]);
+const showCollectionDropdown = ref(false);
 const relatedMovies = ref([]);
 const loading = ref(true);
 const error = ref(null);
+
+const isDescriptionExpanded = ref(false);
 
 const newReview = reactive({ rating: 5, comment: '' });
 const submittingReview = ref(false);
@@ -272,6 +321,14 @@ const isConfirmModalOpen = ref(false);
 const pendingDeleteReviewId = ref(null);
 
 const watchlistItem = computed(() => watchlist.value.find(item => item.movie.id === movieId.value));
+
+const truncatedDescription = computed(() => {
+  if (!movie.value || !movie.value.description) return '';
+  if (isDescriptionExpanded.value || movie.value.description.length <= 250) {
+    return movie.value.description;
+  }
+  return movie.value.description.substring(0, 250) + '...';
+});
 
 const userReview = computed(() => {
   if (!authStore.user || !reviews.value) return null;
@@ -289,6 +346,15 @@ const goToDetail = (item) => {
     router.push(`/series/${item.id}`);
   } else {
     router.push(`/movies/${item.id}`);
+  }
+};
+
+const fetchUserCollections = async () => {
+  try {
+    const response = await getCollections();
+    userCollections.value = response.data.results.filter(c => c.user.id === authStore.user?.id);
+  } catch (err) {
+    console.error('Failed to fetch collections:', err);
   }
 };
 
@@ -339,7 +405,10 @@ const fetchMovie = async (id) => {
         return;
     }
 
-    await fetchWatchlist();
+    if (authStore.isLoggedIn) {
+      await fetchWatchlist();
+      await fetchUserCollections();
+    }
     await fetchRelatedMovies(movie.value);
     await fetchReviews();
   } catch (err) {
@@ -347,6 +416,17 @@ const fetchMovie = async (id) => {
     console.error('Error fetching movie:', err);
   } finally {
     loading.value = false;
+  }
+};
+
+const handleAddToCollection = async (collectionId) => {
+  try {
+    await addMovieToCollection(collectionId, movieId.value);
+    showCollectionDropdown.value = false;
+    toast.success('Přidáno do kolekce.');
+  } catch (err) {
+    console.error('Failed to add to collection:', err);
+    toast.error('Film už v této kolekci je.');
   }
 };
 
@@ -453,8 +533,10 @@ watch(() => route.params.id, (newId) => {
 watch(() => authStore.isLoggedIn, (isLoggedIn) => {
   if (isLoggedIn) {
     fetchWatchlist();
+    fetchUserCollections();
   } else {
     watchlist.value = [];
+    userCollections.value = [];
   }
 });
 </script>
