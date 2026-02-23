@@ -499,11 +499,14 @@ const handleChangePassword = async () => {
       old_password: passwordForm.old_password,
       new_password: passwordForm.new_password
     });
-    toast.success("Heslo změněno.");
-    passwordForm.old_password = '';
-    passwordForm.new_password = '';
-    passwordForm.confirm_password = '';
-    showPasswordSection.value = false;
+    
+    // ----- ZDE PŘIDÁVÁM ZMĚNY -----
+    toast.success("Heslo úspěšně změněno. Prosím, přihlaste se znovu s novým heslem.");
+    authStore.logout(); // Odhlášení uživatele
+    navigateTo('/'); // Přesměrování na domovskou stránku nebo přihlašovací obrazovku
+    closeEditModal(); // Zavření modalu
+    // ----------------------------
+
   } catch (err) {
     toast.error(err.response?.data?.detail || "Chyba při změně hesla.");
   } finally {
