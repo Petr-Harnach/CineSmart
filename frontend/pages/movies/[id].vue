@@ -169,22 +169,28 @@
                 </div>
               </form>
             </div>
-            <div v-else>
-              <div class="flex items-center gap-4 mb-3">
-                <span class="text-2xl font-black text-gray-900 dark:text-white">{{ userReview.rating }} <span class="text-yellow-500 text-xl">★</span></span>
-                <div class="h-4 w-px bg-gray-300 dark:bg-gray-700"></div>
-                <span class="text-sm font-bold text-gray-500 uppercase">{{ new Date(userReview.created_at).toLocaleDateString() }}</span>
-              </div>
-              <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{{ userReview.comment }}</p>
-            </div>
-          </div>
+                      <div v-else>
+                        <div class="flex items-center gap-4 mb-4">
+                          <img v-if="userReview.user.profile_picture" :src="userReview.user.profile_picture" class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700">
+                          <div v-else class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm uppercase">
+                            {{ userReview.user.username.charAt(0) }}
+                          </div>
+                          <div class="flex items-center gap-4">
+                            <span class="text-2xl font-black text-gray-900 dark:text-white">{{ userReview.rating }} <span class="text-yellow-500 text-xl">★</span></span>
+                            <div class="h-4 w-px bg-gray-300 dark:bg-gray-700"></div>
+                            <span class="text-sm font-bold text-gray-500 uppercase">{{ new Date(userReview.created_at).toLocaleDateString() }}</span>
+                          </div>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{{ userReview.comment }}</p>
+                      </div>          </div>
 
           <!-- Ostatní recenze -->
           <div v-if="otherReviews.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-transform hover:shadow-md">
               <div class="flex justify-between items-start mb-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm uppercase">
+                  <img v-if="review.user.profile_picture" :src="review.user.profile_picture" class="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700">
+                  <div v-else class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm uppercase">
                     {{ review.user.username.charAt(0) }}
                   </div>
                   <div class="min-w-0">
