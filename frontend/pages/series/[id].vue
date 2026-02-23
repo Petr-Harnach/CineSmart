@@ -7,24 +7,19 @@
 
     <div v-else-if="series" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <!-- Hlavička seriálu -->
-      <div class="md:flex">
+      <div class="md:flex border-b border-gray-200 dark:border-gray-700">
         <!-- PLAKÁT S TLAČÍTKEM -->
         <div class="md:flex-shrink-0 relative group">
           <img v-if="series.poster" :src="series.poster" :alt="series.title" class="h-96 w-full object-cover md:w-80">
           <div v-else class="bg-gray-300 dark:bg-gray-700 h-96 w-full md:w-80 flex items-center justify-center text-gray-500">Žádný plakát</div>
           
-          <!-- Tlačítko Watchlist (Overlay) -->
           <button 
             @click.stop="toggleWatchlist"
             class="absolute top-3 right-3 bg-gray-900/70 text-white p-2.5 rounded-full hover:bg-gray-900 hover:scale-110 transition-all shadow-lg border border-white/20"
             :title="watchlistItem ? 'Odebrat ze seznamu' : 'Přidat do seznamu'"
           >
-            <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+            <svg v-if="!watchlistItem" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
           </button>
         </div>
         
@@ -32,34 +27,16 @@
           <div class="flex justify-between items-start mb-2">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ series.title }}</h1>
             
-            <!-- Tlačítko Kolekce (Ikonka knížky) -->
             <div v-if="authStore.isLoggedIn" class="relative">
-              <button 
-                @click="showCollectionDropdown = !showCollectionDropdown"
-                class="flex items-center gap-2 p-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm font-semibold"
-                title="Přidat do kolekce"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+              <button @click="showCollectionDropdown = !showCollectionDropdown" class="flex items-center gap-2 p-2 px-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                 <span>Kolekce</span>
               </button>
-              
-              <div v-if="showCollectionDropdown" 
-                   class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
-                <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">
-                  Nemáte žádné kolekce.
-                </div>
+              <div v-if="showCollectionDropdown" class="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl z-30 overflow-hidden">
+                <div v-if="userCollections.length === 0" class="p-4 text-sm text-gray-500 italic">Nemáte žádné kolekce.</div>
                 <div v-else>
                   <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Přidat do:</p>
-                  <button 
-                    v-for="col in userCollections" 
-                    :key="col.id"
-                    @click="handleAddToCollection(col.id)"
-                    class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
-                  >
-                    {{ col.name }}
-                  </button>
+                  <button v-for="col in userCollections" :key="col.id" @click="handleAddToCollection(col.id)" class="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0">{{ col.name }}</button>
                 </div>
               </div>
             </div>
@@ -72,184 +49,292 @@
               <span v-else> – Současnost</span>
             </span>
             <span v-else>TBA</span>
-            
-            <span v-if="series.seasons && series.seasons.length" class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-200">
-              {{ series.seasons.length }} {{ series.seasons.length === 1 ? 'Série' : (series.seasons.length < 5 ? 'Série' : 'Sérií') }}
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-200">
+              {{ series.seasons?.length || 0 }} {{ series.seasons?.length === 1 ? 'Série' : (series.seasons?.length < 5 ? 'Série' : 'Sérií') }}
             </span>
-
             <AvgRating :rating="series.avg_rating" />
           </div>
           
           <div v-if="series.description" class="mb-6">
-            <h3 class="font-bold text-gray-900 dark:text-gray-100 mb-1">Popis</h3>
-            <p class="text-gray-700 dark:text-gray-200 leading-relaxed">{{ series.description }}</p>
+            <h3 class="font-bold text-gray-900 dark:text-gray-100 mb-1 uppercase text-xs tracking-widest">Popis seriálu</h3>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{{ series.description }}</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
-            <div v-if="series.directors && series.directors.length">
-              <span class="font-bold text-gray-900 dark:text-gray-100">Tvůrci/Režie:</span>
-              <span class="text-gray-600 dark:text-gray-300 ml-2">
+          <div class="grid grid-cols-1 gap-4 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
+            <div v-if="series.directors?.length">
+              <span class="font-bold text-gray-900 dark:text-gray-100">Hlavní tvůrci:</span>
+              <span class="text-gray-600 dark:text-gray-400 ml-2">
                 <template v-for="(d, i) in series.directors" :key="d.id">
-                  <NuxtLink :to="`/directors/${d.id}`" class="hover:underline">{{ d.name }}</NuxtLink><span v-if="i < series.directors.length - 1">, </span>
+                  <NuxtLink :to="`/directors/${d.id}`" class="hover:text-blue-500 transition-colors">{{ d.name }}</NuxtLink><span v-if="i < series.directors.length - 1">, </span>
                 </template>
               </span>
             </div>
-            <div v-if="series.genres && series.genres.length">
+            <div v-if="series.genres?.length">
               <span class="font-bold text-gray-900 dark:text-gray-100">Žánry:</span>
-              <span class="text-gray-600 dark:text-gray-300 ml-2">{{ series.genres.map(g => g.name).join(', ') }}</span>
+              <span class="text-gray-600 dark:text-gray-400 ml-2">{{ series.genres.map(g => g.name).join(', ') }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <hr class="border-gray-200 dark:border-gray-700">
-
-      <div class="p-8 bg-gray-50 dark:bg-gray-900/50">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Epizody</h2>
+      <!-- SEKCE EPIZODY -->
+      <div class="p-8 bg-gray-50 dark:bg-gray-900/30">
+        <h2 class="text-2xl font-black mb-6 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+          Série a Epizody
+        </h2>
         
         <div v-if="series.seasons && series.seasons.length > 0">
-          <div class="flex overflow-x-auto space-x-2 mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
+          <!-- Taby sérií -->
+          <div class="flex overflow-x-auto space-x-2 mb-8 pb-2 border-b border-gray-200 dark:border-gray-700 scrollbar-hide">
             <button 
               v-for="(season, index) in series.seasons" 
               :key="season.id"
               @click="selectedSeasonIndex = index"
-              class="px-4 py-2 whitespace-nowrap rounded-t-lg font-medium transition-colors"
+              class="px-6 py-3 whitespace-nowrap rounded-t-xl font-bold transition-all"
               :class="selectedSeasonIndex === index 
-                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
+                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-t border-l border-r border-gray-200 dark:border-gray-700 shadow-sm' 
+                : 'text-gray-500 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'"
             >
               {{ season.season_number }}. Série
             </button>
           </div>
 
-          <div v-if="currentSeason" class="space-y-4">
-            <div class="mb-4">
-              <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
-                {{ currentSeason.title || `${currentSeason.season_number}. Série` }}
-              </h3>
-              <p v-if="currentSeason.release_date" class="text-sm text-gray-500">
-                Premiéra: {{ new Date(currentSeason.release_date).getFullYear() }}
-              </p>
-              <p v-if="currentSeason.overview" class="text-gray-600 dark:text-gray-300 mt-2">
-                {{ currentSeason.overview }}
-              </p>
+          <!-- Detail vybrané série -->
+          <div v-if="currentSeason" class="animate-in fade-in duration-500">
+            <div class="flex flex-col md:flex-row gap-6 mb-10 bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+              <div class="w-32 flex-shrink-0">
+                <img v-if="currentSeason.poster" :src="currentSeason.poster" class="w-full h-auto rounded-lg shadow-lg">
+                <div v-else class="w-full aspect-[2/3] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 text-xs">Bez plakátu</div>
+              </div>
+              <div class="flex-grow">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {{ currentSeason.title || `${currentSeason.season_number}. Série` }}
+                </h3>
+                <p v-if="currentSeason.release_date" class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3">
+                  Premiéra: {{ new Date(currentSeason.release_date).toLocaleDateString('cs-CZ') }}
+                </p>
+                <p v-if="currentSeason.overview" class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">
+                  {{ currentSeason.overview }}
+                </p>
+                
+                <!-- Štáb série -->
+                <div class="flex flex-wrap gap-6 text-xs border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
+                  <div v-if="currentSeason.directors?.length">
+                    <p class="font-bold text-gray-500 uppercase mb-1">Režie série</p>
+                    <p class="text-gray-900 dark:text-gray-200">{{ currentSeason.directors.map(d => d.name).join(', ') }}</p>
+                  </div>
+                  <div v-if="currentSeason.screenwriters?.length">
+                    <p class="font-bold text-gray-500 uppercase mb-1">Scénář série</p>
+                    <p class="text-gray-900 dark:text-gray-200">{{ currentSeason.screenwriters.map(s => s.name).join(', ') }}</p>
+                  </div>
+                  <div v-if="currentSeason.actors?.length">
+                    <p class="font-bold text-gray-500 uppercase mb-1">Hlavní obsazení</p>
+                    <p class="text-gray-900 dark:text-gray-200">{{ currentSeason.actors.map(a => a.name).join(', ') }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div v-if="currentSeason.episodes && currentSeason.episodes.length > 0" class="space-y-4">
+            <!-- Seznam epizod -->
+            <div v-if="currentSeason.episodes?.length > 0" class="grid grid-cols-1 gap-4">
               <div 
                 v-for="episode in currentSeason.episodes" 
                 :key="episode.id" 
-                class="flex flex-col sm:flex-row bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                @click="openEpisodeModal(episode)"
+                class="flex flex-col sm:flex-row bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer group"
               >
-                <div class="sm:w-48 flex-shrink-0 relative">
-                  <img 
-                    v-if="getEpisodeImage(episode)" 
-                    :src="getEpisodeImage(episode)" 
-                    :alt="episode.title" 
-                    class="w-full h-32 object-cover"
-                  >
-                  <div v-else class="w-full h-32 bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 text-xs">
-                    Bez náhledu
-                  </div>
-                  <div class="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1 rounded">
-                    {{ episode.episode_number }}
+                <div class="sm:w-56 flex-shrink-0 relative overflow-hidden">
+                  <img v-if="getEpisodeImage(episode)" :src="getEpisodeImage(episode)" class="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500">
+                  <div v-else class="w-full h-36 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-xs tracking-widest uppercase">Bez náhledu</div>
+                  <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                  <div class="absolute bottom-2 left-2 bg-black/80 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">
+                    E{{ episode.episode_number }}
                   </div>
                 </div>
                 
-                <div class="p-4 flex-grow">
-                  <div class="flex justify-between items-start">
-                    <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <div class="p-5 flex-grow min-w-0">
+                  <div class="flex justify-between items-start mb-1">
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-500 transition-colors">
                       {{ episode.episode_number }}. {{ episode.title }}
                     </h4>
-                    <span v-if="episode.runtime" class="text-xs font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300">
-                      {{ episode.runtime }} min
+                    <span v-if="episode.runtime" class="text-[10px] font-bold bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-500 dark:text-gray-400">
+                      {{ episode.runtime }} MIN
                     </span>
                   </div>
-                  <p class="text-xs text-gray-500 mb-2">
-                    {{ episode.air_date ? new Date(episode.air_date).toLocaleDateString('cs-CZ') : 'Datum neznámé' }}
+                  <p class="text-[11px] text-gray-400 font-bold mb-2">
+                    {{ episode.air_date ? new Date(episode.air_date).toLocaleDateString('cs-CZ') : 'DATUM NEZNÁMÉ' }}
                   </p>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-                    {{ episode.overview || 'Popis epizody není k dispozici.' }}
+                  <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 italic">
+                    {{ episode.overview || 'Popis epizody bude brzy doplněn.' }}
                   </p>
                   
-                  <div v-if="episode.directors?.length || episode.guest_stars?.length" class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  <!-- Rychlý přehled štábu u epizody -->
+                  <div class="mt-4 flex gap-4 text-[10px] text-gray-400 uppercase tracking-widest font-bold">
                     <span v-if="episode.directors?.length">
-                      <strong>Režie:</strong> {{ episode.directors.map(d => d.name).join(', ') }}
+                      <span class="text-blue-500">Režie:</span> {{ episode.directors[0].name }}
                     </span>
-                    <span v-if="episode.guest_stars?.length" class="ml-3">
-                      <strong>Hosté:</strong> {{ episode.guest_stars.map(a => a.name).join(', ') }}
+                    <span v-if="episode.screenwriters?.length">
+                      <span class="text-blue-500">Scénář:</span> {{ episode.screenwriters[0].name }}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-            <div v-else class="text-center py-8 text-gray-500 italic">
+            <div v-else class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 italic">
               Tato série zatím nemá žádné epizody.
             </div>
           </div>
         </div>
       </div>
 
-      <hr class="border-gray-200 dark:border-gray-700">
+      <!-- RECENZE SEKCE -->
+      <div class="p-8 border-t border-gray-200 dark:border-gray-700">
+        <h2 class="text-2xl font-black mb-8 dark:text-gray-100 flex items-center gap-2 uppercase tracking-tight">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+          Recenze a Hodnocení
+        </h2>
 
-      <!-- Recenze -->
-      <div class="p-8">
-        <div v-if="userReview" class="mb-8">
-          <h3 class="text-xl font-bold mb-4 dark:text-gray-100">Vaše recenze</h3>
-          <div class="bg-blue-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm border border-blue-200 dark:border-gray-600">
-            <template v-if="editingReviewId === userReview.id">
-              <form @submit.prevent="handleSaveEdit(userReview.id)">
-                <div class="mb-2">
-                  <label class="block text-gray-700 dark:text-gray-300 text-sm mb-1">Hodnocení</label>
-                  <RatingInput v-model="editedReviewRating" />
-                </div>
-                <div class="mb-2">
-                  <label for="edit-comment" class="block text-gray-700 dark:text-gray-300 text-sm">Komentář</label>
-                  <textarea v-model="editedReviewComment" id="edit-comment" rows="2" maxlength="1000" class="w-full p-1 border rounded bg-gray-100 dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500"></textarea>
-                </div>
-                <div class="flex justify-end space-x-2">
-                  <button type="button" @click="handleCancelEdit" class="px-3 py-1 bg-gray-300 rounded text-sm">Zrušit</button>
-                  <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Uložit</button>
-                </div>
-              </form>
-            </template>
-            <template v-else>
-              <div class="flex justify-between items-start mb-2">
-                <p class="font-semibold dark:text-gray-100">{{ userReview.user.username }}</p>
-                <p class="text-yellow-500">{{ '⭐'.repeat(userReview.rating) }}</p>
-              </div>
-              <p class="text-gray-700 dark:text-gray-300 text-sm">{{ userReview.comment }}</p>
-              <div class="flex justify-end gap-2 mt-3">
-                <button @click="handleEditReview(userReview)" class="text-xs text-blue-600 hover:underline">Upravit</button>
-                <button @click="handleDeleteReview(userReview.id)" class="text-xs text-red-600 hover:underline">Smazat</button>
-              </div>
-            </template>
-          </div>
-        </div>
-
-        <h2 class="text-2xl font-bold mb-4 dark:text-gray-100">Recenze</h2>
-        <div v-if="otherReviews.length > 0" class="space-y-4">
-          <div v-for="review in otherReviews" :key="review.id" class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="flex justify-between items-start mb-2">
-              <p class="font-semibold dark:text-gray-100">{{ review.user.username }}</p>
-              <p class="text-yellow-500">{{ '⭐'.repeat(review.rating) }}</p>
+        <!-- Moje recenze -->
+        <div v-if="userReview" class="mb-10 bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Moje hodnocení</h3>
+            <div class="flex gap-2">
+              <button @click="handleEditReview(userReview)" class="text-[10px] font-bold text-gray-500 hover:text-blue-500 uppercase transition-colors">Upravit</button>
+              <button @click="handleDeleteReview(userReview.id)" class="text-[10px] font-bold text-gray-500 hover:text-red-500 uppercase transition-colors">Smazat</button>
             </div>
-            <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.comment }}</p>
+          </div>
+          
+          <div v-if="editingReviewId === userReview.id">
+            <form @submit.prevent="handleSaveEdit(userReview.id)" class="space-y-4">
+              <RatingInput v-model="editedReviewRating" />
+              <textarea v-model="editedReviewComment" rows="3" class="w-full p-3 border rounded-xl bg-white dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+              <div class="flex justify-end gap-2">
+                <button type="button" @click="handleCancelEdit" class="px-4 py-2 text-sm font-bold text-gray-500 uppercase">Zrušit</button>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20">Uložit změny</button>
+              </div>
+            </form>
+          </div>
+          <div v-else>
+            <div class="flex items-center gap-4 mb-3">
+              <span class="text-2xl font-black text-gray-900 dark:text-white">{{ userReview.rating }} <span class="text-yellow-500 text-xl">★</span></span>
+              <div class="h-4 w-px bg-gray-300 dark:bg-gray-700"></div>
+              <span class="text-sm font-bold text-gray-500 uppercase">{{ new Date(userReview.created_at).toLocaleDateString() }}</span>
+            </div>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ userReview.comment }}</p>
           </div>
         </div>
-        <p v-else-if="!userReview" class="text-gray-500 italic text-center py-4">Zatím žádné recenze.</p>
 
-        <div v-if="authStore.isLoggedIn && !userReview" class="mt-8">
-          <h3 class="font-bold mb-4 dark:text-gray-100">Přidat recenzi</h3>
-          <form @submit.prevent="submitReview" class="space-y-4">
-            <RatingInput v-model="newReview.rating" />
-            <textarea v-model="newReview.comment" placeholder="Napište svůj názor na seriál..." class="w-full p-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
-            <button type="submit" :disabled="submittingReview" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400">Odeslat</button>
+        <!-- Ostatní recenze -->
+        <div v-if="otherReviews.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-for="review in otherReviews" :key="review.id" class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-transform hover:shadow-md">
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-sm uppercase">
+                  {{ review.user.username.charAt(0) }}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-bold text-gray-900 dark:text-white truncate">{{ review.user.username }}</p>
+                  <p class="text-[10px] text-gray-400 font-bold uppercase">{{ new Date(review.created_at).toLocaleDateString() }}</p>
+                </div>
+              </div>
+              <div class="bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 px-2 py-1 rounded-lg text-xs font-black">
+                {{ review.rating }} ★
+              </div>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ review.comment }}</p>
+          </div>
+        </div>
+        <div v-else-if="!userReview" class="text-center py-12 bg-gray-50 dark:bg-gray-800/30 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+          <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Buďte první, kdo napíše recenzi!</p>
+        </div>
+
+        <!-- Formulář pro novou recenzi -->
+        <div v-if="authStore.isLoggedIn && !userReview" class="mt-12 bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700">
+          <h3 class="text-xl font-black mb-6 dark:text-gray-100 uppercase tracking-tight">Napsat vlastní názor</h3>
+          <form @submit.prevent="submitReview" class="space-y-6">
+            <div>
+              <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Vaše hodnocení</label>
+              <RatingInput v-model="newReview.rating" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Text recenze</label>
+              <textarea v-model="newReview.comment" placeholder="Jak se vám tento seriál líbil? Co říkáte na obsazení nebo atmosféru?" class="w-full p-4 border rounded-2xl dark:bg-gray-900 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" rows="4"></textarea>
+            </div>
+            <button type="submit" :disabled="submittingReview" class="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-sm font-black uppercase tracking-widest transition-all transform hover:scale-105 shadow-xl shadow-blue-600/20 disabled:opacity-50">
+              Odeslat recenzi
+            </button>
           </form>
         </div>
       </div>
-
     </div>
+
+    <!-- EPISODE DETAIL MODAL -->
+    <transition enter-active-class="duration-300 ease-out" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="duration-200 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+      <div v-if="selectedEpisode" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 py-12 text-center sm:block sm:p-0">
+          <div class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm transition-opacity" @click="closeEpisodeModal"></div>
+
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+          <div class="inline-block align-bottom bg-white dark:bg-gray-900 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-200 dark:border-gray-800">
+            <div class="relative h-64 sm:h-96">
+              <img v-if="getEpisodeImage(selectedEpisode)" :src="getEpisodeImage(selectedEpisode)" class="w-full h-full object-cover">
+              <div v-else class="w-full h-full bg-gray-800 flex items-center justify-center text-gray-600">Bez náhledu</div>
+              <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+              <button @click="closeEpisodeModal" class="absolute top-4 right-4 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full transition-colors">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              <div class="absolute bottom-6 left-8 right-8">
+                <p class="text-blue-400 font-black uppercase tracking-widest text-xs mb-2">{{ currentSeason?.season_number }}. Série &bull; Epizoda {{ selectedEpisode.episode_number }}</p>
+                <h3 class="text-3xl sm:text-4xl font-black text-white leading-tight">{{ selectedEpisode.title }}</h3>
+              </div>
+            </div>
+
+            <div class="p-8 sm:p-10">
+              <div class="flex flex-wrap items-center gap-6 mb-8 pb-6 border-b border-gray-100 dark:border-gray-800">
+                <div class="flex items-center gap-2">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <span class="text-sm font-bold text-gray-600 dark:text-gray-400">{{ selectedEpisode.air_date ? new Date(selectedEpisode.air_date).toLocaleDateString('cs-CZ') : 'Datum neznámé' }}</span>
+                </div>
+                <div v-if="selectedEpisode.runtime" class="flex items-center gap-2">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span class="text-sm font-bold text-gray-600 dark:text-gray-400">{{ selectedEpisode.runtime }} minut</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div class="lg:col-span-2">
+                  <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Děj epizody</h4>
+                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ selectedEpisode.overview || 'K této epizodě zatím nebyl přidán podrobný popis.' }}</p>
+                </div>
+                
+                <div class="space-y-8">
+                  <div v-if="selectedEpisode.directors?.length">
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Režie</h4>
+                    <div class="space-y-2">
+                      <NuxtLink v-for="d in selectedEpisode.directors" :key="d.id" :to="`/directors/${d.id}`" class="block text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">{{ d.name }}</NuxtLink>
+                    </div>
+                  </div>
+                  <div v-if="selectedEpisode.screenwriters?.length">
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Scénář</h4>
+                    <div class="space-y-2">
+                      <p v-for="s in selectedEpisode.screenwriters" :key="s.id" class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ s.name }}</p>
+                    </div>
+                  </div>
+                  <div v-if="selectedEpisode.guest_stars?.length">
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Hostující hvězdy</h4>
+                    <div class="space-y-2">
+                      <NuxtLink v-for="a in selectedEpisode.guest_stars" :key="a.id" :to="`/actors/${a.id}`" class="block text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">{{ a.name }}</NuxtLink>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <!-- Confirm Modal -->
     <ConfirmModal 
@@ -303,6 +388,9 @@ const pendingDeleteReviewId = ref(null);
 
 const watchlist = ref([]);
 const isProcessingWatchlist = ref(false);
+
+// Episode Modal State
+const selectedEpisode = ref(null);
 
 const currentSeason = computed(() => {
   if (!series.value || !series.value.seasons || series.value.seasons.length === 0) return null;
@@ -477,6 +565,14 @@ const getEpisodeImage = (episode) => {
   return null;
 };
 
+const openEpisodeModal = (episode) => {
+  selectedEpisode.value = episode;
+};
+
+const closeEpisodeModal = () => {
+  selectedEpisode.value = null;
+};
+
 onMounted(fetchSeries);
 
 watch(() => route.params.id, (newId) => {
@@ -495,3 +591,13 @@ watch(() => authStore.isLoggedIn, (isLoggedIn) => {
   }
 });
 </script>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
